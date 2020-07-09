@@ -10,21 +10,21 @@
 # Please see https://i3wm.org/docs/userguide.html for a complete reference!
 
 exec i3-msg restart
-set $mod Mod1
+set $mod Mod4
 
 # Font for window titles
-font pango:monospace 8
+#font pango:monospace 8
 
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
-#font pango:DejaVu Sans Mono 8
+font pango:DejaVu Sans Mono 10
 
 
 # kill focused window
-bindsym $mod+Shift+q kill
+bindsym $mod+q kill
 
 # start dmenu (a program launcher)
-bindsym $mod+d exec dmenu_run
+bindsym $mod+d exec "rofi -show drun"
 # There also is the (new) i3-dmenu-desktop which only displays applications
 # shipping a .desktop file. It is a wrapper around dmenu, so you need that
 # installed.
@@ -123,7 +123,7 @@ bindsym $mod+Shift+9 move container to workspace $ws9
 bindsym $mod+Shift+0 move container to workspace $ws10
 
 #scratchpad
-bindsym $mod+Shift+s move scratchpad 
+bindsym $mod+Shift+minus move scratchpad 
 bindsym $mod+minus scratchpad show
 
 # reload the configuration file
@@ -162,9 +162,9 @@ bindsym $mod+r mode "resize"
 
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
-bar { 
-	status_command i3status
-}
+# bar { 
+    # status_command i3status
+# }
 default_border pixel 1
 for_window [class="^.*"] border pixel 0
 
@@ -172,39 +172,48 @@ for_window [class="^.*"] border pixel 0
 client.focused #FFFFFF #7af442 #FFFFFF #FFFFFF
 
 #printscreen
-bindsym Print exec "maim -s /home/julian/Storage/Images/Screenshots/$(date +%F~%T).png && cat $(python3 /home/julian/Workspace/scripts/catalogs/last_file.py /home/julian/Storage/Images/Screenshots/)| xclip -selection clipboard -t image/png"
+bindsym $mod+Shift+s exec "lumes -s -d $HOME/Storage/Images/Screenshots/"
+bindsym Print exec "flameshot gui"
 
 #keyboard
-exec_always "setxkbmap -layout us,ru -option grp:shifts_toggle -option ctrl:swapcaps"
+bindsym $mod+Shift+o exec "setxkbmap -layout us,ua -variant ,legacy -option grp:shifts_toggle -option ctrl:swapcaps -option altwin:swap_lalt_lwin -option altwin:menu_win -option altwin:swap_alt_win"
+bindsym $mod+Shift+p exec "setxkbmap -layout us,ru -option grp:shifts_toggle -option ctrl:swapcaps -option altwin:swap_lalt_lwin -option altwin:menu_win -option altwin:swap_alt_win"
+#startup
+exec "keepassxc"
+exec "compton"
+exec "nitrogen --restore"
 
 #volume
-bindsym Shift+Ctrl+Up exec amixer -q sset Master 3%+
-bindsym Shift+Ctrl+Down exec amixer -q sset Master 3%-
+bindsym Shift+Ctrl+Up exec "amixer -q sset Master 3%+"
+bindsym Shift+Ctrl+Down exec "amixer -q sset Master 3%-"
 
 #terminal
 #start a terminal
-bindsym $mod+Return exec alacritty
+bindsym $mod+Return exec "alacritty -e fish -c port"
 assign [class = "Alacritty"] $ws1
 #web browser
-bindsym $mod+c exec firefox
+# bindsym $mod+c exec firefox
 assign [class = "Firefox"] $ws2
 #gimp
-#bindsym $mod+g exec gimp
-bindsym $mod+g exec gimp
-assign [class = "Gimp"] $ws5
+# bindsym $mod+g exec gimp
+# assign [class = "Gimp"] $ws6
 #libreoffice
 #assign [class = "libreoffice-draw"] $ws3
 #image viewer
 for_window [class = "feh"] floating enable
 
 #quick terminal
-bindsym $mod+t exec kitty
-for_window [class = "kitty"] floating enable
-for_window [class = "kitty"] resize set 760 500
+bindsym $mod+t exec "kitty --class 'scratch_terminal'"
+for_window [class = "scratch_terminal"] floating enable, resize set 760 500
 #telega
-bindsym $mod+m exec telegram-desktop
-for_window [class = "TelegramDesktop"] floating enable
-for_window [class = "TelegramDesktop"] resize set 420 500
+# bindsym $mod+m exec telegram-desktop
+for_window [class = "TelegramDesktop"] floating enable, resize set 420 500
+for_window [class = "KotatogramDesktop"] floating enable, resize set 420 500
+#keepassxc
+for_window [class = "KeePassXC"] floating enable, resize set 1200 700
+#zoom
+#for_window [class ="zoom"] floating enable
+# doesn't look nice with floating
 
 #floating
 for_window [floating] border pixel 5

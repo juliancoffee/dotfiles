@@ -9,3 +9,6 @@ editors/nvim/colors/*
 
 # ignore plugged directory for nvim
 editors/nvim/plugged
+
+#ignore 
+editors/nvim/.netrwhist
