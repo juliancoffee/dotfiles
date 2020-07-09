@@ -1,3 +1,11 @@
+# ignore trash
 **/.mypy_cache/**/*
 **/__pycache__/**/*
-wm/qtile/libqtile
+
+# ignore all colorscheme
+editors/nvim/colors/*
+# except muclor.vim, which is my modified onehalfdark scheme
+!editors/nvim/colors/muclor.vim
+
+# ignore plugged directory for nvim
+editors/nvim/plugged
