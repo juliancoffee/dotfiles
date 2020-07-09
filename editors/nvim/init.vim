@@ -42,10 +42,12 @@ let g:ada_standard_types = 1
 " ------------------------------------------------------------
 " Ale linter
 source $HOME/.config/nvim/ale.vim
+" ------------------------------------------------------------
 " Deoplete
 " source $HOME/.config/nvim/deoplete.vim
+" ------------------------------------------------------------
 " LanguageClient
 " source $HOME/.config/nvim/language_client.vim
+" ------------------------------------------------------------
 " Coc.nvim
 source $HOME/.config/nvim/coc.vim
-let g:css_filetypes = ['css']
