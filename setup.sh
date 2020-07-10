@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+# shellcheck disable=SC2039
+
 error_color() {
     printf "\x1b[31m" #red for error
 }
@@ -63,9 +65,17 @@ setup() {
     fi
 }
 
-DOTS=$(dirname "$0")
-echo "===== Dotfiles root in $DOTS ====="
-setup "$DOTS/editors/nvim" "$HOME/.config/nvim" "Neovim"
-setup "$DOTS/wm/i3" "$HOME/.config/i3" "i3"
-setup "$DOTS/pagers/most/.mostrc" "$HOME/.mostrc" "most"
-setup "$DOTS/other/rofi" "$HOME/.config/rofi" "rofi"
+DOTS="$HOME/dotfiles"
+path_to_dots=$(dirname "$0")
+if test "$path_to_dots" -ef "$DOTS"
+then
+    echo "===== Dotfiles root in $DOTS ====="
+    setup "$DOTS/editors/nvim" "$HOME/.config/nvim" "Neovim"
+    setup "$DOTS/wm/i3" "$HOME/.config/i3" "i3"
+    setup "$DOTS/pagers/most/.mostrc" "$HOME/.mostrc" "most"
+    setup "$DOTS/other/rofi" "$HOME/.config/rofi" "rofi"
+else
+    error_color
+    echo "Script runned from $path_to_dots, but \$DOTS set to $DOTS"
+    reset_color
+fi
