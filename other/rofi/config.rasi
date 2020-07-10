@@ -1,4 +1,6 @@
 configuration {
  modi: "drun";
  show-icons: true;
+ terminal: "kitty";
+ drun-show-actions: true;
 }
