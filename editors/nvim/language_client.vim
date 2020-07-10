@@ -1,3 +1,10 @@
+call plug#begin()
+Plug 'autozimu/LanguageClient-neovim', {
+            \'branch': 'next',
+            \'do': 'bash install.sh',
+            \}
+call plug#end()
+
 let g:LanguageClient_serverCommands = {
             \ }
 

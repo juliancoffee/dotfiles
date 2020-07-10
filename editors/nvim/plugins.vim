@@ -1,22 +1,14 @@
 " vim plug
-call plug#begin()  "yes, there will be a plugins
 
 " ------------------------------------------------------------
 " Workflow plugins
 "Plug 'Valloric/YouCompleteMe'
 Plug 'scrooloose/nerdtree', {'on': 'NERDTreeToggle' }  "improved file explorer
 Plug 'tell-k/vim-autopep8'                             "python code autoformat
-Plug 'dense-analysis/ale'                              "linter plugin
-" Plug 'Shougo/deoplete.nvim', {'do': ':UpdateRemotePlugins'} "completer plugin
 Plug 'Shougo/echodoc.vim'                              " documentation to echo area
-" language server client
-Plug 'autozimu/LanguageClient-neovim', {
-            \'branch': 'next',
-            \'do': 'bash install.sh',
-            \}
 "Plug 'davidhalter/jedi-vim'                            " python completion
+" source ./deoplete-install.vim
 Plug 'racer-rust/vim-racer'                            " rust completion
-Plug 'neoclide/coc.nvim', {'branch': 'release'}        " VSCode like completion
 
 " ------------------------------------------------------------
 
@@ -52,7 +44,6 @@ Plug 'elmcast/elm-vim'                         "plugin to elm language
 Plug 'reasonml-editor/vim-reason-plus'         "plugin to reasoml language
 " ------------------------------------------------------------
 
-call plug#end()
 " ------------------------------------------------------------
 map <C-t> :NERDTreeToggle<CR>
 let g:airline#extensions#tabline#enabled = 1

@@ -5,6 +5,7 @@ endif
 
 " ------------------------------------------------------------
 " Plugins
+call plug#begin()  "yes, there will be a plugins
 source $HOME/.config/nvim/plugins.vim
 " ------------------------------------------------------------
 "  Remaps
@@ -12,7 +13,6 @@ source $HOME/.config/nvim/keys.vim
 " ------------------------------------------------------------
 " Options
 " ------------------------------------------------------------
-colorscheme muclor
 
 set termguicolors
 set completeopt-=preview
@@ -51,3 +51,10 @@ source $HOME/.config/nvim/ale.vim
 " ------------------------------------------------------------
 " Coc.nvim
 source $HOME/.config/nvim/coc.vim
+" ------------------------------------------------------------
+
+" ------------------------------------------------------------
+" Finita la comedia
+call plug#end()
+" colorshemes must be called after plug#end
+colorscheme muclor

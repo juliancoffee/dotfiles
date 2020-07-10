@@ -1,3 +1,5 @@
+Plug 'dense-analysis/ale'                              "linter plugin
+
 let g:ale_linters = {
             \'javascript': ['eslint'],
             \'python': ['flake8', 'mypy'],
