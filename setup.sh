@@ -76,6 +76,7 @@ then
     setup "$DOTS/other/rofi" "$HOME/.config/rofi" "rofi"
 else
     error_color
-    echo "Script runned from $path_to_dots, but \$DOTS set to $DOTS"
+    echo "Script runned from $path_to_dots, but \$DOTS set to $DOTS."
+    echo "Change it in setup.sh file"
     reset_color
 fi
