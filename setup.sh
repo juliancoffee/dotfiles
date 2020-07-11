@@ -23,19 +23,45 @@ setup() {
     local dest="$2"
     local name="$3"
 
+    # maybe we forgot to set $name
+    if [ -z "$name" ]
+    then
+        warn_color
+        echo "setup called with $src to $dest, but without $name, but we'll continue"
+        echo "fix it, please"
+        reset_color
+    fi
+
+    # check if arguments passed
+    if [ -z "$src" ] 
+    then
+        error_color
+        echo "$name: src is undefined, skip"
+        reset_color
+
+        return
+    elif [ -z "$dest" ]
+    then
+        error_color
+        echo "$name: destination is undefined, skip"
+        reset_color
+
+        return
+    fi
+
     # check if link exists
     if [ -L "$dest" ]
     then
         if [ -e "$dest" ]
         then
             warn_color
-            echo "$name : symbolic link already set"
+            echo "$name: symbolic link already set"
             reset_color
 
             return
         else
             error_color
-            echo "$name : symbolic link set, but broken"
+            echo "$name: symbolic link set, but broken, skip"
             reset_color
 
             return
@@ -46,7 +72,7 @@ setup() {
     if [ -e "$dest" ] 
     then
         error_color
-        echo "$name : config exists: skip"
+        echo "$name: config exists, skip"
         reset_color
 
         return
@@ -69,12 +95,17 @@ DOTS="$HOME/dotfiles"
 path_to_dots=$(dirname "$0")
 if test "$path_to_dots" -ef "$DOTS"
 then
+    # Run setup
     echo "===== Dotfiles root in $DOTS ====="
     setup "$DOTS/editors/nvim" "$HOME/.config/nvim" "Neovim"
     setup "$DOTS/wm/i3" "$HOME/.config/i3" "i3"
     setup "$DOTS/pagers/most/.mostrc" "$HOME/.mostrc" "most"
     setup "$DOTS/other/rofi" "$HOME/.config/rofi" "rofi"
+    setup "$DOTS/browser/firefox/user.js" "$FIREFOX_PATH/user.js" "firefox"
 else
+    # Script is using default value for dotfiles path, which in my case is 
+    # $HOME/dotfiles if path where script runned don't match this value,
+    # it is error
     error_color
     echo "Script runned from $path_to_dots, but \$DOTS set to $DOTS."
     echo "Change it in setup.sh file"
