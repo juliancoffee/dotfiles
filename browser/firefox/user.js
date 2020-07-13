@@ -41,3 +41,5 @@ user_pref('browser.download.hide_plugins_without_extensions', false); // Disable
  */
 user_pref('browser.download.autohideButton', false); // Always display Downloads button
 user_pref('toolkit.legacyUserProfileCustomizations.stylesheets', true); // Allow userChrome/userContent
+user_pref('privacy.userContext.enabled', true); // Enable Container Tabs
+user_pref('privacy.userContext.ui.enabled', true); // Enable Container Tabs setting in preferences
