@@ -9,7 +9,6 @@
 #
 # Please see https://i3wm.org/docs/userguide.html for a complete reference!
 
-exec i3-msg restart
 set $mod Mod4
 
 # Font for window titles
@@ -182,6 +181,7 @@ bindsym $mod+Shift+p exec "setxkbmap -layout us,ru -option grp:shifts_toggle -op
 exec "keepassxc"
 exec "compton"
 exec "nitrogen --restore"
+exec "polybar default"
 
 #volume
 bindsym Shift+Ctrl+Up exec "amixer -q sset Master 3%+"
@@ -204,7 +204,8 @@ for_window [class = "feh"] floating enable
 
 #quick terminal
 bindsym $mod+t exec "kitty --class 'scratch_terminal'"
-for_window [class = "scratch_terminal"] floating enable, resize set 760 500
+for_window [class = "scratch_terminal"] floating enable, resize set 760 500, move scratchpad, scratchpad show
+
 #telega
 # bindsym $mod+m exec telegram-desktop
 for_window [class = "TelegramDesktop"] floating enable, resize set 420 500
