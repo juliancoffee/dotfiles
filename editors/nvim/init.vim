@@ -36,20 +36,25 @@ let g:ada_standard_types = 1
 " OCaml
 " set rtp+=/home/julian/.opam/default/share/merlin/vim
 " helptags /home/julian/.opam/default/share/merlin/vim/doc
+"
+" Plugins with options
+" ------------------------------------------------------------
+" *Code::Stats*
+source $HOME/.config/nvim/code_stats.vim
 
 " ------------------------------------------------------------
 " IDE like
 " ------------------------------------------------------------
-" Ale linter
+" *ALE linter*
 source $HOME/.config/nvim/ale.vim
 " ------------------------------------------------------------
-" Deoplete
+" *Deoplete*
 " source $HOME/.config/nvim/deoplete.vim
 " ------------------------------------------------------------
-" LanguageClient
+" *LanguageClient*
 " source $HOME/.config/nvim/language_client.vim
 " ------------------------------------------------------------
-" Coc.nvim
+" *Coc.nvim*
 source $HOME/.config/nvim/coc.vim
 " ------------------------------------------------------------
 

@@ -4,6 +4,8 @@
 
 # ignore all colorscheme
 editors/nvim/colors/*
+# sensitive data
+editors/nvim/secrets/*
 # except muclor.vim, which is my modified onehalfdark scheme
 !editors/nvim/colors/muclor.vim
 
