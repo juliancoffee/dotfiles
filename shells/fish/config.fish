@@ -16,7 +16,7 @@ end
 #export variables
 export TERM=kitty
 export EDITOR=nvim
-export PAGER=most
+export MANPAGER=most
 
 #plugins and other
 export PYENV_ROOT="$HOME/.local/share/pyenv"
