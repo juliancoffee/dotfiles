@@ -92,8 +92,8 @@ setup() {
 }
 
 DOTS="$HOME/dotfiles"
-path_to_dots=$(dirname "$0")
-if test "$path_to_dots" -ef "$DOTS"
+current_path_to_dots=$(dirname "$0")
+if test "$current_path_to_dots" -ef "$DOTS"
 then
     # Run setup
     echo "===== Dotfiles root in $DOTS ====="
@@ -101,13 +101,14 @@ then
     setup "$DOTS/wm/i3" "$HOME/.config/i3" "i3"
     setup "$DOTS/pagers/most/.mostrc" "$HOME/.mostrc" "most"
     setup "$DOTS/other/rofi" "$HOME/.config/rofi" "rofi"
-    setup "$DOTS/browser/firefox/user.js" "$FIREFOX_PATH/user.js" "firefox"
+    setup "$DOTS/browser/firefox/user.js" "$FIREFOX_USERJS_PATH" "firefox"
+    setup "$DOTS/shells/fish/config.fish" "$HOME/.config/fish/config.fish" "fish"
 else
     # Script is using default value for dotfiles path, which in my case is 
     # $HOME/dotfiles if path where script runned don't match this value,
     # it is error
     error_color
-    echo "Script runned from $path_to_dots, but \$DOTS set to $DOTS."
+    echo "Script runned from $current_path_to_dots, but \$DOTS set to $DOTS."
     echo "Change it in setup.sh file"
     reset_color
 fi
