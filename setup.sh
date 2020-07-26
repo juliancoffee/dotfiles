@@ -95,13 +95,24 @@ DOTS="$HOME/dotfiles"
 current_path_to_dots=$(dirname "$0")
 if test "$current_path_to_dots" -ef "$DOTS"
 then
+    # Checking variables
+    #
+    # For firefox, we may automaticaly guess profile directory, but there may be more than one
+    # so just set FIREFOX_PROFILE_PATH yourself
+    # enter about:profiles in your firefox to see needed directory
+    firefox_err_msg="
+        path to firefox profile must be specified
+        (read comments in setup.sh)
+    "
+    ${FIREFOX_PROFILE_PATH:?"$(error_color)$firefox_err_msg$(reset_color)"}
+
     # Run setup
     echo "===== Dotfiles root in $DOTS ====="
     setup "$DOTS/editors/nvim" "$HOME/.config/nvim" "Neovim"
     setup "$DOTS/wm/i3" "$HOME/.config/i3" "i3"
     setup "$DOTS/pagers/most/.mostrc" "$HOME/.mostrc" "most"
     setup "$DOTS/other/rofi" "$HOME/.config/rofi" "rofi"
-    setup "$DOTS/browser/firefox/user.js" "$FIREFOX_USERJS_PATH" "firefox"
+    setup "$DOTS/browser/firefox/user.js" "$FIREFOX_PROFILE_PATH/user.js" "firefox"
     setup "$DOTS/shells/fish/config.fish" "$HOME/.config/fish/config.fish" "fish"
 else
     # Script is using default value for dotfiles path, which in my case is 
