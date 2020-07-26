@@ -1,6 +1,11 @@
 #!/usr/bin/env sh
 
-# shellcheck disable=SC2039
+# Dependencies:
+# POSIX shell (bash in sh emulation, for example can be used)
+# coreutils:
+#   printf
+#   realpath
+#   dirname
 
 error_color() {
     printf "\x1b[31m" #red for error
@@ -18,10 +23,17 @@ reset_color() {
     printf "\x1b[0m"
 }
 
+debug() {
+    if [ -n "$DOTS_DEBUG" ]
+    then
+        echo "$1"
+    fi
+}
+
 setup() {
-    local src="$1"
-    local dest="$2"
-    local name="$3"
+    src="$1"
+    dest="$2"
+    name="$3"
 
     # maybe we forgot to set $name
     if [ -z "$name" ]
@@ -91,35 +103,40 @@ setup() {
     fi
 }
 
-DOTS="$HOME/dotfiles"
-current_path_to_dots=$(dirname "$0")
-if test "$current_path_to_dots" -ef "$DOTS"
+# set DOTFILES to default value if unset
+debug "${DOTFILES="$HOME/.config/dotfiles"}"
+called_with=$(dirname "$0")            # get relative path
+called_from=$(realpath "$called_with") # convert to absolute
+if [ "$called_from" = "$DOTFILES" ]
 then
     # Checking variables
     #
-    # For firefox, we may automaticaly guess profile directory, but there may be more than one
-    # so just set FIREFOX_PROFILE_PATH yourself
-    # enter about:profiles in your firefox to see needed directory
+    # For firefox, we may automaticaly guess profile directory, but there may
+    # be more than one so just set FIREFOX_PROFILE_PATH yourself
+    # Enter about:profiles in firefox to see needed directory
     firefox_err_msg="
-        path to firefox profile must be specified
-        (read comments in setup.sh)
+        Path to firefox profile must be specified
+        Read comments in setup.sh to fix it
     "
-    ${FIREFOX_PROFILE_PATH:?"$(error_color)$firefox_err_msg$(reset_color)"}
+    ${FIREFOX_PROFILE_PATH?"$(error_color)$firefox_err_msg$(reset_color)"}
 
     # Run setup
     echo "===== Dotfiles root in $DOTS ====="
-    setup "$DOTS/editors/nvim" "$HOME/.config/nvim" "Neovim"
-    setup "$DOTS/wm/i3" "$HOME/.config/i3" "i3"
-    setup "$DOTS/pagers/most/.mostrc" "$HOME/.mostrc" "most"
-    setup "$DOTS/other/rofi" "$HOME/.config/rofi" "rofi"
-    setup "$DOTS/browser/firefox/user.js" "$FIREFOX_PROFILE_PATH/user.js" "firefox"
-    setup "$DOTS/shells/fish/config.fish" "$HOME/.config/fish/config.fish" "fish"
+    setup "$DOTFILES/editors/nvim" "$HOME/.config/nvim" "Neovim"
+    setup "$DOTFILES/wm/i3" "$HOME/.config/i3" "i3"
+    setup "$DOTFILES/pagers/most/.mostrc" "$HOME/.mostrc" "most"
+    setup "$DOTFILES/other/rofi" "$HOME/.config/rofi" "rofi"
+    setup "$DOTFILES/browser/firefox/user.js" "$FIREFOX_PROFILE_PATH/user.js" "firefox"
+    setup "$DOTFILES/shells/fish/config.fish" "$HOME/.config/fish/config.fish" "fish"
 else
     # Script is using default value for dotfiles path, which in my case is 
-    # $HOME/dotfiles if path where script runned don't match this value,
-    # it is error
+    # $HOME/dotfiles. If path where script runned don't match this value,
+    # that means your dotfiles directory is in another place.
+    # You should change DOTFILES variable in script above or set DOTFILES variable.
     error_color
-    echo "Script runned from $current_path_to_dots, but \$DOTS set to $DOTS."
-    echo "Change it in setup.sh file"
+    echo "
+        Script runned from $called_from, but \$DOTFILES set to $DOTFILES.
+        Read comments in setup.sh to fix it
+    "
     reset_color
 fi
