@@ -49,9 +49,9 @@ set -l EMACS_rc "$HOME/.emacs.d/init.el"
 
 #Alias for edit configs
 # Shell
-alias edsh="$EDITOR $SHELL_rc" # fish
+abbr --add edsh "$EDITOR $SHELL_rc" # fish
 # Editors
-alias edvim="$EDITOR $NVIM_rc" # nvim
+abbr --add edvim "$EDITOR $NVIM_rc" # nvim
 alias edem="$EDITOR $EMACS_rc" # emacs
 # Window managers
 alias edwm="$EDITOR $WM_rc" # awesome wm
@@ -134,6 +134,12 @@ function cdload
 end
 complete -c cdload -x -a "(__fish_complete_directories ($DOWNLOADS))" 
 
+
+#git
+abbr --add g "git"
+abbr --add gs "git status"
+abbr --add gall "git add -A"
+abbr --add gc "git commit"
 
 #tmux
 function start 
