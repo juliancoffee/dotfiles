@@ -137,9 +137,11 @@ complete -c cdload -x -a "(__fish_complete_directories ($DOWNLOADS))"
 
 #git
 abbr --add g "git"
-abbr --add gs "git status"
-abbr --add gall "git add -A"
-abbr --add gc "git commit"
+abbr --add gdiff "git diff"
+abbr --add gstat "git status"
+abbr --add gaddall "git add -A"
+abbr --add gcomm "git commit"
+abbr --add gclon "git clone"
 
 #tmux
 function start 
