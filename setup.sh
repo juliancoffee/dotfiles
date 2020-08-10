@@ -128,6 +128,7 @@ then
     setup "$DOTFILES/other/rofi" "$HOME/.config/rofi" "rofi"
     setup "$DOTFILES/browser/firefox/user.js" "$FIREFOX_PROFILE_PATH/user.js" "firefox"
     setup "$DOTFILES/shells/fish/config.fish" "$HOME/.config/fish/config.fish" "fish"
+    setup "$DOTFILES/wm/bars/polybar" "$HOME/.config/polybar" "polybar"
 else
     # Script is using default value for dotfiles path, which in my case is 
     # $HOME/dotfiles. If path where script runned don't match this value,
