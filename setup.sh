@@ -114,11 +114,11 @@ then
     # For firefox, we may automaticaly guess profile directory, but there may
     # be more than one so just set FIREFOX_PROFILE_PATH yourself
     # Enter about:profiles in firefox to see needed directory
-    firefox_err_msg="
-        Path to firefox profile must be specified
-        Read comments in setup.sh to fix it
-    "
-    ${FIREFOX_PROFILE_PATH?"$(error_color)$firefox_err_msg$(reset_color)"}
+    #firefox_err_msg="
+    #    Path to firefox profile must be specified
+    #    Read comments in setup.sh to fix it
+    #"
+    #${FIREFOX_PROFILE_PATH?"$(error_color)$firefox_err_msg$(reset_color)"}
 
     # Run setup
     echo "===== Dotfiles root in $DOTS ====="
@@ -126,9 +126,10 @@ then
     setup "$DOTFILES/wm/i3" "$HOME/.config/i3" "i3"
     setup "$DOTFILES/pagers/most/.mostrc" "$HOME/.mostrc" "most"
     setup "$DOTFILES/other/rofi" "$HOME/.config/rofi" "rofi"
-    setup "$DOTFILES/browser/firefox/user.js" "$FIREFOX_PROFILE_PATH/user.js" "firefox"
+    #setup "$DOTFILES/browser/firefox/user.js" "$FIREFOX_PROFILE_PATH/user.js" "firefox"
     setup "$DOTFILES/shells/fish/config.fish" "$HOME/.config/fish/config.fish" "fish"
     setup "$DOTFILES/wm/bars/polybar" "$HOME/.config/polybar" "polybar"
+    setup "$DOTFILES/other/mpv/mpv.conf" "$HOME/.config/mpv/mpv.conf" "mpv"
 else
     # Script is using default value for dotfiles path, which in my case is 
     # $HOME/dotfiles. If path where script runned don't match this value,
