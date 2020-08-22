@@ -1,5 +1,6 @@
 ### About
-It is my repo for my dotfiles.
+It is my repo for my dotfiles.<br>
+Clone it to ~/.config/dotfiles and edit setup.sh
 
 ### Currently in setup.sh
 - `fish` config (the most user friendly shell)
@@ -11,4 +12,4 @@ It is my repo for my dotfiles.
 
 
 ### Setup
-There is file setup.sh, written for POSIX shell using coreutils as dependency.<br>
+There is file setup.sh, written for POSIX shell using coreutils as dependency.
