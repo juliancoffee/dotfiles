@@ -9,6 +9,8 @@ Clone it to ~/.config/dotfiles and edit setup.sh
 - `rofi` config (cool dmenu replacement)
 - `most` config (pager that I use for `man`)
 - `firefox` user.js (declarative way to set about:config)
+- `polyabr` config (wm-agnostic X11 bar)
+- `mpv` config (the best media player)
 
 
 ### Setup
