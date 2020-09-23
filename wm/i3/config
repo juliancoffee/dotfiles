@@ -187,13 +187,15 @@ exec "polybar default"
 bindsym Shift+Ctrl+Up exec "amixer -q sset Master 3%+"
 bindsym Shift+Ctrl+Down exec "amixer -q sset Master 3%-"
 
-#terminal
-#start a terminal
+# terminal
+# start a terminal
 bindsym $mod+Return exec "alacritty -e fish -c port"
 assign [class = "Alacritty"] $ws1
-#web browser
+# web browser
 # bindsym $mod+c exec firefox
 assign [class = "Firefox"] $ws2
+# zoom
+assign [class = "zoom"] $ws4
 #gimp
 # bindsym $mod+g exec gimp
 # assign [class = "Gimp"] $ws6
