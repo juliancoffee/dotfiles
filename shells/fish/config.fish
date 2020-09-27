@@ -155,7 +155,7 @@ function hello
 end
 
 #dotfiles
-set -U DOTFILES "$HOME/dotfiles"
+set -U DOTFILES "$HOME/.config/dotfiles"
 function todot
     cp $argv[1] $DOTFILES/.
 end
