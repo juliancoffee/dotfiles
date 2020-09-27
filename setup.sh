@@ -121,7 +121,7 @@ then
     #${FIREFOX_PROFILE_PATH?"$(error_color)$firefox_err_msg$(reset_color)"}
 
     # Run setup
-    echo "===== Dotfiles root in $DOTS ====="
+    echo "===== Dotfiles root in $DOTFILES ====="
     setup "$DOTFILES/editors/nvim" "$HOME/.config/nvim" "Neovim"
     setup "$DOTFILES/wm/i3" "$HOME/.config/i3" "i3"
     setup "$DOTFILES/pagers/most/.mostrc" "$HOME/.mostrc" "most"
@@ -130,6 +130,7 @@ then
     setup "$DOTFILES/shells/fish/config.fish" "$HOME/.config/fish/config.fish" "fish"
     setup "$DOTFILES/wm/bars/polybar" "$HOME/.config/polybar" "polybar"
     setup "$DOTFILES/other/mpv/mpv.conf" "$HOME/.config/mpv/mpv.conf" "mpv"
+    setup "$DOTFILES/wm/compositors/picom" "$HOME/.config/picom" "picom"
 else
     # Script is using default value for dotfiles path, which in my case is 
     # $HOME/dotfiles. If path where script runned don't match this value,
