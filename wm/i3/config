@@ -179,7 +179,7 @@ bindsym $mod+Shift+o exec "setxkbmap -layout us,ua -variant ,legacy -option grp:
 bindsym $mod+Shift+p exec "setxkbmap -layout us,ru -option grp:shifts_toggle -option ctrl:swapcaps -option altwin:swap_lalt_lwin -option altwin:menu_win -option altwin:swap_alt_win"
 #startup
 exec "keepassxc"
-exec "compton"
+exec "picom"
 exec "nitrogen --restore"
 exec "polybar default"
 
