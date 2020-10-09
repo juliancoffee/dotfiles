@@ -122,12 +122,12 @@ then
 
     # Run setup
     echo "===== Dotfiles root in $DOTFILES ====="
-    setup "$DOTFILES/editors/nvim" "$HOME/.config/nvim" "Neovim"
-    setup "$DOTFILES/wm/i3" "$HOME/.config/i3" "i3"
-    setup "$DOTFILES/pagers/most/.mostrc" "$HOME/.mostrc" "most"
-    setup "$DOTFILES/other/rofi" "$HOME/.config/rofi" "rofi"
-    #setup "$DOTFILES/browser/firefox/user.js" "$FIREFOX_PROFILE_PATH/user.js" "firefox"
     setup "$DOTFILES/shells/fish/config.fish" "$HOME/.config/fish/config.fish" "fish"
+    setup "$DOTFILES/wm/i3" "$HOME/.config/i3" "i3"
+    setup "$DOTFILES/editors/nvim" "$HOME/.config/nvim" "Neovim"
+    setup "$DOTFILES/other/rofi" "$HOME/.config/rofi" "rofi"
+    setup "$DOTFILES/pagers/most/.mostrc" "$HOME/.mostrc" "most"
+    #setup "$DOTFILES/browser/firefox/user.js" "$FIREFOX_PROFILE_PATH/user.js" "firefox"
     setup "$DOTFILES/wm/bars/polybar" "$HOME/.config/polybar" "polybar"
     setup "$DOTFILES/other/mpv/mpv.conf" "$HOME/.config/mpv/mpv.conf" "mpv"
     setup "$DOTFILES/wm/compositors/picom" "$HOME/.config/picom" "picom"
