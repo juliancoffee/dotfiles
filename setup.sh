@@ -130,6 +130,7 @@ then
     #setup "$DOTFILES/browser/firefox/user.js" "$FIREFOX_PROFILE_PATH/user.js" "firefox"
     setup "$DOTFILES/wm/bars/polybar" "$HOME/.config/polybar" "polybar"
     setup "$DOTFILES/other/mpv/mpv.conf" "$HOME/.config/mpv/mpv.conf" "mpv"
+    setup "$DOTFILES/other/mpv/input.conf" "$HOME/.config/mpv/input.conf" "mpv hotkeys"
     setup "$DOTFILES/wm/compositors/picom" "$HOME/.config/picom" "picom"
 else
     # Script is using default value for dotfiles path, which in my case is 
