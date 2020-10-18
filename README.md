@@ -12,6 +12,7 @@ Clone it to ~/.config/dotfiles and edit setup.sh
 - `polybar` config (wm-agnostic X11 bar)
 - `mpv` config (the best media player)
 - `picom` config (yeah, transparency in the terminal)
+- `kitty` config (yeah, terminal which supports transparency)
 
 
 ### Setup

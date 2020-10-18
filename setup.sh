@@ -132,6 +132,7 @@ then
     setup "$DOTFILES/other/mpv/mpv.conf" "$HOME/.config/mpv/mpv.conf" "mpv"
     setup "$DOTFILES/other/mpv/input.conf" "$HOME/.config/mpv/input.conf" "mpv hotkeys"
     setup "$DOTFILES/wm/compositors/picom" "$HOME/.config/picom" "picom"
+    setup "$DOTFILES/terminals/kitty" "$HOME/.config/kitty" "kitty"
 else
     # Script is using default value for dotfiles path, which in my case is 
     # $HOME/dotfiles. If path where script runned don't match this value,
