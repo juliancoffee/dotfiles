@@ -59,18 +59,16 @@ bindsym $mod+Shift+Down move down 90px
 bindsym $mod+Shift+Up move up 90px
 bindsym $mod+Shift+Right move right 90px
 
-# split in horizontal orientation
-bindsym $mod+s split h
-
-# split in vertical orientation
-bindsym $mod+v split v
-
 # enter fullscreen mode for the focused container
 bindsym $mod+f fullscreen toggle
 
 # change container layout (stacked, tabbed, toggle split)
 bindsym $mod+w layout tabbed
 bindsym $mod+e layout splith
+bindsym $mod+x layout toggle split
+# split in horizontal/vertical orientation
+bindsym $mod+v split v
+bindsym $mod+s split h
 
 # toggle tiling / floating
 bindsym $mod+Shift+space floating toggle
@@ -178,6 +176,7 @@ bindsym Print exec "flameshot gui"
 bindsym $mod+Shift+o exec "setxkbmap -layout us,ua -variant ,legacy -option grp:shifts_toggle -option ctrl:swapcaps -option altwin:swap_lalt_lwin -option altwin:menu_win -option altwin:swap_alt_win"
 bindsym $mod+Shift+p exec "setxkbmap -layout us,ru -option grp:shifts_toggle -option ctrl:swapcaps -option altwin:swap_lalt_lwin -option altwin:menu_win -option altwin:swap_alt_win"
 #startup
+workspace_layout tabbed
 exec "keepassxc"
 exec "picom --backend glx --vsync"
 exec "nitrogen --restore"
