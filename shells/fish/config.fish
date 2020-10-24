@@ -162,6 +162,7 @@ end
 function cddot
     cd "$DOTFILES/$argv[1]"
 end
+complete -c cddot -x -a "(__fish_complete_directories ($DOTFILES))" 
 
 #pyenv
 if command -v pyenv 1>/dev/null 2>&1
