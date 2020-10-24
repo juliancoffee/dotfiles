@@ -173,8 +173,8 @@ bindsym $mod+Shift+s exec "lumes -s -d $HOME/Storage/Images/Screenshots/"
 bindsym Print exec "flameshot gui"
 
 #keyboard
-bindsym $mod+Shift+o exec "setxkbmap -layout us,ua -variant ,legacy -option grp:shifts_toggle -option ctrl:swapcaps -option altwin:swap_lalt_lwin -option altwin:menu_win -option altwin:swap_alt_win"
-bindsym $mod+Shift+p exec "setxkbmap -layout us,ru -option grp:shifts_toggle -option ctrl:swapcaps -option altwin:swap_lalt_lwin -option altwin:menu_win -option altwin:swap_alt_win"
+bindsym $mod+Shift+p exec "setxkbmap -layout us,ua -variant ,legacy -option grp:shifts_toggle -option ctrl:swapcaps -option altwin:swap_lalt_lwin -option altwin:menu_win -option altwin:swap_alt_win"
+bindsym $mod+Shift+o exec "setxkbmap -layout us,ru -option grp:shifts_toggle -option ctrl:swapcaps -option altwin:swap_lalt_lwin -option altwin:menu_win -option altwin:swap_alt_win"
 #startup
 workspace_layout tabbed
 exec "keepassxc"
