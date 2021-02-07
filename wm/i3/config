@@ -178,7 +178,7 @@ bindsym $mod+Shift+o exec "setxkbmap -layout us,ru -option grp:shifts_toggle -op
 #startup
 workspace_layout tabbed
 exec "keepassxc"
-exec "picom --backend glx --vsync"
+exec "picom --vsync"
 exec "nitrogen --restore"
 exec "polybar default"
 
