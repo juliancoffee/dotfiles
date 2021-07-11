@@ -1,13 +1,13 @@
 Plug 'neoclide/coc.nvim', {'branch': 'release'}        " VSCode like completion
 
 let g:coc_global_extensions = [
-    \ 'coc-python',
+    \ 'coc-rust-analyzer',
+    \ 'coc-pyright',
     \ 'coc-clangd',
     \ 'coc-css',
     \ 'coc-html',
     \ 'coc-json',
     \ 'coc-vimlsp',
-    \ 'coc-rust-analyzer',
     \ ]
 
 nnoremap gd :call CocAction('jumpDefinition', 'edit')<CR>

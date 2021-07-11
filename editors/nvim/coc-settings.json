@@ -1,13 +1,7 @@
 {
-  "languageserver": {
-    "elmLS": {
-      "command": "elm-language-server",
-      "filetypes": ["elm"],
-      "rootPatterns": ["elm.json"],
-      "initializationOptions": {
-        "elmAnalyseTrigger": "change"
-      }
-    }
-  },
-  "codeLens.enable": true
+    "python.linting.enabled": true
+    , "python.linting.mypyEnabled": true
+    , "python.linting.flake8Enabled": true
+    , "python.linting.pytypeEnabled": false
+    , "codeLens.enable": true
 }

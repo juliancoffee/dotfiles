@@ -23,6 +23,7 @@ set shiftwidth=4
 set smarttab         "tabs
 set expandtab
 set smartindent
+set exrc             " local config
 
 " ------------------------------------------------------------
 " Language customize that don't fit into ftplugin

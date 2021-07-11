@@ -8,7 +8,6 @@ Plug 'tell-k/vim-autopep8'                             "python code autoformat
 Plug 'Shougo/echodoc.vim'                              " documentation to echo area
 "Plug 'davidhalter/jedi-vim'                            " python completion
 " source ./deoplete-install.vim
-Plug 'racer-rust/vim-racer'                            " rust completion
 
 " ------------------------------------------------------------
 
@@ -42,6 +41,7 @@ Plug 'wlangstroth/vim-racket'                  "plugin to racket language
 Plug 'rhysd/vim-crystal'                       "plugin to crystal language
 Plug 'elmcast/elm-vim'                         "plugin to elm language
 Plug 'reasonml-editor/vim-reason-plus'         "plugin to reasoml language
+Plug 'ron-rs/ron.vim'                          "plugin for Rusty Object Notation
 " ------------------------------------------------------------
 
 " ------------------------------------------------------------
