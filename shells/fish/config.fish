@@ -13,6 +13,10 @@ function fish_prompt
     larta
 end
 
+function fish_command_not_found
+    __fish_default_command_not_found_handler $argv[1]
+end
+
 #export variables
 export TERM=kitty
 export EDITOR=nvim
@@ -67,6 +71,9 @@ alias edhello="cd $HOME/Workspace/scripts/tmux"
 alias la="ls -a"
 alias ll="ls -l"
 
+#nvim aliases
+abbr --add novim "nvim -u NORC"
+
 #Alias for default command
 alias tree='tree -C'
 alias ls='ls --color=auto --sort=extension --group-directories-first'
@@ -87,18 +94,6 @@ set -U STORAGE "$HOME/Storage"
 set -U WORK "$HOME/Workspace"
 set -U CONFIG "$HOME/.config"
 set -U DOWNLOADS "$HOME/Downloads"
-
-function ed
-    if $argv[2]
-        echo "Wow"
-    else if test -d $argv[1] 
-        cd argv[1]
-    else if test -f $argv[1]
-        echo $argv[1] is a file
-    else 
-        echo $argv[1] "doesn't" exists
-    end
-end
 
 function toterm
     sh -c "cat $argv[1] | nc termbin.com 9999 | xclip -selection clipboard"
