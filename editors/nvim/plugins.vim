@@ -42,6 +42,8 @@ Plug 'rhysd/vim-crystal'                       "plugin to crystal language
 Plug 'elmcast/elm-vim'                         "plugin to elm language
 Plug 'reasonml-editor/vim-reason-plus'         "plugin to reasoml language
 Plug 'ron-rs/ron.vim'                          "plugin for Rusty Object Notation
+Plug 'tikhomirov/vim-glsl'                     "plugin for glsl syntax
+Plug 'maxmellon/vim-jsx-pretty'                "plugin for JSX support
 " ------------------------------------------------------------
 
 " ------------------------------------------------------------
