@@ -24,6 +24,7 @@ set smarttab         "tabs
 set expandtab
 set smartindent
 set exrc             " local config
+set tabpagemax=500   " why this limit even exists?
 
 " ------------------------------------------------------------
 " Language customize that don't fit into ftplugin
