@@ -162,8 +162,8 @@ bindsym $mod+r mode "resize"
 # bar { 
     # status_command i3status
 # }
-default_border pixel 1
-for_window [class="^.*"] border pixel 0
+default_border none
+for_window [class="^*"] border pixel 0
 
 #colors
 client.focused #FFFFFF #7af442 #FFFFFF #FFFFFF
