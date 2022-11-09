@@ -133,9 +133,10 @@ then
     setup "$DOTFILES/other/mpv/input.conf" "$HOME/.config/mpv/input.conf" "mpv hotkeys"
     setup "$DOTFILES/wm/compositors/picom" "$HOME/.config/picom" "picom"
     setup "$DOTFILES/terminals/kitty" "$HOME/.config/kitty" "kitty"
+    setup "$DOTFILES/tmux/.tmux.conf" "$HOME/.tmux.conf" "tmux"
 else
     # Script is using default value for dotfiles path, which in my case is 
-    # $HOME/dotfiles. If path where script runned don't match this value,
+    # $HOME/.config/dotfiles. If path where script runned don't match this value,
     # that means your dotfiles directory is in another place.
     # You should change DOTFILES variable in script above or set DOTFILES variable.
     error_color
