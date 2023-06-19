@@ -1,0 +1,10 @@
+# Download grml config if doesn't exist
+
+if [ ! -f ./zsh/grml.zsh ]; then
+    echo "grml configuration not found"
+    echo "installing grml zsh configuration"
+    curl -L https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc --create-dirs -o ./zsh/grml.zsh
+fi
+
+# load grml config
+. ./zsh/grml.zsh
