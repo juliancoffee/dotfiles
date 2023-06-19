@@ -1,0 +1,12 @@
+shell:
+  program: /bin/zsh
+  args:
+    - --login
+    - -c
+    - tmux
+
+window:
+  startup_mode: "Maximized"
+
+font:
+  size: 14.0
