@@ -172,15 +172,12 @@ client.focused #FFFFFF #7af442 #FFFFFF #FFFFFF
 bindsym $mod+Shift+s exec "lumes -s -d $HOME/Storage/Images/Screenshots/"
 bindsym Print exec "flameshot gui"
 
-#keyboard
-bindsym $mod+Shift+p exec "setxkbmap -layout us,ua -variant ,legacy -option grp:menu_toggle -option ctrl:swapcaps -option altwin:swap_lalt_lwin -option altwin:menu_win -option altwin:swap_alt_win"
-bindsym $mod+Shift+o exec "setxkbmap -layout us,ru -option grp:menu_toggle -option ctrl:swapcaps -option altwin:swap_lalt_lwin -option altwin:menu_win -option altwin:swap_alt_win"
 #startup
 workspace_layout tabbed
 exec "keepassxc"
 exec "picom"
 exec "nitrogen --restore"
-exec "polybar default"
+exec "polybar"
 
 #volume
 bindsym Shift+Ctrl+Up exec "amixer -q sset Master 3%+"
@@ -188,7 +185,7 @@ bindsym Shift+Ctrl+Down exec "amixer -q sset Master 3%-"
 
 # terminal
 # start a terminal
-bindsym $mod+Return exec "alacritty -e fish -c port"
+bindsym $mod+Return exec "alacritty -e tmux"
 assign [class = "Alacritty"] $ws1
 # web browser
 # bindsym $mod+c exec firefox
@@ -204,7 +201,7 @@ assign [class = "zoom"] $ws4
 for_window [class = "feh"] floating enable
 
 #quick terminal
-bindsym $mod+t exec "kitty --class 'scratch_terminal'"
+#bindsym $mod+t exec "kitty --class 'scratch_terminal'"
 for_window [class = "scratch_terminal"] floating enable, resize set 760 500, move scratchpad, scratchpad show
 
 #telega
@@ -212,7 +209,8 @@ for_window [class = "scratch_terminal"] floating enable, resize set 760 500, mov
 for_window [class = "TelegramDesktop"] floating enable
 for_window [class = "KotatogramDesktop"] floating enable
 #keepassxc
-for_window [class = "KeePassXC"] floating enable, resize set 1200 700
+#for_window [class = "KeePassXC"] floating enable, resize set 1200 700
+for_window [class = "KeePassXC"] floating enable
 #zoom
 #for_window [class ="zoom"] floating enable
 # doesn't look nice with floating
