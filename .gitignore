@@ -1,16 +1,12 @@
-# ignore trash
-**/.mypy_cache/**/*
+# ignore cache
 **/__pycache__/**/*
 
-# ignore all colorscheme
+# ignore all colorscheme, except my custom one
 editors/nvim/colors/*
+!editors/nvim/colors/muclor.vim
 # sensitive data
 editors/nvim/secrets/*
-# except muclor.vim, which is my modified onehalfdark scheme
-!editors/nvim/colors/muclor.vim
 
-# ignore plugged directory for nvim
+# ignore plugings
 editors/nvim/plugged
-
-#ignore 
 editors/nvim/.netrwhist
