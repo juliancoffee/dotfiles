@@ -122,5 +122,7 @@ end
 # !! Contents within this block are managed by 'conda init' !!
 #eval /home/julian/anaconda3/bin/conda "shell.fish" "hook" $argv | source
 # <<< conda initialize <<<
+
 export GOPATH=$HOME/go
 eval (opam config env)
+export JAVA_HOME=/usr/lib/jvm/default
