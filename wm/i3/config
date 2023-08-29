@@ -169,7 +169,7 @@ for_window [class="^*"] border pixel 0
 client.focused #FFFFFF #7af442 #FFFFFF #FFFFFF
 
 #printscreen
-bindsym $mod+Shift+s exec "lumes -s -d $HOME/Storage/Images/Screenshots/"
+bindsym $mod+Shift+s exec "lumes -s -d $HOME/Storage/Screenshots/"
 bindsym Print exec "flameshot gui"
 
 #startup
