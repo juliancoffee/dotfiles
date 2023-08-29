@@ -42,7 +42,7 @@ let g:ada_standard_types = 1
 " Plugins with options
 " ------------------------------------------------------------
 " *Code::Stats*
-source $HOME/.config/nvim/code_stats.vim
+" source $HOME/.config/nvim/code_stats.vim
 
 " ------------------------------------------------------------
 " IDE like

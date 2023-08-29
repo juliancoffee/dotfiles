@@ -1,7 +1,6 @@
 Plug 'neoclide/coc.nvim', {'branch': 'release'}        " VSCode like completion
 
 let g:coc_global_extensions = [
-    \ 'coc-rust-analyzer',
     \ 'coc-pyright',
     \ 'coc-clangd',
     \ 'coc-css',
@@ -18,6 +17,7 @@ nnoremap gr :call CocAction('jumpReferences', 'edit')<CR>
 nnoremap gh :call CocAction('doHover')<CR>
 nnoremap <C-f> :call CocAction('fold')<CR>
 nnoremap <C-c>f :call CocAction('doQuickfix')<CR>
+nnoremap <C-c>r :call CocAction('runCommand')<CR>
 nnoremap <F8> :call CocAction('format')<CR>
 nnoremap <F2> :call CocAction('rename')<CR>
 
