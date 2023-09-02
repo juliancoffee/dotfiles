@@ -37,7 +37,7 @@ set -l TMUX_rc "$HOME/.tmux.conf"
 set -l SHELL_rc "$HOME/.config/fish/config.fish"
 set -l WM_rc "$HOME/.config/i3/config"
 
-set -l NVIM_rc "$HOME/.config/nvim/init.vim"
+set -l NVIM_rc "$HOME/.config/nvim/init.lua"
 
 #Alias for edit configs
 # Shell
