@@ -14,7 +14,6 @@ function fish_command_not_found
 end
 
 #export variables
-export TERM=kitty
 export EDITOR=nvim
 export MANPAGER=most
 
