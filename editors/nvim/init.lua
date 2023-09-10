@@ -77,16 +77,16 @@ colorscheme.run()
 --
 
 -- show pretty colors
-vim.o.termguicolors = true
+vim.opt.termguicolors = true
 
 -- shows numbers
-vim.o.number = true
-vim.o.relativenumber = true
+vim.opt.number = true
+vim.opt.relativenumber = true
 
 -- replace <tab> with spaces
-vim.o.expandtab = true
-vim.o.tabstop = 4
-vim.o.shiftwidth = 4
+vim.opt.expandtab = true
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
 
 -- vim has these options, but it seems to work just fine without them
 -- I'll leave them just in case, but i'm not sure if they're still useful
@@ -94,7 +94,7 @@ vim.o.shiftwidth = 4
 -- vim.o.smartindent = true
 
 -- show sneaky characters
-vim.o.list = true
+vim.opt.list = true
 vim.opt.listchars = {
     trail = ".",
     tab = "> ",
@@ -111,6 +111,6 @@ vim.o.tabpagemax = 500
 vim.keymap.set({'n', 'v'}, 'q:', '<Nop>') -- supposed to open cmdline window
 vim.keymap.set('n', 'Q', '<Nop>') -- idk
 
--- disable search highlight
+-- stop search highlighting
 -- <C-_> actually means <C-/>, don't ask me why
 vim.keymap.set('n', '<C-_>', ':nohlsearch<CR>')
