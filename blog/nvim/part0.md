@@ -57,6 +57,66 @@ And, to make it less painful to look at, you can set a colour scheme. It seems t
 ```lua
 vim.cmd.colorscheme('desert')
 ```
-And yes, I see the typo in `vim.o.termguicolros`. For some reason, neovim screams about that when you do `:source %`, (`%` expands to the current buffer, which in this case is your `init.lua`), but not when you just open your editor. Remind me to create or look for an issue about that :).
+And yes, I see the typo in `vim.o.termguicolros`. For some reason, neovim screams about that when you do `:source %`, (`%` expands to the current buffer, which in this case is your `init.lua`), but not when you just open your editor. Here is the [issue].
+
+`vim.opt` btw doesn't have this problem, so I guess I could stick with it.
+
+With that, let's add more options. This time with some explanations, so I hope I won't forget why some options are there.
+```lua
+--
+-- options
+--
+
+-- show pretty colors
+vim.opt.termguicolors = true
+
+-- shows numbers
+vim.opt.number = true
+vim.opt.relativenumber = true
+
+-- replace <tab> with spaces
+vim.opt.expandtab = true
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+
+-- show sneaky characters
+vim.opt.list = true
+vim.opt.listchars = {
+    trail = ".",
+    tab = "> ",
+}
+
+-- set bigger limit to allowed number of pages opened with "-p"
+vim.o.tabpagemax = 500
+```
+I deleted some options from my Vimscript config for different reasons.
+- `completeopt` because I don't understand what it does, I'll think about it when I get to completion.
+- `smarttab` because it's default now.
+- `exrc` because it's deprecated as security issue, which is fair. Additionally, it doesn't quite work, because you would need to place it into each folder of your project so it's always available.
+- `smartindent` because indenting seems to work just fine without it.
+
+I also added `list` and `listchars` options to catch some invisible noise which can pollute git or plainly break your program in some languages.
+
+The last part of "vanilla" vim is keymaps (or remaps, to be precise). You can set them with the `vim.keymap.set` function, so let's do that.
+```lua
+-- disable accidental q key-press
+vim.keymap.set({'n', 'v'}, 'q:', '<Nop>') -- supposed to open cmdline window
+vim.keymap.set('n', 'Q', '<Nop>') -- idk
+```
+I kind of wish I could just disable Ex mode completely, but this will do.
+
+`<Nop>` basically means removing these keys. You can't use `vim.keymap.del` for default keymaps, because they are well, keymaps, not remaps. Yes, Vim (and Neovim) seem to treat remaps just like that, remaps, when you type one set of characters, Vim replaces them with other characters. So `<Nop>` replaces what would be trigger to command with nothing.
+
+The next keymap will give you a better example.
+```lua
+-- stop search highlighting
+-- <C-_> actually means <C-/>, don't ask me why
+vim.keymap.set('n', '<C-_>', ':nohlsearch<CR>')
+```
+It shows two quirks of remaps at the same time.
+- The first one is that `nvim` is a terminal program, which is awesome but has some disadvantages. The main one is that it operates on characters, not keys. And it doesn't always map like you would expect. `/` is one of the exceptions and is different from terminal to terminal or from OS to OS.
+- Second is the nature of remap. If you want to execute a command, you need to type the same characters you would type when executing a command from Normal mode. Which includes both `:` and `Enter`, `<CR>` in this case, short for `carriage return`, I guess. Neovim actually allows one to pass a function as a last argument instead of a character string, where you can use `vim.cmd`, but let's keep it simple.
+
 
 [editor]: https://stackoverflow.com/questions/11828270/how-do-i-exit-vim
+[issue]: https://github.com/neovim/neovim/issues/25081
