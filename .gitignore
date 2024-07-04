@@ -10,3 +10,7 @@ editors/nvim/secrets/*
 # ignore plugings
 editors/nvim/plugged
 editors/nvim/.netrwhist
+
+### MPV
+# ignore watch_later list
+other/mpv/watch_later
