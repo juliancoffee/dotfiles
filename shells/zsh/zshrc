@@ -8,3 +8,5 @@ fi
 
 # load grml config
 . ~/.zsh/grml.zsh
+
+export PATH=$HOME/.local/bin:$PATH
