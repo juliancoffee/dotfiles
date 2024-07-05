@@ -14,6 +14,7 @@ function () {
     # some variables
     local DOTFILES="$HOME/.config/dotfiles"
     local SHELL_RC="$HOME/.zshrc"
+    local VIM_RC="$HOME/.config/nvim/init.lua"
     export EDITOR="nvim"
 
     # better path
@@ -23,4 +24,5 @@ function () {
     alias cddot="cd $DOTFILES"
     alias upd="source $SHELL_RC"
     alias edsh="$EDITOR $SHELL_RC"
+    alias edvim="$EDITOR $VIM_RC"
 }
