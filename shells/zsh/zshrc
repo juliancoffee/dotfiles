@@ -9,4 +9,18 @@ fi
 # load grml config
 . ~/.zsh/grml.zsh
 
-export PATH=$HOME/.local/bin:$PATH
+# "main" function, because I do want my local variables to stay local
+function () {
+    # some variables
+    local DOTFILES="$HOME/.config/dotfiles"
+    local SHELL_RC="$HOME/.zshrc"
+    export EDITOR="nvim"
+
+    # better path
+    export PATH=$HOME/.local/bin:$PATH
+
+    # aliases
+    alias cddot="cd $DOTFILES"
+    alias upd="source $SHELL_RC"
+    alias edsh="$EDITOR $SHELL_RC"
+}
