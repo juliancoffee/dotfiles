@@ -52,19 +52,6 @@ def print_warn(msg: str) -> None:
 def print_err(msg: str) -> None:
     print_colored(msg, ColorCode.RED)
 
-def make_choice(desc: str, choices: list[tuple[str, Path]]) -> tuple[str, Path]:
-    print(f"There are multiple choices for {desc}:")
-    for (i, (desc, path)) in enumerate(choices):
-        print(f"{i}) {desc} <> {path}")
-
-    while True:
-        try:
-            request = input("Please type a number to pick: ")
-            idx = int(request)
-            return choices[idx]
-        except ValueError:
-            print_err("failed to parse the number, please try again")
-
 def handle_existence(desc: str, dest: Path) -> bool:
     if dest.exists():
         print(f"{desc}:")
@@ -96,6 +83,19 @@ def handle_existence(desc: str, dest: Path) -> bool:
         return True
     return False
 
+def make_choice(desc: str, choices: list[tuple[str, Path]]) -> tuple[str, Path]:
+    print(f"There are multiple choices for {desc}:")
+    for (i, (desc, path)) in enumerate(choices):
+        print(f"{i}) {desc} <> {path}")
+
+    while True:
+        try:
+            request = input("Please type a number to pick: ")
+            idx = int(request)
+            return choices[idx]
+        except ValueError:
+            print_err("failed to parse the number, please try again")
+
 def setup_link(desc: str, src: Path, dest: Path) -> None:
     if handle_existence(desc, dest):
         return
@@ -103,33 +103,42 @@ def setup_link(desc: str, src: Path, dest: Path) -> None:
     dest.symlink_to(src)
     print_ok(f"{desc}: {dest} => {src}")
 
+# - name
+# - either direct source in dotfiles or a list of alternatives
+# - link destination
+SetupRequest = tuple[str, Path | list[tuple[str, Path]], Path]
+
+def setup(req: SetupRequest) -> None:
+    desc, src, dest = req
+    if handle_existence(desc, dest):
+        return
+
+    if isinstance(src, Path):
+        setup_link(desc, src, dest)
+    elif isinstance(src, list):
+        choice, src = make_choice(desc, src)
+        setup_link(f"desc/{choice}", src, dest)
+    else:
+        raise TypeError(f"wrong `src` type: {src}")
+
 def main():
     home = Path.home()
     print("Assuming current directory as the dotfiles root")
     dotfiles = Path.cwd()
 
-    simple_configs = [
+    configs = [
         # tmux config is old, it lives in $HOME
         ("tmux", dotfiles / "tmux/.tmux.conf", home / ".tmux.conf"),
         # zsh too
         ("zsh", dotfiles / "shells/zsh/zshrc", home / ".zshrc"),
         # mpv is a good boi
         ("mpv", dotfiles / "other/mpv", home / ".config/mpv"),
+        # all others too
         ("nvim", dotfiles / "editors/nvim", home / ".config/nvim"),
-    ]
-
-    option_configs = [
-        # alacritty has options mainly because of shell usage
-        #
-        # On my Linux machines (with i3wm, at least) I just make a keybind to
-        # run alacritty with tmux, plus I use fish.
-        #
-        # On MacOS, I can't (or don't know how) edit what button on by bar does
-        # so instead, I specify how the shell should be invoked in the config,
-        # which also runs tmux, but also zsh.
         (
             "alacritty",
             [
+                # runs zsh and starts tmux
                 ("mac", dotfiles / "terminals/alacritty-mac"),
             ],
             home / ".config/alacritty",
@@ -137,13 +146,7 @@ def main():
         ),
     ]
 
-    for (desc, src, dest) in simple_configs:
-        setup_link(desc, src, dest)
-
-    for (desc, choices, dest) in option_configs:
-        if handle_existence(desc, dest):
-            continue
-        choice, src = make_choice(desc, choices)
-        setup_link(f"desc/{choice}", src, dest)
+    for config in configs:
+        setup(config)
 
 main()
