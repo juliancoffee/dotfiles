@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 
-from enum import StrEnum
+from typing import Optional
+
+from enum import StrEnum, Enum
 from pathlib import PurePath, Path
+import fnmatch
+import itertools
+
 
 class ColorCode(StrEnum):
     """ To be used with `print_colored`.
@@ -121,6 +127,169 @@ def setup(req: SetupRequest) -> None:
     else:
         raise TypeError(f"wrong `src` type: {src}")
 
+
+class FsNode:
+    def __init__(self, this: Path, *, prev: Optional[FsNode]) -> None:
+        self._this = this.absolute()
+        self.prev = prev
+
+        self.next: Optional[list[FsNode]] = None
+        if this.is_dir():
+            self.next = []
+
+    def current(self) -> Path:
+        return self._this
+
+    def find_adopter(self, potential_child: Path) -> Optional[FsNode]:
+        """ Finds the node that would be a direct parent in the tree """
+        potential_child = potential_child.absolute()
+
+        def find_direct_parent(tree: FsNode, path: Path) -> Optional[FsNode]:
+            if not path.is_relative_to(tree.current()):
+                return None
+            if tree.next is None:
+                return None
+
+            found = None
+            for child in tree.next:
+                attempt = find_direct_parent(child, path)
+                if attempt is not None:
+                    found = attempt
+                    break
+
+            # If none of the candidates qualify, but we do, we are the parent
+            if found is None:
+                return tree
+            else:
+                return found
+
+        return find_direct_parent(self, potential_child)
+
+    def try_adopting(self, child: Path) -> bool:
+        """ Pull the child under the tree.
+
+        Creates new node and puts it to the direct parent.
+        """
+        adopter = self.find_adopter(child)
+        if adopter is None:
+            return False
+
+        assert adopter._push_child(child), "adopter should be able to have"
+        return True
+
+    def nuke_ancestory(self) -> list[FsNode]:
+        """ Nuke the ancestory of this node.
+
+        Returns the list of orphaned branches.
+        """
+        leftout = []
+        cursor = self
+        while cursor.prev is not None:
+            assert cursor.prev.next is not None, ".prev always has .next"
+
+            children = filter(lambda x: x is not cursor, cursor.prev.next)
+            for branch in children:
+                branch.prev = None
+                leftout.append(branch)
+            cursor = cursor.prev
+
+        return leftout
+
+    def _push_child(self, child: Path) -> bool:
+        """ Register new child node
+
+        Returns `False` if the current node can't have children, probably
+        because it's a file.
+        """
+        new_child = FsNode(child, prev=self)
+        if self.next is not None:
+            self.next.append(new_child)
+            return True
+        return False
+
+
+class DirState(Enum):
+    # All content of a directory is under config
+    HOLDER = 1
+    # Some of content of a directory is under config
+    DIRTY = 2
+    # We don't know
+    UNKNOWN = 3
+
+def check_missed(configs: list[SetupRequest], dotfiles: Path) -> None:
+    taken = []
+    for _desc, src, _dest  in configs:
+        if isinstance(src, Path):
+            taken.append(src.name)
+        elif isinstance(src, list):
+            for _desc_a, alternative in src:
+                taken.append(alternative.name)
+
+    potentially_missed: list[FsNode] = []
+    for root, dirs, files in dotfiles.walk():
+        skiplist = [
+            fnmatch.filter(dirs, skippath)
+            for skippath in [".git", ".mypy_cache", "blog", "scripts"]
+        ]
+
+        for d in itertools.chain.from_iterable(skiplist):
+            dirs.remove(d)
+
+        # default to unknown
+        state = DirState.UNKNOWN
+
+        # find dirs that already under config and remove them from the
+        # algorithm
+        taken_dirs = [d for d in dirs if d in taken]
+        for d in taken_dirs:
+            dirs.remove(d)
+
+        # analyze the files
+        taken_files = [file for file in files if file in taken]
+        left_files = [file for file in files if file not in taken]
+
+        if (taken_dirs or taken_files) and not (dirs or left_files):
+            state = DirState.HOLDER
+
+        if (taken_dirs or taken_files) and (dirs or left_files):
+            state = DirState.DIRTY
+
+        def register_miss(path, potentially_missed):
+            for miss in potentially_missed:
+                if miss.try_adopting(path):
+                    break
+            else:
+                unknown = FsNode(path, prev=None)
+                potentially_missed.append(unknown)
+
+        def cleanup_from(path, potentially_missed):
+            orphans = None
+            catch = None
+            for miss in potentially_missed:
+                adopter = miss.find_adopter(path)
+                if adopter is not None:
+                    orphans = adopter.nuke_ancestory()
+                    catch = miss
+                    break
+
+            if catch is not None:
+                potentially_missed.remove(catch)
+
+        # If unknown, just add to potentially_missed
+        if state is DirState.UNKNOWN:
+            register_miss(root, potentially_missed)
+        # If completely taken, remove ancestors from potentially_missed
+        elif state is DirState.HOLDER:
+            cleanup_from(root, potentially_missed)
+        # If dirty, do that too, but also handle missed files.
+        elif state is DirState.DIRTY:
+            cleanup_from(root, potentially_missed)
+            # no need to do the same with dirs, btw
+            for missed_file in left_files:
+                register_miss(missed_file, potentially_missed)
+
+    return potentially_missed
+
 def main():
     home = Path.home()
     print("Assuming current directory as the dotfiles root")
@@ -149,4 +318,13 @@ def main():
     for config in configs:
         setup(config)
 
-main()
+    print("Checking paths that aren't under the config...")
+    miss = False
+    for missed in check_missed(configs, dotfiles):
+        miss = True
+        print(f"\t{missed.current()}")
+    if not miss:
+        print("you're good!")
+
+if __name__ == "__main__":
+    main()
