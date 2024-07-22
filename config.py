@@ -62,36 +62,33 @@ def print_err(msg: str) -> None:
 
 def handle_existence(desc: str, dest: Path) -> bool:
     if dest.exists():
-        if dest.is_symlink():
-            print_warn(f"{desc}:")
-            print_warn(
-                    f"it's already there, it's a [symlink to {dest.resolve()}]"
-            )
-        else:
-            print_warn(f"{desc}:")
-            print_warn(f"it's already there")
+        print(f"{desc}: skipped (already there)")
+        if OPTIONS.verbose >= 1:
+            if dest.is_symlink():
+                print_warn(
+                        "\texplanation:"
+                        f" destination is taken by [symlink to {dest.resolve()}]"
+                )
+            else:
+                print_warn(f"\texplanation: destination is taken by non-symlink")
 
-        if dest.is_file():
-            print_warn(f"{desc}:")
-            print_warn("it's a [plain file]")
-        elif dest.is_dir():
-            file_num = 0
-            dir_num = 0
-            link_num = 0
-            for child in dest.iterdir():
-                if child.is_file():
-                    file_num += 1
-                if child.is_dir():
-                    dir_num += 1
-                if child.is_symlink():
-                    link_num += 1
+        if OPTIONS.verbose >= 1:
+            if dest.is_dir():
+                file_num = 0
+                dir_num = 0
+                link_num = 0
+                for child in dest.iterdir():
+                    if child.is_file():
+                        file_num += 1
+                    if child.is_dir():
+                        dir_num += 1
+                    if child.is_symlink():
+                        link_num += 1
 
-            print_warn(f"{desc}:")
-            print_warn(
-                    "it's a [directory with {} files, {} dirs, {} links]"
-                        .format(file_num, dir_num, link_num)
-            )
-        print_warn("skipping")
+                print_warn(
+                        "\tnote: it's a [directory with {} files, {} dirs, {} links]"
+                            .format(file_num, dir_num, link_num)
+                )
         return True
     return False
 
@@ -297,15 +294,17 @@ def check_missed(configs: list[SetupRequest], dotfiles: Path) -> list[FsNode]:
     return potentially_missed
 
 def dotfiles_dir() -> Path:
-    print("Assuming current directory as the dotfiles root")
+    if OPTIONS.verbose >= 1:
+        print_warn("warning: assuming current directory as the dotfiles root")
     return Path.cwd()
 
 def setup_all(configs: list[SetupRequest]) -> None:
+    print_ok("Setting links up...")
     for config in configs:
         setup(config)
 
 def display_missed(configs: list[SetupRequest], dotfiles: Path) -> None:
-    print("Checking paths that aren't under the config...")
+    print_ok("Checking paths that aren't in the config...")
     miss = False
     for missed in check_missed(configs, dotfiles):
         miss = True
@@ -313,7 +312,7 @@ def display_missed(configs: list[SetupRequest], dotfiles: Path) -> None:
     if not miss:
         print_ok("you're good!")
 
-def main():
+def options() -> argparse.Namespace:
     # cmdline parsing
     prog = sys.argv[0]
     parser = argparse.ArgumentParser(
@@ -322,14 +321,14 @@ def main():
         "=" * 50 +
             "\nThis program will help you to manage your dotfiles."
             "\n\n"
-            "\nThe most straightforward argument is probably `link-all`."
+            "\"The most straightforward argument is probably `link-all`."
             "\nExample if you want to link everything:"
             f"\n\t{prog} --link-all"
             "\n"
         + "=" * 50)
 
     parser.add_argument(
-            "--link-all",
+            "-a", "--link-all",
             help="link all dotfiles in the config",
             action="store_true"
     )
@@ -337,12 +336,20 @@ def main():
             "--check",
             help="compare the dotfiles with config and display which are missed",
             action="store_true")
+    parser.add_argument(
+            "-v", "--verbose",
+            help="be verbose (can be repeated up to -vv)",
+            default=0,
+            action="count"
+    )
     # force-feed help when no arguments were supplied
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
         sys.exit(1)
-    args = parser.parse_args()
+    return parser.parse_args()
+OPTIONS = options()
 
+def main():
     # setup
     home = Path.home()
     dotfiles = dotfiles_dir()
@@ -368,10 +375,10 @@ def main():
     ]
 
     # command execution
-    if args.check:
+    if OPTIONS.check:
         display_missed(configs, dotfiles)
 
-    if args.link_all:
+    if OPTIONS.link_all:
         setup_all(configs)
 
 if __name__ == "__main__":
