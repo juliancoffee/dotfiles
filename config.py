@@ -5,8 +5,10 @@ from typing import Optional
 
 from enum import StrEnum, Enum
 from pathlib import PurePath, Path
+import sys
 import fnmatch
 import itertools
+import argparse
 
 
 class ColorCode(StrEnum):
@@ -60,14 +62,19 @@ def print_err(msg: str) -> None:
 
 def handle_existence(desc: str, dest: Path) -> bool:
     if dest.exists():
-        print(f"{desc}:")
         if dest.is_symlink():
-            print_warn(f"it's already there, it's a [symlink to {dest.resolve()}]")
+            print_warn(f"{desc}:")
+            print_warn(
+                    f"it's already there, it's a [symlink to {dest.resolve()}]"
+            )
         else:
+            print_warn(f"{desc}:")
             print_warn(f"it's already there")
+
         if dest.is_file():
+            print_warn(f"{desc}:")
             print_warn("it's a [plain file]")
-        if dest.is_dir():
+        elif dest.is_dir():
             file_num = 0
             dir_num = 0
             link_num = 0
@@ -79,11 +86,10 @@ def handle_existence(desc: str, dest: Path) -> bool:
                 if child.is_symlink():
                     link_num += 1
 
+            print_warn(f"{desc}:")
             print_warn(
-                    f"it's a [directory with "
-                    f"{file_num} files, "
-                    f"{dir_num} dirs, "
-                    f"{link_num} links]"
+                    "it's a [directory with {} files, {} dirs, {} links]"
+                        .format(file_num, dir_num, link_num)
             )
         print_warn("skipping")
         return True
@@ -216,7 +222,7 @@ class DirState(Enum):
     # We don't know
     UNKNOWN = 3
 
-def check_missed(configs: list[SetupRequest], dotfiles: Path) -> None:
+def check_missed(configs: list[SetupRequest], dotfiles: Path) -> list[FsNode]:
     taken = []
     for _desc, src, _dest  in configs:
         if isinstance(src, Path):
@@ -290,10 +296,56 @@ def check_missed(configs: list[SetupRequest], dotfiles: Path) -> None:
 
     return potentially_missed
 
-def main():
-    home = Path.home()
+def dotfiles_dir() -> Path:
     print("Assuming current directory as the dotfiles root")
-    dotfiles = Path.cwd()
+    return Path.cwd()
+
+def setup_all(configs: list[SetupRequest]) -> None:
+    for config in configs:
+        setup(config)
+
+def display_missed(configs: list[SetupRequest], dotfiles: Path) -> None:
+    print("Checking paths that aren't under the config...")
+    miss = False
+    for missed in check_missed(configs, dotfiles):
+        miss = True
+        print(f"\t{missed.current()}")
+    if not miss:
+        print_ok("you're good!")
+
+def main():
+    # cmdline parsing
+    prog = sys.argv[0]
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=
+        "=" * 50 +
+            "\nThis program will help you to manage your dotfiles."
+            "\n\n"
+            "\nThe most straightforward argument is probably `link-all`."
+            "\nExample if you want to link everything:"
+            f"\n\t{prog} --link-all"
+            "\n"
+        + "=" * 50)
+
+    parser.add_argument(
+            "--link-all",
+            help="link all dotfiles in the config",
+            action="store_true"
+    )
+    parser.add_argument(
+            "--check",
+            help="compare the dotfiles with config and display which are missed",
+            action="store_true")
+    # force-feed help when no arguments were supplied
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
+    args = parser.parse_args()
+
+    # setup
+    home = Path.home()
+    dotfiles = dotfiles_dir()
 
     configs = [
         # tmux config is old, it lives in $HOME
@@ -315,16 +367,12 @@ def main():
         ),
     ]
 
-    for config in configs:
-        setup(config)
+    # command execution
+    if args.check:
+        display_missed(configs, dotfiles)
 
-    print("Checking paths that aren't under the config...")
-    miss = False
-    for missed in check_missed(configs, dotfiles):
-        miss = True
-        print(f"\t{missed.current()}")
-    if not miss:
-        print("you're good!")
+    if args.link_all:
+        setup_all(configs)
 
 if __name__ == "__main__":
     main()
