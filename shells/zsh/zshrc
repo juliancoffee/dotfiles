@@ -1,5 +1,4 @@
-# Download grml config if doesn't exist
-
+# download grml config if doesn't exist
 if [ ! -f ~/.zsh/grml.zsh ]; then
     echo "grml configuration not found"
     echo "installing grml zsh configuration"
@@ -8,6 +7,32 @@ fi
 
 # load grml config
 . ~/.zsh/grml.zsh
+
+# prompts
+autoload -U promptinit; promptinit
+
+if git --version > /dev/null
+then
+    # two-line prompt with git integration
+    # download if needed
+    if [ ! -d ~/.zsh/agkozak-zsh-prompt ]; then
+        git clone https://github.com/agkozak/agkozak-zsh-prompt \
+            "$HOME/.zsh/agkozak-zsh-prompt"
+    fi
+    fpath+=($HOME/.zsh/agkozak-zsh-prompt)
+
+    # options
+    AGKOZAK_LEFT_PROMPT_ONLY=1
+
+    # setup
+    # promptinit must go after `fpath` modification
+    promptinit
+    # actually choose the prompt
+    prompt agkozak-zsh-prompt
+else
+    # fallback, comes with zsh by default
+    prompt adam2
+fi
 
 # "main" function, because I do want my local variables to stay local
 function () {
