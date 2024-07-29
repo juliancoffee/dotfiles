@@ -1,19 +1,22 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Any, Callable
 
 from enum import StrEnum, Enum
 from pathlib import PurePath, Path
+from dataclasses import dataclass
+import shutil
 import sys
 import fnmatch
 import itertools
 import argparse
 
-
 class ColorCode(StrEnum):
     """ To be used with `print_colored`.
-    Read `print_colored` to understand what these numbers mean, if you want.
+
+    Read `print_colored` docs to understand what these numbers mean, if you
+    want.
     """
     RED = "31"
     YELLOW = "33"
@@ -21,34 +24,36 @@ class ColorCode(StrEnum):
 
 
 def print_colored(msg: str, code: ColorCode) -> None:
-    # ANSI escape codes terminal magic
-    #
-    # when you output the following series of characters
-    # \x1b[<some code here>m
-    #
-    # your terminal will act, changing the colour of characters to follow,
-    # their position, their style, etc.
-    #
-    # For example,
-    # "\x1b[31m" means everything after that must be red, the "command" itself
-    # vanishes, of course.
-    #
-    # \x1b just means 27 in hex, ESCAPE in ASCII, [31m are just regular
-    # characters
-    #
-    # Note, "everything" really means "everything", try open some boring
-    # shell (`sh` should do the trick) without neatly customized colored
-    # prompt and type there:
-    # ```sh
-    # $ echo "\x1b[31m"
-    # ```
-    # and every character you'll see after that will be red, including prompts,
-    # your own typed in commands, their results, everything.
-    #
-    # To "counter" that, you must reset the colour, after writing the message,
-    # type, \x1b[0m, another escape code.
-    #
-    # off-topic, thanks Guido for making print() adding \n by default.
+    """
+    ANSI escape codes terminal magic
+
+    when you output the following series of characters
+    \x1b[<some code here>m
+
+    your terminal will act, changing the colour of characters to follow,
+    their position, their style, etc.
+
+    For example,
+    "\x1b[31m" means everything after that must be red, the "command" itself
+    vanishes, of course.
+
+    \x1b just means 27 in hex, ESCAPE in ASCII, [31m are just regular
+    characters
+
+    Note, "everything" really means "everything", try open some boring
+    shell (`sh` should do the trick) without neatly customized colored
+    prompt and type there:
+    ```sh
+    $ echo "\x1b[31m"
+    ```
+    and every character you'll see after that will be red, including prompts,
+    your own typed in commands, their results, everything.
+
+    To "counter" that, you must reset the colour, after writing the message,
+    type, \x1b[0m, another escape code.
+
+    off-topic, thanks Guido for making print() adding \n by default.
+    """
     print(f"\x1b[{code}m{msg}\x1b[0m")
 
 def print_ok(msg: str) -> None:
@@ -112,24 +117,55 @@ def setup_link(desc: str, src: Path, dest: Path) -> None:
     dest.symlink_to(src)
     print_ok(f"{desc}: {dest} => {src}")
 
-# - name
-# - either direct source in dotfiles or a list of alternatives
-# - link destination
-SetupRequest = tuple[str, Path | list[tuple[str, Path]], Path]
+def binary_check(name: str) -> bool:
+    return shutil.which(name) is not None
 
-def setup(req: SetupRequest) -> None:
-    desc, src, dest = req
-    if handle_existence(desc, dest):
-        return
+@dataclass
+class PathPicker:
+    opts: list[tuple[str, Path]]
 
-    if isinstance(src, Path):
-        setup_link(desc, src, dest)
-    elif isinstance(src, list):
-        choice, src = make_choice(desc, src)
-        setup_link(f"desc/{choice}", src, dest)
-    else:
-        raise TypeError(f"wrong `src` type: {src}")
+@dataclass
+class Config:
+    def __init__(
+            self,
+            desc: str,
+            src: Path | PathPicker,
+            dest: Path,
+            custom_check: Optional[Callable[[], bool]] = None,
+    ) -> None:
+        self.desc = desc
+        self.src = src
+        self.dest = dest
+        self.custom_check = custom_check
+        if custom_check is not None:
+            self.needed = custom_check
+        else:
+            self.needed = lambda: binary_check(self.desc)
 
+    def setup_link(self) -> None:
+        # check if need running
+        if self.custom_check is not None:
+            if not self.custom_check():
+                print_warn(f"{self.desc}: skipped (custom check decided against)")
+                return
+        else:
+            if not binary_check(self.desc):
+                print_warn(f"{self.desc}: skipped (binary not found)")
+                return
+
+        # check if destination is used already
+        if handle_existence(self.desc, self.dest):
+            return
+
+        # if all is fine, link
+        match self.src:
+            case Path() as src:
+                setup_link(self.desc, src, self.dest)
+            case PathPicker(opts):
+                choice, src = make_choice(self.desc, opts)
+                setup_link(f"{self.desc}/{choice}", src, self.dest)
+            case _:
+                raise TypeError(f"wrong `src` type: {self.src}")
 
 class FsNode:
     def __init__(self, this: Path, *, prev: Optional[FsNode]) -> None:
@@ -219,14 +255,15 @@ class DirState(Enum):
     # We don't know
     UNKNOWN = 3
 
-def check_missed(configs: list[SetupRequest], dotfiles: Path) -> list[FsNode]:
+def check_missed(configs: list[Config], dotfiles: Path) -> list[FsNode]:
     taken = []
-    for _desc, src, _dest  in configs:
-        if isinstance(src, Path):
-            taken.append(src.name)
-        elif isinstance(src, list):
-            for _desc_a, alternative in src:
-                taken.append(alternative.name)
+    for config in configs:
+        match config.src:
+            case Path() as src:
+                taken.append(src.name)
+            case PathPicker(opts):
+                for _sub_desc, alternative in opts:
+                    taken.append(alternative.name)
 
     potentially_missed: list[FsNode] = []
     for root, dirs, files in dotfiles.walk():
@@ -298,12 +335,12 @@ def dotfiles_dir() -> Path:
         print_warn("warning: assuming current directory as the dotfiles root")
     return Path.cwd()
 
-def setup_all(configs: list[SetupRequest]) -> None:
+def link_all(configs: list[Config]) -> None:
     print_ok("Setting links up...")
     for config in configs:
-        setup(config)
+        config.setup_link()
 
-def display_missed(configs: list[SetupRequest], dotfiles: Path) -> None:
+def display_missed(configs: list[Config], dotfiles: Path) -> None:
     print_ok("Checking paths that aren't in the config...")
     miss = False
     for missed in check_missed(configs, dotfiles):
@@ -349,37 +386,52 @@ def options() -> argparse.Namespace:
     return parser.parse_args()
 OPTIONS = options()
 
-def main():
+def main() -> None:
     # setup
     home = Path.home()
     dotfiles = dotfiles_dir()
 
-    configs = [
-        # tmux config is old, it lives in $HOME
-        ("tmux", dotfiles / "tmux/.tmux.conf", home / ".tmux.conf"),
-        # zsh too
-        ("zsh", dotfiles / "shells/zsh/zshrc", home / ".zshrc"),
-        # mpv is a good boi
-        ("mpv", dotfiles / "other/mpv", home / ".config/mpv"),
-        # all others too
-        ("nvim", dotfiles / "editors/nvim", home / ".config/nvim"),
-        (
+    c = Config
+    configs: list[Config] = [
+        # cli
+        c("tmux", dotfiles / "tmux/.tmux.conf", home / ".tmux.conf"),
+        c("zsh", dotfiles / "shells/zsh/zshrc", home / ".zshrc"),
+        c("fish", dotfiles / "shells/fish", home / ".config/fish"),
+        c("nvim", dotfiles / "editors/nvim", home / ".config/nvim"),
+        c("most", dotfiles / "pagers/most/.mostrc", home / ".mostrc"),
+        # GUI
+        c("mpv", dotfiles / "other/mpv", home / ".config/mpv"),
+        c("kitty", dotfiles / "terminals/kitty", home / ".config/kitty"),
+        c(
             "alacritty",
-            [
-                # runs zsh and starts tmux
+            PathPicker([
                 ("mac", dotfiles / "terminals/alacritty-mac"),
-            ],
+            ]),
             home / ".config/alacritty",
 
         ),
+        # X11 specific
+        c("rofi", dotfiles / "others/rofi", home / ".config/rofi"),
+        c("i3", dotfiles / "wm/i3", home / ".config/i3"),
+        c("polybar", dotfiles / "wm/bars/polybar", home / ".config/polybar"),
+        c("picom", dotfiles / "wm/compositors/picom", home / ".config/picom"),
     ]
+
+    dummy: Any = ""
+    ignored: list[Config] = [
+        # has a dynamic target based on profile and OS
+        c("firefox", dotfiles / "browser/firefox", dummy),
+        # based on vimscript, will need deleting anyway
+        c("nvim-old", dotfiles / "editors/nvim-old", dummy),
+    ]
+    all_configs = configs + ignored
 
     # command execution
     if OPTIONS.check:
-        display_missed(configs, dotfiles)
+        display_missed(all_configs, dotfiles)
 
     if OPTIONS.link_all:
-        setup_all(configs)
+        link_all(configs)
 
 if __name__ == "__main__":
     main()
