@@ -84,6 +84,8 @@ class PathPicker:
 
 @dataclass
 class Config:
+    OPTIONS: Optional[argparse.Namespace] = None
+
     def __init__(
             self,
             desc: str,
@@ -113,7 +115,7 @@ class Config:
                 return
 
         # check if destination is used already
-        if self.handle_existence():
+        if self._handle_existence():
             return
 
 
@@ -127,10 +129,12 @@ class Config:
             case _:
                 raise TypeError(f"wrong `src` type: {self.src}")
 
-    def handle_existence(self) -> bool:
+    def _handle_existence(self) -> bool:
+        assert self.OPTIONS is not None
+
         if self.dest.exists():
             print(f"{self.desc}: skipped (already there)")
-            if OPTIONS.verbose >= 1:
+            if self.OPTIONS.verbose >= 1:
                 if self.dest.is_symlink():
                     print_warn(
                             "\texplanation:"
@@ -140,7 +144,7 @@ class Config:
                 else:
                     print_warn(f"\texplanation: destination is taken by non-symlink")
 
-            if OPTIONS.verbose >= 1:
+            if self.OPTIONS.verbose >= 2:
                 if self.dest.is_dir():
                     file_num = 0
                     dir_num = 0
@@ -326,8 +330,8 @@ def check_missed(configs: list[Config], dotfiles: Path) -> list[FsNode]:
 
     return potentially_missed
 
-def dotfiles_dir() -> Path:
-    if OPTIONS.verbose >= 1:
+def dotfiles_dir(options: argparse.Namespace) -> Path:
+    if options.verbose >= 1:
         print_warn("warning: assuming current directory as the dotfiles root")
     return Path.cwd()
 
@@ -345,7 +349,7 @@ def display_missed(configs: list[Config], dotfiles: Path) -> None:
     if not miss:
         print_ok("you're good!")
 
-def options() -> argparse.Namespace:
+def cli_options() -> argparse.Namespace:
     # cmdline parsing
     prog = sys.argv[0]
     parser = argparse.ArgumentParser(
@@ -380,13 +384,14 @@ def options() -> argparse.Namespace:
         parser.print_help(sys.stderr)
         sys.exit(1)
     return parser.parse_args()
-OPTIONS = options()
 
 def main() -> None:
     # setup
+    options = cli_options()
     home = Path.home()
-    dotfiles = dotfiles_dir()
+    dotfiles = dotfiles_dir(options)
 
+    Config.OPTIONS = options
     c = Config
     configs: list[Config] = [
         # cli
@@ -423,10 +428,10 @@ def main() -> None:
     all_configs = configs + ignored
 
     # command execution
-    if OPTIONS.check:
+    if options.check:
         display_missed(all_configs, dotfiles)
 
-    if OPTIONS.link_all:
+    if options.link_all:
         link_all(configs)
 
 if __name__ == "__main__":
