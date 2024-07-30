@@ -65,38 +65,6 @@ def print_warn(msg: str) -> None:
 def print_err(msg: str) -> None:
     print_colored(msg, ColorCode.RED)
 
-def handle_existence(desc: str, dest: Path) -> bool:
-    if dest.exists():
-        print(f"{desc}: skipped (already there)")
-        if OPTIONS.verbose >= 1:
-            if dest.is_symlink():
-                print_warn(
-                        "\texplanation:"
-                        f" destination is taken by [symlink to {dest.resolve()}]"
-                )
-            else:
-                print_warn(f"\texplanation: destination is taken by non-symlink")
-
-        if OPTIONS.verbose >= 1:
-            if dest.is_dir():
-                file_num = 0
-                dir_num = 0
-                link_num = 0
-                for child in dest.iterdir():
-                    if child.is_file():
-                        file_num += 1
-                    if child.is_dir():
-                        dir_num += 1
-                    if child.is_symlink():
-                        link_num += 1
-
-                print_warn(
-                        "\tnote: it's a [directory with {} files, {} dirs, {} links]"
-                            .format(file_num, dir_num, link_num)
-                )
-        return True
-    return False
-
 def make_choice(desc: str, choices: list[tuple[str, Path]]) -> tuple[str, Path]:
     print(f"There are multiple choices for {desc}:")
     for (i, (desc, path)) in enumerate(choices):
@@ -109,16 +77,6 @@ def make_choice(desc: str, choices: list[tuple[str, Path]]) -> tuple[str, Path]:
             return choices[idx]
         except ValueError:
             print_err("failed to parse the number, please try again")
-
-def setup_link(desc: str, src: Path, dest: Path) -> None:
-    if handle_existence(desc, dest):
-        return
-
-    dest.symlink_to(src)
-    print_ok(f"{desc}: {dest} => {src}")
-
-def binary_check(name: str) -> bool:
-    return shutil.which(name) is not None
 
 @dataclass
 class PathPicker:
@@ -137,35 +95,73 @@ class Config:
         self.src = src
         self.dest = dest
         self.custom_check = custom_check
-        if custom_check is not None:
-            self.needed = custom_check
-        else:
-            self.needed = lambda: binary_check(self.desc)
 
     def setup_link(self) -> None:
+        # helper func
+        def setup(desc: str, src: Path, dest: Path) -> None:
+            dest.symlink_to(src)
+            print_ok(f"{desc}: {dest} => {src}")
+
         # check if need running
         if self.custom_check is not None:
             if not self.custom_check():
-                print_warn(f"{self.desc}: skipped (custom check decided against)")
+                print_warn(f"{self.desc}: skipped (custom check)")
                 return
         else:
-            if not binary_check(self.desc):
+            if shutil.which(self.desc) is None:
                 print_warn(f"{self.desc}: skipped (binary not found)")
                 return
 
         # check if destination is used already
-        if handle_existence(self.desc, self.dest):
+        if self.handle_existence():
             return
+
 
         # if all is fine, link
         match self.src:
             case Path() as src:
-                setup_link(self.desc, src, self.dest)
+                setup(self.desc, src, self.dest)
             case PathPicker(opts):
                 choice, src = make_choice(self.desc, opts)
-                setup_link(f"{self.desc}/{choice}", src, self.dest)
+                setup(f"{self.desc}/{choice}", src, self.dest)
             case _:
                 raise TypeError(f"wrong `src` type: {self.src}")
+
+    def handle_existence(self) -> bool:
+        if self.dest.exists():
+            print(f"{self.desc}: skipped (already there)")
+            if OPTIONS.verbose >= 1:
+                if self.dest.is_symlink():
+                    print_warn(
+                            "\texplanation:"
+                            " destination is taken by [symlink to {}]"
+                                .format(self.dest.resolve())
+                    )
+                else:
+                    print_warn(f"\texplanation: destination is taken by non-symlink")
+
+            if OPTIONS.verbose >= 1:
+                if self.dest.is_dir():
+                    file_num = 0
+                    dir_num = 0
+                    link_num = 0
+                    for child in self.dest.iterdir():
+                        if child.is_file():
+                            file_num += 1
+                        if child.is_dir():
+                            dir_num += 1
+                        if child.is_symlink():
+                            link_num += 1
+
+                    print_warn(
+                            "\tnote: it's a directory with"
+                            f" {file_num} files,"
+                            f" {dir_num} dirs,"
+                            f" {link_num} links."
+                    )
+            return True
+        return False
+
 
 class FsNode:
     def __init__(self, this: Path, *, prev: Optional[FsNode]) -> None:
