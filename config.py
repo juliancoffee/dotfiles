@@ -129,6 +129,37 @@ class Config:
             case _:
                 raise TypeError(f"wrong `src` type: {self.src}")
 
+    def remove_link(self) -> None:
+        def verbose(msg: str) -> None:
+            assert self.OPTIONS is not None
+
+            if self.OPTIONS.verbose >= 1:
+                print_warn(msg)
+
+        if not self.dest.is_symlink():
+            verbose(f"{self.desc}: can't unlink, not a symlink")
+            return
+
+        match self.src:
+            case Path() as src:
+                if src.resolve() == self.dest.resolve():
+                    self.dest.unlink()
+                    print_ok(f"{self.desc}: unlinked")
+                else:
+                    verbose(
+                        f"{self.desc}: won't unlink, doesn't link to config"
+                    )
+            case PathPicker(opts):
+                for _alternative_desc, alternative_src in opts:
+                    if alternative_src.resolve() == self.dest.resolve():
+                        self.dest.unlink()
+                        print_ok(f"{self.desc}: unlinked")
+                        break
+                else:
+                    verbose(
+                        f"{self.desc}: won't unlink, doesn't link to config"
+                    )
+
     def _handle_existence(self) -> bool:
         assert self.OPTIONS is not None
 
@@ -340,6 +371,12 @@ def link_all(configs: list[Config]) -> None:
     for config in configs:
         config.setup_link()
 
+def unlink_all(configs: list[Config]) -> None:
+    print_ok("Removing links...")
+    for config in configs:
+        config.remove_link()
+
+
 def display_missed(configs: list[Config], dotfiles: Path) -> None:
     print_ok("Checking paths that aren't in the config...")
     miss = False
@@ -366,6 +403,11 @@ def cli_options() -> argparse.Namespace:
 
     parser.add_argument(
             "-a", "--link-all",
+            help="link all dotfiles in the config",
+            action="store_true"
+    )
+    parser.add_argument(
+            "--unlink-all",
             help="link all dotfiles in the config",
             action="store_true"
     )
@@ -433,6 +475,9 @@ def main() -> None:
 
     if options.link_all:
         link_all(configs)
+
+    if options.unlink_all:
+        unlink_all(configs)
 
 if __name__ == "__main__":
     main()
