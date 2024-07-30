@@ -1,6 +1,8 @@
+### python stuff
 # ignore cache
 **/__pycache__/**/*
 
+### Nvim
 # ignore all colorscheme, except my custom one
 editors/nvim/colors/*
 !editors/nvim/colors/muclor.vim
@@ -14,3 +16,6 @@ editors/nvim/.netrwhist
 ### MPV
 # ignore watch_later list
 other/mpv/watch_later
+
+### setup data
+recorder.db

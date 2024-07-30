@@ -3,11 +3,14 @@ from __future__ import annotations
 
 from typing import Optional, Any, Callable
 
+import sqlite3
+
 from enum import StrEnum, Enum
 from pathlib import PurePath, Path
 from dataclasses import dataclass
 import shutil
 import sys
+import os
 import fnmatch
 import itertools
 import argparse
@@ -78,6 +81,34 @@ def make_choice(desc: str, choices: list[tuple[str, Path]]) -> tuple[str, Path]:
         except ValueError:
             print_err("failed to parse the number, please try again")
 
+class Recorder:
+    def __init__(self):
+        self.connection = sqlite3.connect("recorder.db", autocommit=False)
+        fresh = (self
+            .connection
+            .execute("SELECT name FROM sqlite_master WHERE name='operation'")
+            .fetchone() is None)
+
+        if fresh:
+            with self.connection as con:
+                con.execute(
+                """CREATE TABLE operation(
+                            kind TEXT,
+                            desc TEXT,
+                            src TEXT,
+                            dest TEXT
+                )""")
+
+    def new_link(self, desc: str, src: Path, dest: Path):
+        src_string = os.fspath(src)
+        dest_string = os.fspath(dest)
+        with self.connection as con:
+            con.execute(
+                "INSERT INTO operation VALUES(?, ?, ?, ?)",
+                ("link", desc, src_string, dest_string)
+            )
+
+
 @dataclass
 class PathPicker:
     opts: list[tuple[str, Path]]
@@ -85,12 +116,14 @@ class PathPicker:
 @dataclass
 class Config:
     OPTIONS: Optional[argparse.Namespace] = None
+    RECORDER: Optional[Recorder] = None
 
     def __init__(
             self,
             desc: str,
             src: Path | PathPicker,
             dest: Path,
+            *,
             custom_check: Optional[Callable[[], bool]] = None,
     ) -> None:
         self.desc = desc
@@ -101,7 +134,10 @@ class Config:
     def setup_link(self) -> None:
         # helper func
         def setup(desc: str, src: Path, dest: Path) -> None:
+            assert self.RECORDER is not None
+
             dest.symlink_to(src)
+            self.RECORDER.new_link(desc, src, dest)
             print_ok(f"{desc}: {dest} => {src}")
 
         # check if need running
@@ -430,10 +466,13 @@ def cli_options() -> argparse.Namespace:
 def main() -> None:
     # setup
     options = cli_options()
+    recorder = Recorder()
+
     home = Path.home()
     dotfiles = dotfiles_dir(options)
 
     Config.OPTIONS = options
+    Config.RECORDER = recorder
     c = Config
     configs: list[Config] = [
         # cli
