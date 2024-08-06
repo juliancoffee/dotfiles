@@ -81,8 +81,22 @@ def make_choice(desc: str, choices: list[tuple[str, Path]]) -> tuple[str, Path]:
         except ValueError:
             print_err("failed to parse the number, please try again")
 
+def pretty_path(p: Path, home: Path, dotfiles: Path) -> str:
+    """ Makes the path easier to read
+    Replaces $HOME with `~`, and dotfiles with `{.}`
+    """
+    p_string = os.fspath(p)
+    home_string = os.fspath(home)
+    dots_string = os.fspath(dotfiles)
+
+    return (
+        p_string
+            .replace(dots_string, "{.}")
+            .replace(home_string, "~")
+    )
+
 class Recorder:
-    def __init__(self):
+    def __init__(self) -> None:
         self.connection = sqlite3.connect("recorder.db", autocommit=False)
         fresh = (self
             .connection
@@ -93,27 +107,45 @@ class Recorder:
             with self.connection as con:
                 con.execute(
                 """CREATE TABLE operation(
-                            kind TEXT,
                             desc TEXT,
                             src TEXT,
                             dest TEXT
                 )""")
 
-    def new_link(self, desc: str, src: Path, dest: Path):
+    def register_link(self, desc: str, src: Path, dest: Path) -> None:
         src_string = os.fspath(src)
         dest_string = os.fspath(dest)
         with self.connection as con:
             con.execute(
-                "INSERT INTO operation VALUES(?, ?, ?, ?)",
-                ("link", desc, src_string, dest_string)
+                "INSERT INTO operation VALUES(?, ?, ?)",
+                (desc, src_string, dest_string)
             )
+
+    def unregister_link(self, dest: Path):
+        dest_string = os.fspath(dest)
+        with self.connection as con:
+            con.execute(
+                "DELETE FROM operation WHERE operation.dest = ?",
+                (dest_string, )
+            )
+
+    def registered_configs(self) -> list[Config]:
+        con = self.connection
+        res = con.execute(
+            "SELECT desc, src, dest FROM operation"
+        )
+        configs = []
+        for desc, src_string, dest_string in res.fetchall():
+            src = Path(src_string)
+            dest = Path(dest_string)
+            configs.append(Config(desc, src, dest))
+        return configs
 
 
 @dataclass
 class PathPicker:
     opts: list[tuple[str, Path]]
 
-@dataclass
 class Config:
     OPTIONS: Optional[argparse.Namespace] = None
     RECORDER: Optional[Recorder] = None
@@ -137,7 +169,7 @@ class Config:
             assert self.RECORDER is not None
 
             dest.symlink_to(src)
-            self.RECORDER.new_link(desc, src, dest)
+            self.RECORDER.register_link(desc, src, dest)
             print_ok(f"{desc}: {dest} => {src}")
 
         # check if need running
@@ -166,6 +198,14 @@ class Config:
                 raise TypeError(f"wrong `src` type: {self.src}")
 
     def remove_link(self) -> None:
+        # helper func
+        def unlink(desc: str, dest: Path) -> None:
+            assert self.RECORDER is not None
+
+            dest.unlink()
+            self.RECORDER.unregister_link(dest)
+            print_ok(f"{desc}: unlinked")
+
         def verbose(msg: str) -> None:
             assert self.OPTIONS is not None
 
@@ -179,8 +219,7 @@ class Config:
         match self.src:
             case Path() as src:
                 if src.resolve() == self.dest.resolve():
-                    self.dest.unlink()
-                    print_ok(f"{self.desc}: unlinked")
+                    unlink(self.desc, self.dest)
                 else:
                     verbose(
                         f"{self.desc}: won't unlink, doesn't link to config"
@@ -188,8 +227,7 @@ class Config:
             case PathPicker(opts):
                 for _alternative_desc, alternative_src in opts:
                     if alternative_src.resolve() == self.dest.resolve():
-                        self.dest.unlink()
-                        print_ok(f"{self.desc}: unlinked")
+                        unlink(self.desc, self.dest)
                         break
                 else:
                     verbose(
@@ -412,6 +450,17 @@ def unlink_all(configs: list[Config]) -> None:
     for config in configs:
         config.remove_link()
 
+def show_log(recorder: Recorder, home: Path, dotfiles: Path) -> None:
+    for config in recorder.registered_configs():
+        # registered cofigs are always trivial
+        assert isinstance(config.src, Path)
+
+        src = pretty_path(config.src, home, dotfiles)
+        dest = pretty_path(config.dest, home, dotfiles)
+        print(
+            f"{config.desc}: {src} => {dest}",
+        )
+
 
 def display_missed(configs: list[Config], dotfiles: Path) -> None:
     print_ok("Checking paths that aren't in the config...")
@@ -422,7 +471,7 @@ def display_missed(configs: list[Config], dotfiles: Path) -> None:
     if not miss:
         print_ok("you're good!")
 
-def cli_options() -> argparse.Namespace:
+def option_parser() -> argparse.Namespace:
     # cmdline parsing
     prog = sys.argv[0]
     parser = argparse.ArgumentParser(
@@ -430,33 +479,46 @@ def cli_options() -> argparse.Namespace:
         description=
         "=" * 50 +
             "\nThis program will help you to manage your dotfiles."
-            "\n\n"
-            "\"The most straightforward argument is probably `link-all`."
-            "\nExample if you want to link everything:"
+            "\n"
+            "\nThe most straightforward argument is probably `link-all`."
+            "\nThis will link every dotfile in the config:"
             f"\n\t{prog} --link-all"
             "\n"
         + "=" * 50)
 
+    # main operations
     parser.add_argument(
-            "-a", "--link-all",
+            "--link-all",
             help="link all dotfiles in the config",
+            action="store_true"
+    )
+    parser.add_argument(
+            "--show-log",
+            help="show all registered operations",
+            action="store_true"
+    )
+    # management
+    parser.add_argument(
+            "--relink-all",
+            help="unlink and relink all dotfiles in the config",
             action="store_true"
     )
     parser.add_argument(
             "--unlink-all",
-            help="link all dotfiles in the config",
+            help="unlink all dotfiles in the config",
             action="store_true"
     )
-    parser.add_argument(
-            "--check",
-            help="compare the dotfiles with config and display which are missed",
-            action="store_true")
+    # misc
     parser.add_argument(
             "-v", "--verbose",
             help="be verbose (can be repeated up to -vv)",
             default=0,
             action="count"
     )
+    parser.add_argument(
+            "--no-check",
+            help="don't check missed from config dotfiles",
+            action="store_true")
     # force-feed help when no arguments were supplied
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
@@ -465,7 +527,7 @@ def cli_options() -> argparse.Namespace:
 
 def main() -> None:
     # setup
-    options = cli_options()
+    options = option_parser()
     recorder = Recorder()
 
     home = Path.home()
@@ -474,6 +536,8 @@ def main() -> None:
     Config.OPTIONS = options
     Config.RECORDER = recorder
     c = Config
+
+    # configs
     configs: list[Config] = [
         # cli
         c("tmux", dotfiles / "tmux/.tmux.conf", home / ".tmux.conf"),
@@ -509,14 +573,21 @@ def main() -> None:
     all_configs = configs + ignored
 
     # command execution
-    if options.check:
-        display_missed(all_configs, dotfiles)
-
     if options.link_all:
         link_all(configs)
 
+    if options.show_log:
+        show_log(recorder, home, dotfiles)
+
     if options.unlink_all:
         unlink_all(configs)
+
+    if options.relink_all:
+        unlink_all(configs)
+        link_all(configs)
+
+    if not options.no_check:
+        display_missed(all_configs, dotfiles)
 
 if __name__ == "__main__":
     main()
