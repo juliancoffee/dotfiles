@@ -508,6 +508,10 @@ def option_parser() -> argparse.Namespace:
             "\nThe most straightforward argument is probably `link-all`."
             "\nThis will link every dotfile in the config:"
             f"\n\t{prog} --link-all"
+            "\nIf you've changed the underlying file structure, use"
+            " `redo-all`."
+            f"\n\t{prog} --redo-all"
+            "\nOr if you want to be more delicate, maybe use `undo ID`."
             "\n"
         + "=" * 50)
 
