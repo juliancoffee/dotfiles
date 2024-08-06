@@ -81,6 +81,16 @@ def make_choice(desc: str, choices: list[tuple[str, Path]]) -> tuple[str, Path]:
         except ValueError:
             print_err("failed to parse the number, please try again")
 
+def load_ignore_file() -> Iterator[str]:
+    src = ".configignore"
+    with open(src, 'r') as f:
+        for line in f:
+            if line.startswith("#"):
+                continue
+            if not line.strip():
+                continue
+            yield line.rstrip()
+
 def pretty_path(p: Path, home: Path, dotfiles: Path) -> str:
     """ Makes the path easier to read
     Replaces $HOME with `~`, and dotfiles with `{.}`
@@ -386,10 +396,10 @@ def check_missed(configs: list[Config], dotfiles: Path) -> list[FsNode]:
                     taken.append(alternative.name)
 
     potentially_missed: list[FsNode] = []
+    ignore_list = list(load_ignore_file())
     for root, dirs, files in dotfiles.walk():
         skiplist = [
-            fnmatch.filter(dirs, skippath)
-            for skippath in [".git", ".mypy_cache", "blog", "scripts"]
+            fnmatch.filter(dirs, skippath) for skippath in ignore_list
         ]
 
         for d in itertools.chain.from_iterable(skiplist):
