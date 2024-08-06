@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-from typing import Optional, Any, Callable
+from typing import Optional, Any, Callable, Iterator
 
 import sqlite3
 
@@ -129,17 +129,32 @@ class Recorder:
                 (dest_string, )
             )
 
-    def registered_configs(self) -> list[Config]:
-        con = self.connection
-        res = con.execute(
-            "SELECT desc, src, dest FROM operation"
+    def numbered_configs(self) -> Iterator[tuple[int, Config]]:
+        res = self.connection.execute(
+            "SELECT oid, desc, src, dest FROM operation"
         )
-        configs = []
-        for desc, src_string, dest_string in res.fetchall():
+        for i, desc, src_string, dest_string in res.fetchall():
             src = Path(src_string)
             dest = Path(dest_string)
-            configs.append(Config(desc, src, dest))
-        return configs
+            yield i, Config(desc, src, dest)
+
+    def registered_configs(self) -> list[Config]:
+        return [c for i, c in self.numbered_configs()]
+
+    def undo_all(self) -> None:
+        configs = self.registered_configs()
+        for config in configs:
+            config.remove_link()
+
+    def undo_by_oid(self, oid: int) -> None:
+        res = self.connection.execute(
+            "SELECT desc, src, dest FROM operation WHERE oid = ?",
+            (oid, )
+        )
+        desc, src_string, dest_string = res.fetchone()
+        src = Path(src_string)
+        dest = Path(dest_string)
+        Config(desc, src, dest).remove_link()
 
 
 @dataclass
@@ -451,16 +466,16 @@ def unlink_all(configs: list[Config]) -> None:
         config.remove_link()
 
 def show_log(recorder: Recorder, home: Path, dotfiles: Path) -> None:
-    for config in recorder.registered_configs():
+    print_ok("Getting registered operations...")
+    for i, config in recorder.numbered_configs():
         # registered cofigs are always trivial
         assert isinstance(config.src, Path)
 
         src = pretty_path(config.src, home, dotfiles)
         dest = pretty_path(config.dest, home, dotfiles)
         print(
-            f"{config.desc}: {src} => {dest}",
+            f"{i} @ {config.desc}: {src} => {dest}",
         )
-
 
 def display_missed(configs: list[Config], dotfiles: Path) -> None:
     print_ok("Checking paths that aren't in the config...")
@@ -499,13 +514,30 @@ def option_parser() -> argparse.Namespace:
     )
     # management
     parser.add_argument(
-            "--relink-all",
-            help="unlink and relink all dotfiles in the config",
-            action="store_true"
+            "--undo",
+            help="undo specific ID-th operation",
+            type=int,
+            metavar="ID",
     )
+    parser.add_argument(
+            "--redo-all",
+            help="undo all registered operations and re-apply config",
+            action="store_true",
+    )
+    parser.add_argument(
+            "--undo-all",
+            help="undo all registered operations",
+            action="store_true",
+    )
+    # for manual testing
     parser.add_argument(
             "--unlink-all",
             help="unlink all dotfiles in the config",
+            action="store_true"
+    )
+    parser.add_argument(
+            "--relink-all",
+            help="unlink and relink all dotfiles in the config",
             action="store_true"
     )
     # misc
@@ -578,6 +610,17 @@ def main() -> None:
 
     if options.show_log:
         show_log(recorder, home, dotfiles)
+
+    match options.undo:
+        case int(oid):
+            recorder.undo_by_oid(oid)
+
+    if options.redo_all:
+        recorder.undo_all()
+        link_all(configs)
+
+    if options.undo_all:
+        recorder.undo_all()
 
     if options.unlink_all:
         unlink_all(configs)
