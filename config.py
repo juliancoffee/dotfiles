@@ -181,7 +181,7 @@ class Config:
             src: Path | PathPicker,
             dest: Path,
             *,
-            custom_check: Optional[Callable[[], bool]] = None,
+            custom_check: Optional[Callable[[], Optional[str]]] = None,
     ) -> None:
         self.desc = desc
         self.src = src
@@ -199,9 +199,10 @@ class Config:
 
         # check if need running
         if self.custom_check is not None:
-            if not self.custom_check():
-                print_warn(f"{self.desc}: skipped (custom check)")
-                return
+            match self.custom_check():
+                case str(refusal):
+                    print_warn(f"{self.desc}: skipped ({refusal})")
+                    return
         else:
             if shutil.which(self.desc) is None:
                 print_warn(f"{self.desc}: skipped (binary not found)")
