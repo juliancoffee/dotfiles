@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-from typing import Optional, Any, Callable, Iterator
+from typing import Optional, Any, Callable, Iterator, ClassVar, cast
 
 import sqlite3
 
@@ -171,21 +171,32 @@ class Recorder:
 class PathPicker:
     opts: list[tuple[str, Path]]
 
+@dataclass
+class DynPath:
+    """To be used with Config() for paths that require in-code creation"""
+    get: Callable[[], Path]
+
 class Config:
-    OPTIONS: Optional[argparse.Namespace] = None
-    RECORDER: Optional[Recorder] = None
+    OPTIONS: ClassVar[Optional[argparse.Namespace]] = None
+    RECORDER: ClassVar[Optional[Recorder]] = None
 
     def __init__(
             self,
             desc: str,
             src: Path | PathPicker,
-            dest: Path,
+            dest: Path | DynPath,
             *,
             custom_check: Optional[Callable[[], Optional[str]]] = None,
     ) -> None:
         self.desc = desc
         self.src = src
-        self.dest = dest
+        match dest:
+            case Path() as path:
+                self.dest = path
+            case DynPath(get=f):
+                if custom_check is not None and custom_check() is None:
+                    if custom_check() is None:
+                        self.dest = f()
         self.custom_check = custom_check
 
     def setup_link(self) -> None:
@@ -238,13 +249,14 @@ class Config:
             if self.OPTIONS.verbose >= 1:
                 print_warn(msg)
 
+
         if not self.dest.is_symlink():
             verbose(f"{self.desc}: can't unlink, not a symlink")
             return
 
         match self.src:
             case Path() as src:
-                if src.resolve() == self.dest.resolve():
+                if src.absolute() == self.dest.resolve():
                     unlink(self.desc, self.dest)
                 else:
                     verbose(
@@ -252,7 +264,7 @@ class Config:
                     )
             case PathPicker(opts):
                 for _alternative_desc, alternative_src in opts:
-                    if alternative_src.resolve() == self.dest.resolve():
+                    if alternative_src.absolute() == self.dest.resolve():
                         unlink(self.desc, self.dest)
                         break
                 else:
@@ -603,6 +615,20 @@ def main() -> None:
             home / ".config/alacritty",
 
         ),
+        # has a dynamic target based on profile and OS
+        c(
+            "firefox",
+            dotfiles / "browser/firefox/user.js",
+            DynPath(
+                # check about:support for profile folder
+                lambda: Path(os.environ["FIREFOX_PROFILE_HOME"]) / "user.js",
+            ),
+            custom_check=
+                lambda:
+                    "no $FIREFOX_PROFILE_HOME provided"
+                    if os.getenv("FIREFOX_PROFILE_HOME") is None
+                    else None,
+        ),
         # X11 specific
         c("rofi", dotfiles / "others/rofi", home / ".config/rofi"),
         c("i3", dotfiles / "wm/i3", home / ".config/i3"),
@@ -612,8 +638,6 @@ def main() -> None:
 
     dummy: Any = ""
     ignored: list[Config] = [
-        # has a dynamic target based on profile and OS
-        c("firefox", dotfiles / "browser/firefox", dummy),
         # based on vimscript, will need deleting anyway
         c("nvim-old", dotfiles / "editors/nvim-old", dummy),
     ]
