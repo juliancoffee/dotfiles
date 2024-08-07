@@ -14,10 +14,16 @@ user_pref("extensions.pocket.enabled", false);
 user_pref("browser.cache.memory.enable", false);
 user_pref("browser.cache.offline.enable", false);
 user_pref("browser.sessionhistory.max_total_viewers", 0);
-user_pref('browser.cache.disk.enable', true); // Enable disk cache
+// Enable disk cache
+user_pref('browser.cache.disk.enable', true);
 user_pref("browser.cache.disk_cache_ssl", false);
-user_pref('browser.cache.disk.capacity', 1000000); // Disk cache capacity: -1 = determine dynamically (default), 0 = none, n = memory capacity in kilobytes
-//user_pref('browser.cache.disk.parent_directory', '/run/user/1000/firefox-cache'); // Write cache to RAM (tmpfs) instead of SSD / HDD
+// Disk cache capacity:
+// -1 = determine dynamically (default),
+// 0 = none,
+// n = memory capacity in kilobytes
+user_pref('browser.cache.disk.capacity', 1000000);
+// Write cache to RAM (tmpfs) instead of SSD / HDD
+//user_pref('browser.cache.disk.parent_directory', '/run/user/1000/firefox-cache'); 
 
 /*
  * Disable middlemouse paste leaking clipboard content on Linux after autoscroll
@@ -33,13 +39,19 @@ user_pref('browser.urlbar.suggest.topsites', false);
 /*
  * Downloads settings
  */
-user_pref('browser.download.useDownloadDir', false); // Always asking where to download
-user_pref('browser.download.hide_plugins_without_extensions', false); // Disable hiding mime types not associated with a plugin
+// Always asking where to download
+user_pref('browser.download.useDownloadDir', false);
+// Disable hiding mime types not associated with a plugin
+user_pref('browser.download.hide_plugins_without_extensions', false);
 
 /*
  * Appearance
  */
-user_pref('browser.download.autohideButton', false); // Always display Downloads button
-user_pref('toolkit.legacyUserProfileCustomizations.stylesheets', true); // Allow userChrome/userContent
-user_pref('privacy.userContext.enabled', true); // Enable Container Tabs
-user_pref('privacy.userContext.ui.enabled', true); // Enable Container Tabs setting in preferences
+// Always display Downloads button
+user_pref('browser.download.autohideButton', false);
+// Allow userChrome/userContent
+user_pref('toolkit.legacyUserProfileCustomizations.stylesheets', true);
+// Enable Container Tabs
+user_pref('privacy.userContext.enabled', true);
+// Enable Container Tabs setting in preferences
+user_pref('privacy.userContext.ui.enabled', true);

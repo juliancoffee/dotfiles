@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+# DEPRECATED, use python stuff instead
+
 # Dependencies:
 # POSIX shell (bash in sh emulation, for example can be used)
 # coreutils:
@@ -102,6 +104,10 @@ setup() {
         reset_color
     fi
 }
+
+warn_color
+echo "deprecated! use build.py instead"
+reset_color
 
 # set DOTFILES to default value if unset
 debug "${DOTFILES="$HOME/.config/dotfiles"}"
