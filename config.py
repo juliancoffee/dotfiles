@@ -519,6 +519,29 @@ def display_missed(configs: list[Config], dotfiles: Path) -> None:
     if not miss:
         print_ok("you're good!")
 
+def check_configs(configs: list[Config]) -> None:
+    print_ok("Checking paths in config for validity...")
+    miss = False
+    for config in configs:
+        match config.src:
+            case Path() as path:
+                if not path.exists():
+                    miss = True
+                    print_warn(f"\t{config.desc}: warning, {path} doesn't exist")
+            case PathPicker(opts):
+                for alternative_desc, alternative_src in opts:
+                    if not alternative_src.exists():
+                        miss = True
+                        print_warn(
+                            "\t{desc}: warning, {path} doesn't exist"
+                                .format(
+                                    desc=f"{config.desc}/{alternative_desc}",
+                                    path=alternative_src,
+                                )
+                        )
+    if not miss:
+        print_ok("you're good!")
+
 def option_parser() -> argparse.Namespace:
     # cmdline parsing
     prog = sys.argv[0]
@@ -680,6 +703,7 @@ def main() -> None:
 
     if not options.no_check:
         display_missed(all_configs, dotfiles)
+        check_configs(all_configs)
 
 if __name__ == "__main__":
     main()
