@@ -38,8 +38,9 @@ fi
 function () {
     # some variables
     local DOTFILES="$HOME/.config/dotfiles"
-    local SHELL_RC="$HOME/.zshrc"
+    local SHELL_RC="$HOME/.config/zsh/.zshrc"
     local VIM_RC="$HOME/.config/nvim/init.lua"
+    local WORK="$HOME/Workspace"
     export EDITOR="nvim"
 
     # better path
@@ -47,6 +48,7 @@ function () {
 
     # aliases
     alias cddot="cd $DOTFILES"
+    alias cdwork="cd $WORK"
     alias upd="source $SHELL_RC"
     alias edsh="$EDITOR $SHELL_RC"
     alias edvim="$EDITOR $VIM_RC"
