@@ -250,6 +250,13 @@ class Config:
                 print_warn(msg)
 
 
+        # check if needs running
+        if self.custom_check is not None:
+            match self.custom_check():
+                case str(refusal):
+                    print_warn(f"{self.desc}: skipped ({refusal})")
+                    return
+
         if not self.dest.is_symlink():
             verbose(f"{self.desc}: can't unlink, not a symlink")
             return
@@ -276,7 +283,10 @@ class Config:
         assert self.OPTIONS is not None
 
         if self.dest.exists():
-            print(f"{self.desc}: skipped (already there)")
+            if self.dest.is_symlink():
+                print(f"{self.desc}: skipped (already there)")
+            else:
+                print_warn(f"{self.desc}: skipped (taken)")
             if self.OPTIONS.verbose >= 1:
                 if self.dest.is_symlink():
                     print_warn(
@@ -509,6 +519,29 @@ def display_missed(configs: list[Config], dotfiles: Path) -> None:
     if not miss:
         print_ok("you're good!")
 
+def check_configs(configs: list[Config]) -> None:
+    print_ok("Checking paths in config for validity...")
+    miss = False
+    for config in configs:
+        match config.src:
+            case Path() as path:
+                if not path.exists():
+                    miss = True
+                    print_warn(f"\t{config.desc}: warning, {path} doesn't exist")
+            case PathPicker(opts):
+                for alternative_desc, alternative_src in opts:
+                    if not alternative_src.exists():
+                        miss = True
+                        print_warn(
+                            "\t{desc}: warning, {path} doesn't exist"
+                                .format(
+                                    desc=f"{config.desc}/{alternative_desc}",
+                                    path=alternative_src,
+                                )
+                        )
+    if not miss:
+        print_ok("you're good!")
+
 def option_parser() -> argparse.Namespace:
     # cmdline parsing
     prog = sys.argv[0]
@@ -630,7 +663,7 @@ def main() -> None:
                     else None,
         ),
         # X11 specific
-        c("rofi", dotfiles / "others/rofi", home / ".config/rofi"),
+        c("rofi", dotfiles / "other/rofi", home / ".config/rofi"),
         c("i3", dotfiles / "wm/i3", home / ".config/i3"),
         c("polybar", dotfiles / "wm/bars/polybar", home / ".config/polybar"),
         c("picom", dotfiles / "wm/compositors/picom", home / ".config/picom"),
@@ -670,6 +703,7 @@ def main() -> None:
 
     if not options.no_check:
         display_missed(all_configs, dotfiles)
+        check_configs(all_configs)
 
 if __name__ == "__main__":
     main()
