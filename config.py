@@ -633,7 +633,8 @@ def main() -> None:
     configs: list[Config] = [
         # cli
         c("tmux", dotfiles / "tmux/.tmux.conf", home / ".tmux.conf"),
-        c("zsh", dotfiles / "shells/zsh/zshrc", home / ".zshrc"),
+        c("zsh", dotfiles / "shells/zsh/zshrc", home / ".config/zsh/.zshrc"),
+        c("zsh", dotfiles / "shells/zsh/zshenv", home / ".zshenv"),
         c("fish", dotfiles / "shells/fish", home / ".config/fish"),
         c("nvim", dotfiles / "editors/nvim", home / ".config/nvim"),
         c("most", dotfiles / "pagers/most/.mostrc", home / ".mostrc"),
