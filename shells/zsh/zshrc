@@ -25,6 +25,12 @@ then
     AGKOZAK_LEFT_PROMPT_ONLY=1
     AGKOZAK_PROMPT_DIRTRIM=0
 
+    # if in ssh, change looks
+    if [ -n "$SSH_CONNECTION" ]
+    then
+        AGKOZAK_COLORS_USER_HOST=magenta
+    fi
+
     # setup
     # promptinit must go after `fpath` modification
     promptinit
