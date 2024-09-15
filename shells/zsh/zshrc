@@ -1,7 +1,7 @@
 # download grml config if doesn't exist
 if [ ! -f ~/.zsh/grml.zsh ]; then
-    echo "grml configuration not found"
-    echo "installing grml zsh configuration"
+    echo "<> grml configuration not found"
+    echo "<> installing grml zsh configuration"
     curl -L https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc --create-dirs -o ~/.zsh/grml.zsh
 fi
 
@@ -16,6 +16,8 @@ then
     # two-line prompt with git integration
     # download if needed
     if [ ! -d ~/.zsh/agkozak-zsh-prompt ]; then
+        echo "<> agkozak prompt not found"
+        echo "<> loading agkozak zsh prompt"
         git clone https://github.com/agkozak/agkozak-zsh-prompt \
             "$HOME/.zsh/agkozak-zsh-prompt"
     fi
@@ -59,4 +61,17 @@ function () {
     alias upd="source $SHELL_RC"
     alias edsh="$EDITOR $SHELL_RC"
     alias edvim="$EDITOR $VIM_RC"
+
+    # if has python3
+    which python3 > /dev/null
+    local ok_python3=$?
+    if (( $ok_python3 == 0 )); then
+        which python > /dev/null
+        local ok_python=$?
+        # but doesn't have python command
+        if (( $ok_python != 0 )); then
+            # just add the alias, for the love of god
+            alias python="python3"
+        fi
+    fi
 }
