@@ -204,6 +204,11 @@ class Config:
         def setup(desc: str, src: Path, dest: Path) -> None:
             assert self.RECORDER is not None
 
+            # try to create a parent directory so that symlink won't fail
+            # hopefully this won't backfire horribly
+            path_to_dest = dest.parent
+            os.makedirs(dest.parent, exist_ok=True)
+
             dest.symlink_to(src)
             self.RECORDER.register_link(desc, src, dest)
             print_ok(f"{desc}: {dest} => {src}")
