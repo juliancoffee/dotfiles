@@ -10,3 +10,8 @@ window:
 
 font:
   size: 14.0
+
+# to makr Ctrl+/ work in neovim
+# ChatGPT told me that adding this here will produce C-_ as it should
+key_bindings:
+  - { key: Slash, mods: Control, chars: "\x1f" }
