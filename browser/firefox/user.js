@@ -55,3 +55,6 @@ user_pref('toolkit.legacyUserProfileCustomizations.stylesheets', true);
 user_pref('privacy.userContext.enabled', true);
 // Enable Container Tabs setting in preferences
 user_pref('privacy.userContext.ui.enabled', true);
+
+// make google docs work
+user_pref('gfx.canvas.accelerated', false)
