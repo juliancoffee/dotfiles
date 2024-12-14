@@ -70,6 +70,9 @@ function () {
             alias python="python3"
         fi
     fi
+
+    # activate virtual environment
+    alias activate="source .venv/bin/activate"
 }
 
 # helpers
