@@ -1,3 +1,8 @@
+---
+--- requires
+---
+local colorscheme = require("color")
+
 --
 -- package management
 --
@@ -16,36 +21,11 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- convinient way to swap between colorschemes
-local colorscheme0 = {
-    plug = {
-        "folke/tokyonight.nvim",
-        lazy = false,
-        priority = 1000,
-        opts = {},
+require("lazy").setup({
+    {
+        colorscheme.plug,
     },
-    run = function()
-        require("tokyonight").setup({
-            style = "moon",
-            styles = {},
-        })
-        vim.cmd [[ colorscheme tokyonight ]]
-    end
-}
-
-local colorscheme = {
-    plug = {
-        "catppuccin/nvim", name = "catppuccin", priority = 1000,
-    },
-    run = function()
-        require("catppuccin").setup({
-            flavour = "frappe"
-        })
-        vim.cmd [[ colorscheme catppuccin ]]
-    end
-}
-
-local lazy_config = {
+}, {
     ui = {
         icons = {
             cmd = "⌘",
@@ -62,13 +42,7 @@ local lazy_config = {
             lazy = "💤 ",
         },
     },
-}
-
-require("lazy").setup({
-    {
-        colorscheme.plug,
-    },
-}, lazy_config)
+})
 
 colorscheme.run()
 
