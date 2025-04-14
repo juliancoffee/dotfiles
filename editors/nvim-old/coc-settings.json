@@ -1,9 +1,0 @@
-{
-    "codeLens.enable": true
-    , "python.linting.enabled": true
-    , "python.linting.flake8Enabled": true
-    , "python.formatting.provider": "autopep8"
-    , "pyright.disableDiagnostics": true
-    , "python.linting.mypyEnabled": false
-    , "python.linting.pytypeEnabled": false
-}
