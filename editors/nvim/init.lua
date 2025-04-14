@@ -1,50 +1,9 @@
 ---
---- requires
+--- Custom modules
 ---
-local colorscheme = require("color")
-
---
--- package management
---
-
--- bootstrap lazy.nvim package manager
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
-    vim.fn.system({
-        "git",
-        "clone",
-        "--filter=blob:none",
-        "https://github.com/folke/lazy.nvim.git",
-        "--branch=stable", -- latest stable release
-        lazypath,
-    })
-end
-vim.opt.rtp:prepend(lazypath)
-
-require("lazy").setup({
-    {
-        colorscheme.plug,
-    },
-}, {
-    ui = {
-        icons = {
-            cmd = "⌘",
-            config = "🛠",
-            event = "📅",
-            ft = "📂",
-            init = "⚙",
-            keys = "🗝",
-            plugin = "🔌",
-            runtime = "💻",
-            source = "📄",
-            start = "🚀",
-            task = "📌",
-            lazy = "💤 ",
-        },
-    },
-})
-
-colorscheme.run()
+--- NOTE: to introduce new module, add it to lua/ folder
+local plugins = require("plugins")
+plugins.setup()
 
 --
 -- options
