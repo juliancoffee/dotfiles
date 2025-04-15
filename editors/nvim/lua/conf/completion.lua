@@ -15,7 +15,7 @@ return {
                     components = {
                         -- Disable nerd icons
                         kind_icon = {
-                            text = function(ctx)
+                            text = function()
                                 return '*'
                             end,
                         },
@@ -26,7 +26,7 @@ return {
 
         -- Complete paths and words from buffer
         sources = {
-            default = { 'path', 'buffer' },
+            default = { 'path', 'buffer', 'omni', 'lsp'},
         },
 
         -- Prefer pre-built rust fuzzy matcher or fallback to lua with warning
