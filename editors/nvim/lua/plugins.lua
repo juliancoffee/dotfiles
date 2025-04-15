@@ -25,6 +25,7 @@ function M.setup()
         -- colorscheme
         colorscheme.lazy_spec,
         require 'conf.telescope',
+        require 'conf.completion',
     }, {
         ui = {
             icons = {
