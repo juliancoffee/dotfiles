@@ -150,7 +150,13 @@ return {
             callback = on_attach,
         })
 
-        -- TODO: diagnostics configuration
+        -- Diagnostics configuration
+        vim.diagnostic.config {
+            -- Use virtual text to display errors
+            virtual_text = true,
+            -- And not signs, because they shift the number line
+            signs = false,
+        }
 
         -- Configuring servers and capabilities
         local capabilities = require('blink.cmp').get_lsp_capabilities()
