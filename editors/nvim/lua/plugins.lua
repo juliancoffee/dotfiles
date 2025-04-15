@@ -45,12 +45,29 @@ function M.setup()
                 'nvim-telescope/telescope-ui-select.nvim',
             },
             config = function()
+                local themes = require("telescope.themes")
+                local actions = require("telescope.actions")
+
                 require('telescope').setup {
+                    -- use dropdown theme by default
+                    -- easier when you don't have the ultra-wide screen :)
+                    defaults = vim.tbl_extend(
+                        "force",
+                        themes.get_dropdown(),
+                        {
+                            mappings = {
+                                i = {
+                                    ["<esc>"] = actions.close,
+                                },
+                            },
+                        }
+                    ),
                     extensions = {
+                        -- switch default vim's select menu to telescope
                         ['ui-select'] = {
-                            require('telescope.themes').get_dropdown(),
+                            themes.get_dropdown(),
                         },
-                    },
+                    }
                 }
 
                 pcall(require('telescope').load_extension, 'fzf')
@@ -75,6 +92,7 @@ function M.setup()
                 vim.keymap.set('n', '<leader>sg', builtin.live_grep, {
                     desc = '[S]earch by [G]rep'
                 })
+
                 vim.keymap.set('n', '<leader>sd', builtin.diagnostics, {
                     desc = '[S]earch [D]iagnostics'
                 })
