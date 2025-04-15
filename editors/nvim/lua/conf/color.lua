@@ -1,6 +1,6 @@
 -- convinient way to swap between colorschemes
 local tokyonight = {
-    plug = {
+    lazy_spec = {
         "folke/tokyonight.nvim",
         lazy = false,
         priority = 1000,
@@ -16,7 +16,7 @@ local tokyonight = {
 }
 
 local catpuccin = {
-    plug = {
+    lazy_spec = {
         "catppuccin/nvim", name = "catppuccin", priority = 1000,
     },
     run = function()
