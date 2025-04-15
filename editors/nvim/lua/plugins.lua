@@ -1,19 +1,19 @@
 --
 -- package management
 --
-local colorscheme = require("conf.color")
+local colorscheme = require 'conf.color'
 
 -- bootstrap lazy.nvim package manager
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 if not vim.uv.fs_stat(lazypath) then
-    vim.fn.system({
-        "git",
-        "clone",
-        "--filter=blob:none",
-        "https://github.com/folke/lazy.nvim.git",
-        "--branch=stable", -- latest stable release
+    vim.fn.system {
+        'git',
+        'clone',
+        '--filter=blob:none',
+        'https://github.com/folke/lazy.nvim.git',
+        '--branch=stable', -- latest stable release
         lazypath,
-    })
+    }
 end
 vim.opt.rtp:prepend(lazypath)
 
@@ -21,7 +21,7 @@ vim.opt.rtp:prepend(lazypath)
 local M = {}
 function M.setup()
     -- install all the plugins
-    require("lazy").setup({
+    require('lazy').setup({
         -- colorscheme
         colorscheme.lazy_spec,
         require 'conf.telescope',
@@ -32,18 +32,18 @@ function M.setup()
     }, {
         ui = {
             icons = {
-                cmd = "⌘",
-                config = "🛠",
-                event = "📅",
-                ft = "📂",
-                init = "⚙",
-                keys = "🗝",
-                plugin = "🔌",
-                runtime = "💻",
-                source = "📄",
-                start = "🚀",
-                task = "📌",
-                lazy = "💤 ",
+                cmd = '⌘',
+                config = '🛠',
+                event = '📅',
+                ft = '📂',
+                init = '⚙',
+                keys = '🗝',
+                plugin = '🔌',
+                runtime = '💻',
+                source = '📄',
+                start = '🚀',
+                task = '📌',
+                lazy = '💤 ',
             },
         },
     })

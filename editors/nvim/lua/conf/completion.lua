@@ -28,13 +28,13 @@ return {
 
         -- Complete paths and words from buffer
         sources = {
-            default = { 'path', 'buffer', 'omni', 'lsp'},
+            default = { 'path', 'buffer', 'omni', 'lsp' },
         },
 
         -- Prefer pre-built rust fuzzy matcher or fallback to lua with warning
         fuzzy = {
             implementation = 'prefer_rust_with_warning',
-        }
+        },
     },
     opts_extend = { 'sources.default' },
 }

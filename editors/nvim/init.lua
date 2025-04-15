@@ -2,7 +2,7 @@
 --- Custom modules
 ---
 --- NOTE: to introduce new module, add it to lua/ folder
-local plugins = require("plugins")
+local plugins = require 'plugins'
 
 --
 -- options
@@ -29,8 +29,8 @@ vim.opt.shiftwidth = 4
 -- show sneaky characters
 vim.opt.list = true
 vim.opt.listchars = {
-    trail = ".",
-    tab = "> ",
+    trail = '.',
+    tab = '> ',
 }
 
 -- set bigger limit to allowed number of pages opened with "-p"
@@ -50,7 +50,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- disable accidental q key-press
-vim.keymap.set({'n', 'v'}, 'q:', '<Nop>') -- supposed to open cmdline window
+vim.keymap.set({ 'n', 'v' }, 'q:', '<Nop>') -- supposed to open cmdline window
 vim.keymap.set('n', 'Q', '<Nop>') -- idk
 
 -- stop search highlighting

@@ -17,29 +17,25 @@ return {
         'nvim-telescope/telescope-ui-select.nvim',
     },
     config = function()
-        local themes = require("telescope.themes")
-        local actions = require("telescope.actions")
+        local themes = require 'telescope.themes'
+        local actions = require 'telescope.actions'
 
         require('telescope').setup {
             -- use dropdown theme by default
             -- easier when you don't have the ultra-wide screen :)
-            defaults = vim.tbl_extend(
-                "force",
-                themes.get_dropdown(),
-                {
-                    mappings = {
-                        i = {
-                            ["<esc>"] = actions.close,
-                        },
+            defaults = vim.tbl_extend('force', themes.get_dropdown(), {
+                mappings = {
+                    i = {
+                        ['<esc>'] = actions.close,
                     },
-                }
-            ),
+                },
+            }),
             extensions = {
                 -- switch default vim's select menu to telescope
                 ['ui-select'] = {
                     themes.get_dropdown(),
                 },
-            }
+            },
         }
 
         pcall(require('telescope').load_extension, 'fzf')
@@ -58,55 +54,52 @@ return {
 
         -- Scroll through telescope commands
         vim.keymap.set('n', '<leader>ss', builtin.builtin, {
-            desc = '[S]croll [S]elect Telescope'
+            desc = '[S]croll [S]elect Telescope',
         })
 
         -- Search fuzzy in current buffer
         vim.keymap.set('n', '<leader>/', builtin.current_buffer_fuzzy_find, {
-            desc = '[/] Fuzzily search in current buffer'
+            desc = '[/] Fuzzily search in current buffer',
         })
 
         -- Search by grep-ing around
         vim.keymap.set('n', '<leader>sg', builtin.live_grep, {
-            desc = '[S]earch by [G]rep'
+            desc = '[S]earch by [G]rep',
         })
 
         -- Switch through files with this word
         vim.keymap.set('n', '<leader>sw', builtin.grep_string, {
-            desc = '[S]witch files with current [W]ord'
+            desc = '[S]witch files with current [W]ord',
         })
 
         -- Scroll through diagnostic
         vim.keymap.set('n', '<leader>sd', builtin.diagnostics, {
-            desc = '[S]croll [D]iagnostics'
+            desc = 'LSP: [S]croll [D]iagnostics',
         })
 
         -- Resume last telescope search
         vim.keymap.set('n', '<leader>sr', builtin.resume, {
-            desc = '[S]earch [R]esume'
+            desc = '[S]earch [R]esume',
         })
 
         -- Recent file switcher
         vim.keymap.set('n', '<leader>s.', builtin.oldfiles, {
-            desc = '[S]witch Recent Files ("." for repeat)'
+            desc = '[S]witch Recent Files ("." for repeat)',
         })
 
         -- Buffer switcher
         vim.keymap.set('n', '<leader><leader>', builtin.buffers, {
-            desc = '[ ] Switch existing buffers'
+            desc = '[ ] Switch existing buffers',
         })
 
         -- Search current file
         vim.keymap.set('n', '<leader>sf', builtin.find_files, {
-            desc = '[S]witch [F]iles'
+            desc = '[S]witch [F]iles',
         })
 
         -- Config files switcher
-        vim.keymap.set('n', '<leader>sn',
-            function()
-                builtin.find_files { cwd = vim.fn.stdpath 'config' }
-            end,
-            { desc = '[S]witch [N]eovim files' }
-        )
+        vim.keymap.set('n', '<leader>sn', function()
+            builtin.find_files { cwd = vim.fn.stdpath 'config' }
+        end, { desc = '[S]witch [N]eovim files' })
     end,
 }
