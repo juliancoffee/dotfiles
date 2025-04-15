@@ -3,6 +3,8 @@ return {
 
     -- Release tag for pre-built binaries
     version = '1.*',
+    ---@module 'blink.cmp'
+    ---@type blink.cmp.Config
     opts = {
         -- Default configuration closer to rust keybinds
         keymap = { preset = 'default' },
