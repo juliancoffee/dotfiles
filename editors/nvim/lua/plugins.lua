@@ -28,6 +28,7 @@ function M.setup()
         require 'conf.completion',
         require 'conf.nvim_ls',
         require 'conf.lsp',
+        require 'conf.autoformat',
     }, {
         ui = {
             icons = {
