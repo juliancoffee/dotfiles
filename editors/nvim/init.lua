@@ -3,7 +3,6 @@
 ---
 --- NOTE: to introduce new module, add it to lua/ folder
 local plugins = require("plugins")
-plugins.setup()
 
 --
 -- options
@@ -57,3 +56,6 @@ vim.keymap.set('n', 'Q', '<Nop>') -- idk
 -- stop search highlighting
 -- <C-_> actually means <C-/>, don't ask me why
 vim.keymap.set('n', '<C-_>', ':nohlsearch<CR>')
+
+-- call plugins at the end after all the options
+plugins.setup()

@@ -47,6 +47,11 @@ function M.setup()
 
     -- don't forget to set up a colorscheme
     colorscheme.run()
+
+    -- some fancy keybinds
+    vim.keymap.set('n', '<leader>l', ':Lazy<CR>', {
+        desc = 'Show [L]azy',
+    })
 end
 
 return M
