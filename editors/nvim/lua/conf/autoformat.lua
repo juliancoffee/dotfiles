@@ -27,6 +27,9 @@ return {
             lua = {
                 'stylua',
             },
+            rust = {
+                'rustfmt',
+            },
         },
     },
 }
