@@ -23,20 +23,21 @@ local M = {}
 function M.setup()
     -- install all the plugins
     require('lazy').setup({
+        -- hotkey autocomplete basically
         require 'conf.whichkey',
+        -- colorscheme
         colorscheme.lazy_spec,
+        -- fuzzy finder UI
         require 'conf.telescope',
+        -- completions
         require 'conf.completion',
-        require 'conf.nvim_ls',
+        -- lsp
         require 'conf.lsp',
+        require 'conf.nvim_ls',
+        -- autoformat
         require 'conf.autoformat',
-        {
-            'folke/todo-comments.nvim',
-            dependencies = {
-                'nvim-lua/plenary.nvim',
-            },
-            opts = { signs = false },
-        },
+        -- todo-style comments
+        require 'conf.todo',
     }, {
         ui = {
             icons = {
