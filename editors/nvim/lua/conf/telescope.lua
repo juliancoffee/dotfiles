@@ -1,7 +1,14 @@
--- fuzzy finder UI
---
--- p.s. copied from kickstart.nvim and tweaked a bit
+--- INFO:
+--- This module holds the plugin configuration for telescope.
+--- Very cool fuzzy finder and floating UI
+
+---@module 'lazy'
+
+---@type LazyPluginSpec
 return {
+    -- fuzzy finder UI
+    --
+    -- p.s. copied from kickstart.nvim and tweaked a bit
     'nvim-telescope/telescope.nvim',
     event = 'VimEnter',
     dependencies = {

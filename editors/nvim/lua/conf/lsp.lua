@@ -1,3 +1,8 @@
+--- INFO:
+--- This module holds the plugin configuration for LSP and tool installation
+
+---@module 'lazy'
+
 -- Run code on LSP attach
 --
 -- Mostly setting some useful keymaps
@@ -139,6 +144,7 @@ local on_attach = function(event)
     end
 end
 
+---@type LazyPluginSpec
 return {
     'neovim/nvim-lspconfig',
     dependencies = {

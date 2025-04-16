@@ -1,6 +1,7 @@
---
--- package management
---
+--- INFO:
+--- Package management
+
+-- load colorscheme module
 local colorscheme = require 'conf.color'
 
 -- bootstrap lazy.nvim package manager

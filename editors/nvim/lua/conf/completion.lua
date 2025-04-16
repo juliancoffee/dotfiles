@@ -1,3 +1,9 @@
+--- INFO:
+--- This module holds the plugin configuration for completions
+
+---@module 'lazy'
+
+---@type LazyPluginSpec
 return {
     'saghen/blink.cmp',
 
