@@ -23,7 +23,7 @@ local M = {}
 function M.setup()
     -- install all the plugins
     require('lazy').setup({
-        -- colorscheme
+        require 'conf.whichkey',
         colorscheme.lazy_spec,
         require 'conf.telescope',
         require 'conf.completion',
