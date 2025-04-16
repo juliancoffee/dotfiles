@@ -46,6 +46,8 @@ function M.setup()
         require 'conf.treesitter',
         -- status line
         require 'conf.statusline',
+        -- fluent
+        'projectfluent/fluent.vim',
     }, {
         rocks = {
             enabled = false,
