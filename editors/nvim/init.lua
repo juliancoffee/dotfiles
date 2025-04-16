@@ -20,11 +20,13 @@ vim.opt.expandtab = true
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
 
--- vim has these options, but it seems to work just fine without them
--- I'll leave them just in case, but i'm not sure if they're still useful
--- vim.opt.autoindent = true
--- vim.opt.smartindent = true
--- vim.opt.breakindent = true
+-- i still don't get what these do, but probably better with them than
+-- without
+--
+-- some of these are default btw
+vim.opt.autoindent = true
+vim.opt.smartindent = true
+vim.opt.breakindent = true
 
 -- show sneaky characters
 vim.opt.list = true
