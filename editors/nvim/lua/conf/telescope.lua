@@ -61,7 +61,7 @@ return {
 
         -- Scroll through telescope commands
         vim.keymap.set('n', '<leader>ss', builtin.builtin, {
-            desc = '[S]croll [S]elect Telescope',
+            desc = '[S]croll Tele[s]cope builtins',
         })
 
         -- Search fuzzy in current buffer
@@ -82,6 +82,11 @@ return {
         -- Scroll through diagnostic
         vim.keymap.set('n', '<leader>sd', builtin.diagnostics, {
             desc = 'LSP: [S]croll [D]iagnostics',
+        })
+
+        -- Scroll through all tree sitter symolbs
+        vim.keymap.set('n', '<leader>st', builtin.treesitter, {
+            desc = '[S]earch [T]reeSitter symbols',
         })
 
         -- Resume last telescope search
