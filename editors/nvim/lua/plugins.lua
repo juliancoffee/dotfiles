@@ -47,6 +47,9 @@ function M.setup()
         -- status line
         require 'conf.statusline',
     }, {
+        rocks = {
+            enabled = false,
+        },
         ui = {
             icons = {
                 cmd = '⌘',

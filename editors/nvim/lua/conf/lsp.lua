@@ -180,6 +180,7 @@ return {
         local capabilities = require('blink.cmp').get_lsp_capabilities()
         local servers = {
             lua_ls = {},
+            ruff = {},
         }
 
         -- Install needed tools

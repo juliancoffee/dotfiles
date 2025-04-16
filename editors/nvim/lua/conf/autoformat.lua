@@ -30,6 +30,11 @@ return {
             rust = {
                 'rustfmt',
             },
+            python = {
+                'ruff',
+                'ruff_format',
+                lsp_format = 'fallback',
+            },
         },
     },
 }
