@@ -13,6 +13,11 @@ return {
         'MunifTanjim/nui.nvim',
     },
     lazy = false,
+    init = function()
+        -- we're replacing built-in netrw
+        vim.g.loaded_netrwPlugin = 1
+        vim.g.loaded_netrw = 1
+    end,
     config = function()
         require('neo-tree').setup {
             log_level = 'debug',
@@ -37,6 +42,13 @@ return {
                 },
             },
             default_component_configs = {
+                icon = {
+                    folder_closed = '[+]',
+                    folder_open = '[-]',
+                    folder_empty = '[]',
+                    folder_empty_open = '',
+                    default = '*',
+                },
                 git_status = {
                     symbols = {
                         added = '+',
@@ -54,6 +66,7 @@ return {
                 },
             },
             filesystem = {
+                hijack_netrw_behavior = 'open_current',
                 filtered_items = {
                     visible = true,
                 },
