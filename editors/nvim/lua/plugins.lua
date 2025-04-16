@@ -38,6 +38,8 @@ function M.setup()
         require 'conf.autoformat',
         -- todo-style comments
         require 'conf.todo',
+        -- filetree UI
+        require 'conf.filetree',
     }, {
         ui = {
             icons = {
