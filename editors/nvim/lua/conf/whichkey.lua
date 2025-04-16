@@ -11,7 +11,14 @@ return {
     event = 'VeryLazy',
     ---@type wk.Opts
     opts = {
-        delay = 0,
+        preset = 'helix',
+        delay = function(mapping)
+            -- if starting to type "+y don't flashbang with helpers
+            if mapping.keys == '"' then
+                return 1500
+            end
+            return 250
+        end,
         icons = {
             -- disable fancy nerdfont icons for plugis
             mappings = false,
@@ -46,6 +53,15 @@ return {
                 F11 = 'F11',
                 F12 = 'F12',
             },
+        },
+    },
+    keys = {
+        {
+            '<leader>?',
+            function()
+                require('which-key').show { global = false }
+            end,
+            desc = 'Local Keymaps',
         },
     },
 }
