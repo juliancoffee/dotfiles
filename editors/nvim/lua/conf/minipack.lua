@@ -37,8 +37,5 @@ return {
             -- Also idk how useful it is, but we'll see.
             require('mini.surround').setup()
         end
-
-        -- statusline
-        require('mini.statusline').setup { use_icons = false }
     end,
 }
