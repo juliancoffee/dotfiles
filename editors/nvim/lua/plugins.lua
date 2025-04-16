@@ -40,6 +40,8 @@ function M.setup()
         require 'conf.todo',
         -- filetree UI
         require 'conf.filetree',
+        -- mini plugins (surrounds, arounds, status line, etc)
+        require 'conf.minipack',
     }, {
         ui = {
             icons = {
