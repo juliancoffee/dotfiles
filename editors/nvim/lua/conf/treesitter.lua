@@ -17,22 +17,38 @@ return {
     ---@diagnostic disable: missing-fields
     opts = {
         ensure_installed = {
+            -- smth
             'bash',
             'c',
+            -- lua
             'lua',
             'luadoc',
-            'html',
+            -- markdown
             'markdown',
             'markdown_inline',
+            -- ???
             'query',
+            -- vim
             'vim',
             'vimdoc',
+            -- git
+            'diff',
+            'gitcommit',
+            -- html
+            'html',
+            'htmldjango',
+            -- ron (Rusty Object Notation)
+            'ron',
+            -- python
+            'python',
+            -- rust
+            'rust',
         },
-        auto_install = true,
+        auto_install = false,
         highlight = {
+            -- disabling this leads also disables telescope treesitter view?
+            -- what the fuck
             enable = true,
-            -- I'm used to old syntax highlight too much
-            disable = { 'rust', 'python' },
         },
         indent = { enable = true },
     },
