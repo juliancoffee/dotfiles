@@ -49,7 +49,7 @@ return {
             -- disabling this leads also disables telescope treesitter view?
             -- what the fuck
             enable = true,
-            disable = { 'luadoc', 'vimdoc', 'rust' },
+            disable = { 'luadoc', 'vimdoc', 'rust', 'python' },
         },
         indent = { enable = true },
     },
