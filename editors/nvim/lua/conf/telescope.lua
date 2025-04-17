@@ -9,7 +9,8 @@ return {
     -- fuzzy finder UI
     --
     -- p.s. copied from kickstart.nvim and tweaked a bit
-    'nvim-telescope/telescope.nvim',
+    'juliancoffee/telescope.nvim',
+    branch = 'juliancoffee/force-treesitter',
     event = 'VimEnter',
     dependencies = {
         'nvim-lua/plenary.nvim',

@@ -1,4 +1,4 @@
---- INFO:
+-- INFO:
 --- This module holds the plugin configuration for treesitter
 ---
 --- WARN:
@@ -49,7 +49,7 @@ return {
             -- disabling this leads also disables telescope treesitter view?
             -- what the fuck
             enable = true,
-            disable = { 'luadoc', 'vimdoc' },
+            disable = { 'luadoc', 'vimdoc', 'rust' },
         },
         indent = { enable = true },
     },
