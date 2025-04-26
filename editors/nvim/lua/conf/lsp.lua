@@ -147,6 +147,7 @@ end
 ---@type LazyPluginSpec
 return {
     'neovim/nvim-lspconfig',
+    event = 'VeryLazy',
     dependencies = {
         -- to install other LSPs
         { 'williamboman/mason.nvim', opts = {} },

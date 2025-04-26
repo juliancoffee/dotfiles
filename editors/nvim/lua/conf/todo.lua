@@ -10,6 +10,7 @@ return {
     dependencies = {
         'nvim-lua/plenary.nvim',
     },
+    event = 'VeryLazy',
     ---@type TodoOptions
     ---@dianostic
     opts = {

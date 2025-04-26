@@ -10,7 +10,7 @@ return {
     --
     -- p.s. copied from kickstart.nvim and tweaked a bit
     'nvim-telescope/telescope.nvim',
-    event = 'VimEnter',
+    event = 'VeryLazy',
     dependencies = {
         'nvim-lua/plenary.nvim',
         {

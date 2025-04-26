@@ -4,6 +4,9 @@
 --- NOTE: to introduce new module, add it to lua/ folder
 local plugins = require 'plugins'
 
+-- experimental module loader that should improve performance
+vim.loader.enable()
+
 --
 -- options
 --

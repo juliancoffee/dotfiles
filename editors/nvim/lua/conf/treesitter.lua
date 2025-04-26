@@ -7,52 +7,53 @@
 ---@module 'lazy'
 ---@module 'nvim-treesitter.configs'
 
+---@type TSConfig
+---@diagnostic disable: missing-fields
+local ts_opts = {
+    ensure_installed = {
+        -- smth
+        'bash',
+        'c',
+        -- lua
+        'lua',
+        'luadoc',
+        -- markdown
+        'markdown',
+        'markdown_inline',
+        -- ???
+        'query',
+        -- vim
+        'vim',
+        'vimdoc',
+        -- git
+        'diff',
+        'gitcommit',
+        -- html
+        'html',
+        'htmldjango',
+        -- ron (Rusty Object Notation)
+        'ron',
+        -- python
+        'python',
+        -- rust
+        'rust',
+    },
+    auto_install = false,
+    highlight = {
+        enable = true,
+        disable = { 'luadoc', 'vimdoc', 'rust', 'python' },
+    },
+    incremental_selection = { enable = true },
+    indent = { enable = true },
+}
+
 ---@type LazyPluginSpec
 local treesitter = {
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
-    -- module to use for `opts`
-    main = 'nvim-treesitter.configs',
-    ---@type TSConfig
-    ---@diagnostic disable: missing-fields
-    opts = {
-        ensure_installed = {
-            -- smth
-            'bash',
-            'c',
-            -- lua
-            'lua',
-            'luadoc',
-            -- markdown
-            'markdown',
-            'markdown_inline',
-            -- ???
-            'query',
-            -- vim
-            'vim',
-            'vimdoc',
-            -- git
-            'diff',
-            'gitcommit',
-            -- html
-            'html',
-            'htmldjango',
-            -- ron (Rusty Object Notation)
-            'ron',
-            -- python
-            'python',
-            -- rust
-            'rust',
-        },
-        auto_install = false,
-        highlight = {
-            enable = true,
-            disable = { 'luadoc', 'vimdoc', 'rust', 'python' },
-        },
-        incremental_selection = { enable = true },
-        indent = { enable = true },
-    },
-    init = function()
+    event = 'VeryLazy',
+    config = function()
+        require('nvim-treesitter.configs').setup(ts_opts)
         --
         -- Enable folds with treesitter
         --
@@ -98,130 +99,109 @@ local function mapquery(query, desc)
     }
 end
 
+---@TSConfig
+local to_opts = {
+    textobjects = {
+        select = {
+            enable = true,
+
+            -- Automatically jump forward to textobj, similar to targets.vim
+            lookahead = true,
+
+            keymaps = {
+                -- You can use the capture groups defined in textobjects.scm
+                ['af'] = mapquery('@function.outer', '@function'),
+                ['if'] = mapquery('@function.inner', 'inner @function'),
+                ['ac'] = mapquery('@class.outer', '@class'),
+                ['ic'] = mapquery('@class.inner', 'inner @class'),
+                ['aa'] = mapquery('@parameter.outer', '@parameter'),
+                ['ia'] = mapquery('@parameter.inner', 'inner @parameter'),
+                ['ie'] = mapquery('@assignment.rhs', 'right of @assignment'),
+                ['ir'] = mapquery('@return.inner', 'inner @return'),
+                ['ad'] = mapquery('@conditional.outer', '@conditional'),
+                ['id'] = mapquery('@conditional.inner', 'inner @conditional'),
+                -- You can also use captures from other query groups like
+                -- `locals.scm`
+                ['as'] = {
+                    query = '@local.scope',
+                    query_group = 'locals',
+                    desc = 'Select language scope',
+                },
+            },
+
+            -- You can choose the select mode (default is charwise 'v')
+            --
+            -- Can also be a function which gets passed a table with the keys
+            -- * query_string: eg '@function.inner'
+            -- * method: eg 'v' or 'o'
+            -- and should return the mode ('v', 'V', or '<c-v>') or a table
+            -- mapping query_strings to modes.
+            selection_modes = {
+                ['@parameter.outer'] = 'v', -- charwise
+                ['@function.outer'] = 'V', -- linewise
+                ['@class.outer'] = '<c-v>', -- blockwise
+            },
+
+            -- If you set this to `true` (default is `false`) then any
+            -- textobject is extended to include preceding or succeeding
+            -- whitespace.
+            -- Succeeding whitespace has priority in order to act similarly
+            -- to eg the built-in `ap`.
+            --
+            -- Can also be a function which gets passed a table with the keys
+            -- * query_string: eg '@function.inner'
+            -- * selection_mode: eg 'v'
+            -- and should return true or false
+            include_surrounding_whitespace = false,
+        },
+        move = {
+            enable = true,
+            set_jumps = true,
+            goto_next_start = {
+                [']m'] = mapquery('@function.outer', 'next @function start'),
+                [']c'] = mapquery('@class.outer', 'next @class start'),
+                [']d'] = mapquery('@conditional.inner', 'next @conditional'),
+            },
+            goto_next_end = {
+                [']M'] = mapquery('@function.outer', 'next @function end'),
+                [']C'] = mapquery('@class.outer', 'next @class end'),
+                [']a'] = mapquery('@parameter.outer', 'next @parameter end'),
+                [']D'] = mapquery(
+                    '@conditional.inner',
+                    'next @conditional end'
+                ),
+            },
+            goto_previous_start = {
+                ['[m'] = mapquery('@function.outer', 'prev @function start'),
+                ['[c'] = mapquery('@class.outer', 'prev @class start'),
+                ['[a'] = mapquery('@parameter.outer', 'prev @parameter start'),
+                ['[d'] = mapquery(
+                    '@conditional.inner',
+                    'prev @conditional start'
+                ),
+            },
+            goto_previous_end = {
+                ['[M'] = mapquery('@function.outer', 'prev @function end'),
+                ['[C'] = mapquery('@class.outer', 'prev @class end'),
+                ['[D'] = mapquery(
+                    '@conditional.inner',
+                    'prev @conditional end'
+                ),
+            },
+            goto_next = {},
+            goto_previos = {},
+        },
+    },
+}
+
 ---@type LazyPluginSpec
 return {
     'nvim-treesitter/nvim-treesitter-textobjects',
     dependencies = { treesitter, require 'conf.gitsigns' },
 
-    -- module to use for `opts`
-    main = 'nvim-treesitter.configs',
-    ---@type TSConfig
-    ---@diagnostic disable: missing-fields
-    opts = {
-        textobjects = {
-            select = {
-                enable = true,
-
-                -- Automatically jump forward to textobj, similar to targets.vim
-                lookahead = true,
-
-                keymaps = {
-                    -- You can use the capture groups defined in textobjects.scm
-                    ['af'] = mapquery('@function.outer', '@function'),
-                    ['if'] = mapquery('@function.inner', 'inner @function'),
-                    ['ac'] = mapquery('@class.outer', '@class'),
-                    ['ic'] = mapquery('@class.inner', 'inner @class'),
-                    ['aa'] = mapquery('@parameter.outer', '@parameter'),
-                    ['ia'] = mapquery('@parameter.inner', 'inner @parameter'),
-                    ['ie'] = mapquery(
-                        '@assignment.rhs',
-                        'right of @assignment'
-                    ),
-                    ['ir'] = mapquery('@return.inner', 'inner @return'),
-                    ['ad'] = mapquery('@conditional.outer', '@conditional'),
-                    ['id'] = mapquery(
-                        '@conditional.inner',
-                        'inner @conditional'
-                    ),
-                    -- You can also use captures from other query groups like
-                    -- `locals.scm`
-                    ['as'] = {
-                        query = '@local.scope',
-                        query_group = 'locals',
-                        desc = 'Select language scope',
-                    },
-                },
-
-                -- You can choose the select mode (default is charwise 'v')
-                --
-                -- Can also be a function which gets passed a table with the keys
-                -- * query_string: eg '@function.inner'
-                -- * method: eg 'v' or 'o'
-                -- and should return the mode ('v', 'V', or '<c-v>') or a table
-                -- mapping query_strings to modes.
-                selection_modes = {
-                    ['@parameter.outer'] = 'v', -- charwise
-                    ['@function.outer'] = 'V', -- linewise
-                    ['@class.outer'] = '<c-v>', -- blockwise
-                },
-
-                -- If you set this to `true` (default is `false`) then any
-                -- textobject is extended to include preceding or succeeding
-                -- whitespace.
-                -- Succeeding whitespace has priority in order to act similarly
-                -- to eg the built-in `ap`.
-                --
-                -- Can also be a function which gets passed a table with the keys
-                -- * query_string: eg '@function.inner'
-                -- * selection_mode: eg 'v'
-                -- and should return true or false
-                include_surrounding_whitespace = false,
-            },
-            move = {
-                enable = true,
-                set_jumps = true,
-                goto_next_start = {
-                    [']m'] = mapquery(
-                        '@function.outer',
-                        'next @function start'
-                    ),
-                    [']c'] = mapquery('@class.outer', 'next @class start'),
-                    [']d'] = mapquery(
-                        '@conditional.inner',
-                        'next @conditional'
-                    ),
-                },
-                goto_next_end = {
-                    [']M'] = mapquery('@function.outer', 'next @function end'),
-                    [']C'] = mapquery('@class.outer', 'next @class end'),
-                    [']a'] = mapquery(
-                        '@parameter.outer',
-                        'next @parameter end'
-                    ),
-                    [']D'] = mapquery(
-                        '@conditional.inner',
-                        'next @conditional end'
-                    ),
-                },
-                goto_previous_start = {
-                    ['[m'] = mapquery(
-                        '@function.outer',
-                        'prev @function start'
-                    ),
-                    ['[c'] = mapquery('@class.outer', 'prev @class start'),
-                    ['[a'] = mapquery(
-                        '@parameter.outer',
-                        'prev @parameter start'
-                    ),
-                    ['[d'] = mapquery(
-                        '@conditional.inner',
-                        'prev @conditional start'
-                    ),
-                },
-                goto_previous_end = {
-                    ['[M'] = mapquery('@function.outer', 'prev @function end'),
-                    ['[C'] = mapquery('@class.outer', 'prev @class end'),
-                    ['[D'] = mapquery(
-                        '@conditional.inner',
-                        'prev @conditional end'
-                    ),
-                },
-                goto_next = {},
-                goto_previos = {},
-            },
-        },
-    },
-    init = function()
+    event = 'VeryLazy',
+    config = function()
+        require('nvim-treesitter.configs').setup(to_opts)
         local ts_repeat_move =
             require 'nvim-treesitter.textobjects.repeatable_move'
 

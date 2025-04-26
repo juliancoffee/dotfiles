@@ -50,6 +50,9 @@ function M.setup()
         -- git intergrations
         require 'conf.gitsigns',
     }, {
+        defaults = {
+            lazy = true,
+        },
         rocks = {
             enabled = false,
         },
