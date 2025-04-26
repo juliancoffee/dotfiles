@@ -128,6 +128,11 @@ return {
                         'right of @assignment'
                     ),
                     ['ir'] = mapquery('@return.inner', 'inner @return'),
+                    ['ad'] = mapquery('@conditional.outer', '@conditional'),
+                    ['id'] = mapquery(
+                        '@conditional.inner',
+                        'inner @conditional'
+                    ),
                     -- You can also use captures from other query groups like
                     -- `locals.scm`
                     ['as'] = {
@@ -161,6 +166,58 @@ return {
                 -- * selection_mode: eg 'v'
                 -- and should return true or false
                 include_surrounding_whitespace = false,
+            },
+            move = {
+                enable = true,
+                set_jumps = true,
+                goto_next_start = {
+                    [']m'] = mapquery(
+                        '@function.outer',
+                        'next @function start'
+                    ),
+                    [']c'] = mapquery('@class.outer', 'next @class start'),
+                    [']d'] = mapquery(
+                        '@conditional.inner',
+                        'next @conditional'
+                    ),
+                },
+                goto_next_end = {
+                    [']M'] = mapquery('@function.outer', 'next @function end'),
+                    [']C'] = mapquery('@class.outer', 'next @class end'),
+                    [']a'] = mapquery(
+                        '@parameter.outer',
+                        'next @parameter end'
+                    ),
+                    [']D'] = mapquery(
+                        '@conditional.inner',
+                        'next @conditional end'
+                    ),
+                },
+                goto_previous_start = {
+                    ['[m'] = mapquery(
+                        '@function.outer',
+                        'prev @function start'
+                    ),
+                    ['[c'] = mapquery('@class.outer', 'prev @class start'),
+                    ['[a'] = mapquery(
+                        '@parameter.outer',
+                        'prev @parameter start'
+                    ),
+                    ['[d'] = mapquery(
+                        '@conditional.inner',
+                        'prev @conditional start'
+                    ),
+                },
+                goto_previous_end = {
+                    ['[M'] = mapquery('@function.outer', 'prev @function end'),
+                    ['[C'] = mapquery('@class.outer', 'prev @class end'),
+                    ['[D'] = mapquery(
+                        '@conditional.inner',
+                        'prev @conditional end'
+                    ),
+                },
+                goto_next = {},
+                goto_previos = {},
             },
         },
     },
