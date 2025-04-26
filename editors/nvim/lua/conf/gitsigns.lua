@@ -27,23 +27,6 @@ return {
                 vim.keymap.set(mode, l, r, opts)
             end
 
-            -- Navigation
-            map('n', '[h', function()
-                if vim.wo.diff then
-                    vim.cmd.normal { ']c', bang = true }
-                else
-                    gitsigns.nav_hunk 'next'
-                end
-            end, { desc = 'prev git hunk' })
-
-            map('n', ']h', function()
-                if vim.wo.diff then
-                    vim.cmd.normal { ']c', bang = true }
-                else
-                    gitsigns.nav_hunk 'next'
-                end
-            end, { desc = 'next git hunk' })
-
             -- Staging and restoring
             map(
                 'n',

@@ -101,7 +101,7 @@ end
 ---@type LazyPluginSpec
 return {
     'nvim-treesitter/nvim-treesitter-textobjects',
-    dependencies = { treesitter },
+    dependencies = { treesitter, require 'conf.gitsigns' },
 
     -- module to use for `opts`
     main = 'nvim-treesitter.configs',
@@ -221,4 +221,55 @@ return {
             },
         },
     },
+    init = function()
+        local ts_repeat_move =
+            require 'nvim-treesitter.textobjects.repeatable_move'
+
+        -- Repeat movement with ; and ,
+        -- ensure , goes forward and ; goes backward regardless of the last direction
+        vim.keymap.set(
+            { 'n', 'x', 'o' },
+            ',',
+            ts_repeat_move.repeat_last_move_next
+        )
+        vim.keymap.set(
+            { 'n', 'x', 'o' },
+            ';',
+            ts_repeat_move.repeat_last_move_previous
+        )
+
+        -- Make builtin f, F, t, T also repeatable with ; and ,
+        vim.keymap.set(
+            { 'n', 'x', 'o' },
+            'f',
+            ts_repeat_move.builtin_f_expr,
+            { expr = true }
+        )
+        vim.keymap.set(
+            { 'n', 'x', 'o' },
+            'F',
+            ts_repeat_move.builtin_F_expr,
+            { expr = true }
+        )
+        vim.keymap.set(
+            { 'n', 'x', 'o' },
+            't',
+            ts_repeat_move.builtin_t_expr,
+            { expr = true }
+        )
+        vim.keymap.set(
+            { 'n', 'x', 'o' },
+            'T',
+            ts_repeat_move.builtin_T_expr,
+            { expr = true }
+        )
+
+        -- Gitsign integration
+        local gs = require 'gitsigns'
+        local next_hunk_repeat, prev_hunk_repeat =
+            ts_repeat_move.make_repeatable_move_pair(gs.next_hunk, gs.prev_hunk)
+
+        vim.keymap.set({ 'n', 'x', 'o' }, ']h', next_hunk_repeat)
+        vim.keymap.set({ 'n', 'x', 'o' }, '[h', prev_hunk_repeat)
+    end,
 }
