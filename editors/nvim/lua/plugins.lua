@@ -48,6 +48,8 @@ function M.setup()
         require 'conf.statusline',
         -- fluent
         'projectfluent/fluent.vim',
+        -- git intergrations
+        require 'conf.gitsigns',
     }, {
         rocks = {
             enabled = false,
