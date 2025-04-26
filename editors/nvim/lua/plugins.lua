@@ -33,7 +33,6 @@ function M.setup()
         require 'conf.completion',
         -- lsp
         require 'conf.lsp',
-        require 'conf.nvim_ls',
         -- autoformat
         require 'conf.autoformat',
         -- todo-style comments
