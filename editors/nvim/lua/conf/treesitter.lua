@@ -53,6 +53,19 @@ local treesitter = {
         indent = { enable = true },
     },
     init = function()
+        --
+        -- Enable folds with treesitter
+        --
+        vim.o.foldmethod = 'expr'
+        vim.o.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+
+        -- The number of levels to fold on startup
+        -- * 0 is toplevel
+        -- * 1 is level lower
+        -- * 2 is even lower
+        -- * ... etc
+        vim.o.foldlevel = 50
+
         -- Force evaluate treesitter on buffer load
         --
         -- This is needed because treesitter is very lazy and if, for example,
