@@ -91,6 +91,13 @@ local treesitter = {
     end,
 }
 
+local function mapquery(query, desc)
+    return {
+        query = query,
+        desc = desc,
+    }
+end
+
 ---@type LazyPluginSpec
 return {
     'nvim-treesitter/nvim-treesitter-textobjects',
@@ -110,22 +117,17 @@ return {
 
                 keymaps = {
                     -- You can use the capture groups defined in textobjects.scm
-                    ['af'] = {
-                        query = '@function.outer',
-                        desc = '@function',
-                    },
-                    ['if'] = {
-                        query = '@function.inner',
-                        desc = 'inner @function',
-                    },
-                    ['ac'] = {
-                        query = '@class.outer',
-                        desc = '@class',
-                    },
-                    ['ic'] = {
-                        query = '@class.inner',
-                        desc = 'inner @class',
-                    },
+                    ['af'] = mapquery('@function.outer', '@function'),
+                    ['if'] = mapquery('@function.inner', 'inner @function'),
+                    ['ac'] = mapquery('@class.outer', '@class'),
+                    ['ic'] = mapquery('@class.inner', 'inner @class'),
+                    ['aa'] = mapquery('@parameter.outer', '@parameter'),
+                    ['ia'] = mapquery('@parameter.inner', 'inner @parameter'),
+                    ['ie'] = mapquery(
+                        '@assignment.rhs',
+                        'right of @assignment'
+                    ),
+                    ['ir'] = mapquery('@return.inner', 'inner @return'),
                     -- You can also use captures from other query groups like
                     -- `locals.scm`
                     ['as'] = {
