@@ -33,7 +33,6 @@ function M.setup()
         require 'conf.completion',
         -- lsp
         require 'conf.lsp',
-        require 'conf.nvim_ls',
         -- autoformat
         require 'conf.autoformat',
         -- todo-style comments
@@ -48,7 +47,14 @@ function M.setup()
         require 'conf.statusline',
         -- fluent
         'projectfluent/fluent.vim',
+        -- git intergrations
+        require 'conf.gitsigns',
+        -- snacks
+        require('conf.snacks').lazy_spec,
     }, {
+        defaults = {
+            lazy = true,
+        },
         rocks = {
             enabled = false,
         },

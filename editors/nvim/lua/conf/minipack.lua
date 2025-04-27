@@ -8,6 +8,7 @@
 ---@type LazyPluginSpec
 return {
     'echasnovski/mini.nvim',
+    event = 'VeryLazy',
     config = function()
         -- extends built-in textobjects but plays horribly with whichkey
         local enable_around = false

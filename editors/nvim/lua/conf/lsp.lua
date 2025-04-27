@@ -147,6 +147,7 @@ end
 ---@type LazyPluginSpec
 return {
     'neovim/nvim-lspconfig',
+    event = 'VeryLazy',
     dependencies = {
         -- to install other LSPs
         { 'williamboman/mason.nvim', opts = {} },
@@ -158,6 +159,19 @@ return {
         { 'j-hui/fidget.nvim', opts = {} },
         -- more completion capabilities
         'saghen/blink.cmp',
+        {
+            -- Add vim info to lua lsp
+            'folke/lazydev.nvim',
+            ft = 'lua',
+            ---@module 'lazydev'
+            ---@type lazydev.Config
+            ---@diagnostic disable-next-line: missing-fields
+            opts = {
+                library = {
+                    { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
+                },
+            },
+        },
     },
     config = function()
         -- Add autocommand for LSP attach event

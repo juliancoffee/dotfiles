@@ -11,6 +11,8 @@ return {
     -- Release tag for pre-built binaries
     version = '1.*',
 
+    event = 'VeryLazy',
+
     ---@type blink.cmp.Config
     opts = {
         -- Default configuration closer to rust keybinds

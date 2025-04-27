@@ -4,6 +4,24 @@
 --- NOTE: to introduce new module, add it to lua/ folder
 local plugins = require 'plugins'
 
+---
+--- shady performance block
+---
+
+--- if PROF in environment variables, start the profiler
+if vim.env.PROF then
+    require('conf.snacks').profiler()
+end
+
+-- disable support for plugins written in Python
+--
+-- that way, the performance of opening python files
+-- is much better, because it doesn't need to load all the machinery
+vim.g.loaded_python3_provider = 0
+
+-- experimental module loader that should improve performance
+vim.loader.enable()
+
 --
 -- options
 --
@@ -38,6 +56,9 @@ vim.opt.listchars = {
 -- set bigger limit to allowed number of pages opened with "-p"
 vim.o.tabpagemax = 500
 
+-- set minimum number of lines visible
+vim.opt.scrolloff = 5
+
 -- Natural splits.
 -- Right and below, instead of left and above.
 vim.opt.splitright = true
@@ -58,6 +79,8 @@ vim.keymap.set('n', 'Q', '<Nop>') -- idk
 -- stop search highlighting
 -- <C-_> actually means <C-/>, don't ask me why
 vim.keymap.set('n', '<C-_>', ':nohlsearch<CR>')
+
+vim.keymap.set('n', '<leader>o', ':only<CR>', { desc = 'Keep [o]nly window' })
 
 -- call plugins at the end after all the options
 plugins.setup()
