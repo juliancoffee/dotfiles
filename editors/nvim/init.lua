@@ -7,10 +7,16 @@ local plugins = require 'plugins'
 ---
 --- shady performance block
 ---
+
+--- if PROF in environment variables, start the profiler
 if vim.env.PROF then
     require('conf.snacks').profiler()
 end
 
+-- disable support for plugins written in Python
+--
+-- that way, the performance of opening python files
+-- is much better, because it doesn't need to load all the machinery
 vim.g.loaded_python3_provider = 0
 
 -- experimental module loader that should improve performance

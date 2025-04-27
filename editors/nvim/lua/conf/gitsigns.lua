@@ -7,6 +7,7 @@
 ---@type LazyPluginSpec
 return {
     'juliancoffee/gitsigns.nvim',
+    -- fork because `gitsigns.diffthis` panics for some reason
     branch = 'juliancoffee/pcall-asystem',
     opts = {
         -- show blame lens if hovered for 1s
