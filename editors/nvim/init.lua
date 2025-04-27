@@ -4,6 +4,15 @@
 --- NOTE: to introduce new module, add it to lua/ folder
 local plugins = require 'plugins'
 
+---
+--- shady performance block
+---
+if vim.env.PROF then
+    require('conf.snacks').profiler()
+end
+
+vim.g.loaded_python3_provider = 0
+
 -- experimental module loader that should improve performance
 vim.loader.enable()
 

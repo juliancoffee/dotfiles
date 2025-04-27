@@ -49,6 +49,8 @@ function M.setup()
         'projectfluent/fluent.vim',
         -- git intergrations
         require 'conf.gitsigns',
+        -- snacks
+        require('conf.snacks').lazy_spec,
     }, {
         defaults = {
             lazy = true,
