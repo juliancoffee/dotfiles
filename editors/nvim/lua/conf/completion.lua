@@ -27,14 +27,18 @@ local main = {
 
         completion = {
             -- Always show docs if available
-            documentation = { auto_show = true, auto_show_delay_ms = 500 },
+            documentation = { auto_show = true },
             menu = {
                 draw = {
                     components = {
                         -- Disable nerd icons
                         kind_icon = {
-                            text = function()
-                                return '*'
+                            text = function(a)
+                                if a.source_name == 'LSP' then
+                                    return '+'
+                                else
+                                    return '*'
+                                end
                             end,
                         },
                     },
@@ -57,6 +61,26 @@ local main = {
         -- Prefer pre-built rust fuzzy matcher or fallback to lua with warning
         fuzzy = {
             implementation = 'prefer_rust_with_warning',
+            sorts = {
+                function(a, b)
+                    -- if no source or sources are equal, return and let
+                    -- other sorting methods handle it
+                    if
+                        (a.source_name == nil or b.source_name == nil)
+                        or (a.source_name == b.source_name)
+                    then
+                        return
+                    end
+
+                    -- otherwise, if next proposal comes from `tmux`
+                    -- return `true` which will always prefer first one
+                    return b.source_name == 'tmux'
+                end,
+
+                -- defaults
+                'score',
+                'sort_text',
+            },
         },
     },
     opts_extend = { 'sources.default' },
