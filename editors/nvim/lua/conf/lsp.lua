@@ -194,6 +194,21 @@ return {
         local capabilities = require('blink.cmp').get_lsp_capabilities()
         local servers = {
             lua_ls = {},
+            pyright = {
+                -- use `uv` to run inside proper environment
+                cmd = { 'uv', 'run', 'pyright-langserver', '--stdio' },
+                settings = {
+                    -- let ruff/isort handle it
+                    disableOrganizeImports = true,
+                    python = {
+                        analysis = {
+                            -- let ruff/mypy handle it
+                            ignore = { '*' },
+                            typeCheckingMode = 'off',
+                        },
+                    },
+                },
+            },
             ruff = {},
         }
 
