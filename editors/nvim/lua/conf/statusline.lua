@@ -15,6 +15,7 @@ return {
         },
         sections = {
             lualine_c = { '%f' },
+            lualine_x = {},
         },
     },
 }
