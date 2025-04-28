@@ -12,12 +12,15 @@ return {
         'nvim-lua/plenary.nvim',
         'MunifTanjim/nui.nvim',
     },
-    event = 'VeryLazy',
-    config = function()
+    -- it must be loaded eagerly, otherwise netrw stuff won't work
+    -- properly
+    lazy = false,
+    init = function()
         -- we're replacing built-in netrw
         vim.g.loaded_netrwPlugin = 1
         vim.g.loaded_netrw = 1
-
+    end,
+    config = function()
         require('neo-tree').setup {
             log_level = 'debug',
             window = {
