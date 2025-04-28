@@ -119,6 +119,8 @@ local to_opts = {
                 ['aa'] = mapquery('@parameter.outer', '@parameter'),
                 ['ia'] = mapquery('@parameter.inner', 'inner @parameter'),
                 -- blocks
+                ['ax'] = mapquery('@call.outer', '@call'),
+                ['ix'] = mapquery('@call.inner', 'inner @call'),
                 ['ab'] = mapquery('@block.outer', '@block'),
                 ['ib'] = mapquery('@block.inner', 'inner @block'),
                 ['ad'] = mapquery('@conditional.outer', '@conditional'),
