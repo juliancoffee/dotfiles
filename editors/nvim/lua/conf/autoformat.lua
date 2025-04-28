@@ -31,7 +31,7 @@ return {
                 'rustfmt',
             },
             python = {
-                'ruff',
+                'isort',
                 'ruff_format',
                 lsp_format = 'fallback',
             },
