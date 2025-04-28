@@ -110,16 +110,22 @@ local to_opts = {
 
             keymaps = {
                 -- You can use the capture groups defined in textobjects.scm
+                -- items
                 ['af'] = mapquery('@function.outer', '@function'),
                 ['if'] = mapquery('@function.inner', 'inner @function'),
                 ['ac'] = mapquery('@class.outer', '@class'),
                 ['ic'] = mapquery('@class.inner', 'inner @class'),
+                -- locals
                 ['aa'] = mapquery('@parameter.outer', '@parameter'),
                 ['ia'] = mapquery('@parameter.inner', 'inner @parameter'),
-                ['ie'] = mapquery('@assignment.rhs', 'right of @assignment'),
-                ['ir'] = mapquery('@return.inner', 'inner @return'),
+                -- blocks
+                ['ab'] = mapquery('@block.outer', '@block'),
+                ['ib'] = mapquery('@block.inner', 'inner @block'),
                 ['ad'] = mapquery('@conditional.outer', '@conditional'),
                 ['id'] = mapquery('@conditional.inner', 'inner @conditional'),
+                -- special stuff
+                ['ie'] = mapquery('@assignment.rhs', 'right of @assignment'),
+                ['ir'] = mapquery('@return.inner', 'inner @return'),
                 -- You can also use captures from other query groups like
                 -- `locals.scm`
                 ['as'] = {
