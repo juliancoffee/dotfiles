@@ -12,9 +12,6 @@ return {
     opts = {
         -- show blame lens if hovered for 1s
         current_line_blame = true,
-        -- colored number lines instead of using sign column
-        signcolumn = false,
-        numhl = true,
         -- diff vertically
         diff_opts = {
             vertical = false,
