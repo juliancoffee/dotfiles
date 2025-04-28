@@ -142,6 +142,11 @@ local on_attach = function(event)
             })
         end, '[T]oggle Inlay [H]ints')
     end
+
+    -- Disable semantic highlighting
+    if client then
+        client.server_capabilities.semanticTokensProvider = nil
+    end
 end
 
 ---@type LazyPluginSpec
@@ -194,13 +199,28 @@ return {
         local capabilities = require('blink.cmp').get_lsp_capabilities()
         local servers = {
             lua_ls = {},
-            pyright = {
+            -- pyright = {
+            --     -- use `uv` to run inside proper environment
+            --     cmd = { 'uv', 'run', 'pyright-langserver', '--stdio' },
+            --     settings = {
+            --         -- let ruff/isort handle it
+            --         disableOrganizeImports = true,
+            --         python = {
+            --             analysis = {
+            --                 -- let ruff/mypy handle it
+            --                 ignore = { '*' },
+            --                 typeCheckingMode = 'off',
+            --             },
+            --         },
+            --     },
+            -- },
+            basedpyright = {
                 -- use `uv` to run inside proper environment
-                cmd = { 'uv', 'run', 'pyright-langserver', '--stdio' },
+                cmd = { 'uv', 'run', 'basedpyright-langserver', '--stdio' },
                 settings = {
                     -- let ruff/isort handle it
                     disableOrganizeImports = true,
-                    python = {
+                    basedpyright = {
                         analysis = {
                             -- let ruff/mypy handle it
                             ignore = { '*' },
