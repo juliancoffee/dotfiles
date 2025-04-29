@@ -80,7 +80,9 @@ return {
         })
 
         -- Scroll through diagnostic
-        vim.keymap.set('n', '<leader>sd', builtin.diagnostics, {
+        vim.keymap.set('n', '<leader>sd', function()
+            builtin.diagnostics { bufnr = 0 }
+        end, {
             desc = 'LSP: [S]croll [D]iagnostics',
         })
 
