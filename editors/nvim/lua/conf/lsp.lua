@@ -223,8 +223,12 @@ return {
                     basedpyright = {
                         analysis = {
                             -- let ruff/mypy handle it
-                            ignore = { '*' },
+                            -- ignore = { '*' },
                             typeCheckingMode = 'off',
+                            diagnosticSeverityOverrides = {
+                                reportImplicitOverride = true,
+                                reportIncompatibleMethodOverride = true,
+                            },
                         },
                     },
                 },
