@@ -202,6 +202,7 @@ return {
         local capabilities = require('blink.cmp').get_lsp_capabilities()
         local servers = {
             lua_ls = {},
+            cssls = {},
             -- pyright = {
             --     -- use `uv` to run inside proper environment
             --     cmd = { 'uv', 'run', 'pyright-langserver', '--stdio' },
