@@ -206,6 +206,9 @@ local to_opts = {
 return {
     'nvim-treesitter/nvim-treesitter-textobjects',
     dependencies = { treesitter, require 'conf.gitsigns' },
+    enabled = function()
+        return not require('conf._utils').is_termux()
+    end,
 
     event = 'VeryLazy',
     config = function()

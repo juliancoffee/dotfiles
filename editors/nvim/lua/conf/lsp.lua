@@ -178,6 +178,9 @@ return {
             },
         },
     },
+    enabled = function()
+        return not require('conf._utils').is_termux()
+    end,
     config = function()
         -- Add autocommand for LSP attach event
         vim.api.nvim_create_autocmd('LspAttach', {
