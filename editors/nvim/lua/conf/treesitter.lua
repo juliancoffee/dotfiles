@@ -205,7 +205,7 @@ local to_opts = {
 ---@type LazyPluginSpec
 return {
     'nvim-treesitter/nvim-treesitter-textobjects',
-    dependencies = { treesitter, require 'conf.gitsigns' },
+    dependencies = { treesitter },
     enabled = function()
         return not require('conf._utils').is_termux()
     end,
@@ -216,8 +216,11 @@ return {
         local ts_repeat_move =
             require 'nvim-treesitter.textobjects.repeatable_move'
 
-        -- Repeat movement with ; and ,
-        -- ensure , goes forward and ; goes backward regardless of the last direction
+        -- Repeat movement with [;] and [,]
+        --  [,] goes forward
+        --  [;] goes backward
+        --
+        -- regardless of the last direction
         vim.keymap.set(
             { 'n', 'x', 'o' },
             ',',
@@ -254,13 +257,5 @@ return {
             ts_repeat_move.builtin_T_expr,
             { expr = true }
         )
-
-        -- Gitsign integration
-        local gs = require 'gitsigns'
-        local next_hunk_repeat, prev_hunk_repeat =
-            ts_repeat_move.make_repeatable_move_pair(gs.next_hunk, gs.prev_hunk)
-
-        vim.keymap.set({ 'n', 'x', 'o' }, ']h', next_hunk_repeat)
-        vim.keymap.set({ 'n', 'x', 'o' }, '[h', prev_hunk_repeat)
     end,
 }

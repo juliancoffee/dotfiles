@@ -7,6 +7,7 @@
 ---@type LazyPluginSpec
 return {
     'lewis6991/gitsigns.nvim',
+    event = 'VeryLazy',
     opts = {
         -- show blame lens if hovered for 1s
         current_line_blame = true,
@@ -67,6 +68,38 @@ return {
                 'ih',
                 gitsigns.select_hunk,
                 { desc = 'inner git hunk' }
+            )
+
+            -- Movements
+            local has_ts_moves, ts_repeat_move = pcall(function()
+                return require 'nvim-treesitter.textobjects.repeatable_move'
+            end)
+
+            local next_hunk, prev_hunk =
+                function()
+                    gitsigns.nav_hunk 'next'
+                end, function()
+                    gitsigns.nav_hunk 'prev'
+                end
+
+            if has_ts_moves then
+                next_hunk, prev_hunk = ts_repeat_move.make_repeatable_move_pair(
+                    next_hunk,
+                    prev_hunk
+                )
+            end
+
+            vim.keymap.set(
+                { 'n', 'x', 'o' },
+                ']h',
+                next_hunk,
+                { desc = 'next Git hunk' }
+            )
+            vim.keymap.set(
+                { 'n', 'x', 'o' },
+                '[h',
+                prev_hunk,
+                { desc = 'prev Git hunk' }
             )
         end,
     },
