@@ -63,16 +63,19 @@ local dap = {
         )
 
         local dapui = require('dapui')
-        -- open on connect
-        dap.listeners.before.attach.dapui_config = dapui.open
-        dap.listeners.before.launch.dapui_config = dapui.open
-        -- close on disconnect
-        dap.listeners.before.disconnect.dapui_config = dapui.close
-        dap.listeners.before.event_terminated.dapui_config = dapui.close
-        dap.listeners.before.event_exited.dapui_config = dapui.close
-
-        vim.keymap.set('n', '<leader>de', dapui.eval, { desc = 'DAP: Eval' })
-        vim.keymap.set('n', '<leader>dq', dapui.close, { desc = 'DAP: Close' })
+        vim.keymap.set('n', '<leader>de', dapui.eval, { desc = 'DAP: [E]val' })
+        vim.keymap.set(
+            'n',
+            '<leader>do',
+            dap.repl.open,
+            { desc = 'DAP: [O]pen Repl' }
+        )
+        vim.keymap.set(
+            'n',
+            '<leader>dq',
+            dap.repl.close,
+            { desc = 'DAP: [Q]uit Repl' }
+        )
     end,
 }
 
