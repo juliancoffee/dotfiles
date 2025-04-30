@@ -18,14 +18,14 @@ return {
 
             build = 'make',
             cond = function()
-                return vim.fn.executable 'make' == 1
+                return vim.fn.executable('make') == 1
             end,
         },
         'nvim-telescope/telescope-ui-select.nvim',
     },
     config = function()
-        local themes = require 'telescope.themes'
-        local actions = require 'telescope.actions'
+        local themes = require('telescope.themes')
+        local actions = require('telescope.actions')
 
         require('telescope').setup {
             -- use dropdown theme by default
@@ -48,7 +48,7 @@ return {
         pcall(require('telescope').load_extension, 'fzf')
         pcall(require('telescope').load_extension, 'ui-select')
 
-        local builtin = require 'telescope.builtin'
+        local builtin = require('telescope.builtin')
         -- Search help manual
         vim.keymap.set('n', '<leader>sh', builtin.help_tags, {
             desc = '[S]earch [H]elp',
@@ -113,7 +113,7 @@ return {
 
         -- Config files switcher
         vim.keymap.set('n', '<leader>sn', function()
-            builtin.find_files { cwd = vim.fn.stdpath 'config' }
+            builtin.find_files { cwd = vim.fn.stdpath('config') }
         end, { desc = '[S]witch [N]eovim files' })
     end,
 }

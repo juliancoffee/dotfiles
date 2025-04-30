@@ -2,7 +2,7 @@
 --- Config entry point
 
 --- NOTE: to introduce new module, add it to lua/ folder
-local plugins = require 'plugins'
+local plugins = require('plugins')
 
 ---
 --- shady performance block

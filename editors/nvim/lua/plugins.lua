@@ -2,10 +2,10 @@
 --- Package management
 
 -- load colorscheme module
-local colorscheme = require 'conf.color'
+local colorscheme = require('conf.color')
 
 -- bootstrap lazy.nvim package manager
-local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
+local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
 if not vim.uv.fs_stat(lazypath) then
     vim.fn.system {
         'git',
@@ -24,31 +24,31 @@ function M.setup()
     -- install all the plugins
     require('lazy').setup({
         -- hotkey autocomplete basically
-        require 'conf.whichkey',
+        require('conf.whichkey'),
         -- colorscheme
         colorscheme.lazy_spec,
         -- fuzzy finder UI
-        require 'conf.telescope',
+        require('conf.telescope'),
         -- completions
-        require 'conf.completion',
+        require('conf.completion'),
         -- lsp
-        require 'conf.lsp',
+        require('conf.lsp'),
         -- autoformat
-        require 'conf.autoformat',
+        require('conf.autoformat'),
         -- todo-style comments
-        require 'conf.todo',
+        require('conf.todo'),
         -- filetree UI
-        require 'conf.filetree',
+        require('conf.filetree'),
         -- mini plugins (surrounds, arounds, etc)
-        require 'conf.minipack',
+        require('conf.minipack'),
         -- tree-sitter
-        require 'conf.treesitter',
+        require('conf.treesitter'),
         -- status line
-        require 'conf.statusline',
+        require('conf.statusline'),
         -- fluent
         'projectfluent/fluent.vim',
         -- git intergrations
-        require 'conf.gitsigns',
+        require('conf.gitsigns'),
         -- snacks
         require('conf.snacks').lazy_spec,
     }, {

@@ -21,7 +21,7 @@ local tokyonight = {
             style = 'moon',
             styles = {},
         }
-        vim.cmd [[ colorscheme tokyonight ]]
+        vim.cmd([[ colorscheme tokyonight ]])
     end,
 }
 
@@ -36,7 +36,7 @@ local catpuccin = {
         require('catppuccin').setup {
             flavour = 'frappe',
         }
-        vim.cmd [[ colorscheme catppuccin ]]
+        vim.cmd([[ colorscheme catppuccin ]])
     end,
 }
 

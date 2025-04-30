@@ -39,7 +39,7 @@ return {
                 {
                     event = 'file_open_requested',
                     handler = function()
-                        vim.cmd [[ Neotree close ]]
+                        vim.cmd([[ Neotree close ]])
                     end,
                 },
             },
@@ -76,7 +76,7 @@ return {
         }
 
         vim.keymap.set('n', '<leader>k', function()
-            vim.cmd [[ Neotree toggle reveal_force_cwd ]]
+            vim.cmd([[ Neotree toggle reveal_force_cwd ]])
         end, { desc = 'Show Tree' })
     end,
 }

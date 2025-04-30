@@ -16,7 +16,7 @@ return {
             vertical = false,
         },
         on_attach = function(bufnr)
-            local gitsigns = require 'gitsigns'
+            local gitsigns = require('gitsigns')
 
             local function map(mode, l, r, opts)
                 opts = opts or {}
@@ -72,14 +72,14 @@ return {
 
             -- Movements
             local has_ts_moves, ts_repeat_move = pcall(function()
-                return require 'nvim-treesitter.textobjects.repeatable_move'
+                return require('nvim-treesitter.textobjects.repeatable_move')
             end)
 
             local next_hunk, prev_hunk =
                 function()
-                    gitsigns.nav_hunk 'next'
+                    gitsigns.nav_hunk('next')
                 end, function()
-                    gitsigns.nav_hunk 'prev'
+                    gitsigns.nav_hunk('prev')
                 end
 
             if has_ts_moves then

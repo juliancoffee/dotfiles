@@ -10,9 +10,9 @@ local spec = {
     'folke/snacks.nvim',
     opts = function()
         -- Toggle the profiler
-        Snacks.toggle.profiler():map '<leader>pp'
+        Snacks.toggle.profiler():map('<leader>pp')
         -- Toggle the profiler highlights
-        Snacks.toggle.profiler_highlights():map '<leader>ph'
+        Snacks.toggle.profiler_highlights():map('<leader>ph')
     end,
     keys = {
         {
@@ -26,7 +26,7 @@ local spec = {
 }
 
 local function profiler()
-    local snacks = vim.fn.stdpath 'data' .. '/lazy/snacks.nvim'
+    local snacks = vim.fn.stdpath('data') .. '/lazy/snacks.nvim'
     vim.opt.rtp:append(snacks)
     ---@diagnostic disable-next-line: missing-fields
     require('snacks.profiler').startup {

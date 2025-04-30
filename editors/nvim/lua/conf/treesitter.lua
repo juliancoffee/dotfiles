@@ -87,7 +87,7 @@ local treesitter = {
             group = vim.api.nvim_create_augroup('ForceTreesitterEval', {}),
             pattern = '*.*',
             callback = function(event_opts)
-                local parsers = require 'nvim-treesitter.parsers'
+                local parsers = require('nvim-treesitter.parsers')
                 local lang = parsers.get_buf_lang(event_opts.buf)
                 local ok, parser = pcall(function()
                     return vim.treesitter.get_parser(event_opts.buf, lang)
@@ -222,7 +222,7 @@ return {
     config = function()
         require('nvim-treesitter.configs').setup(to_opts)
         local ts_repeat_move =
-            require 'nvim-treesitter.textobjects.repeatable_move'
+            require('nvim-treesitter.textobjects.repeatable_move')
 
         -- Repeat movement with [;] and [,]
         --  [,] goes forward
