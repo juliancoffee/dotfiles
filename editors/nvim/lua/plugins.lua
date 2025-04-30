@@ -51,6 +51,8 @@ function M.setup()
         require('conf.gitsigns'),
         -- snacks
         require('conf.snacks').lazy_spec,
+        -- debugging experience
+        require('conf.dap'),
     }, {
         defaults = {
             lazy = true,
