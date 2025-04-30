@@ -203,6 +203,7 @@ return {
         local servers = {
             lua_ls = {},
             cssls = {},
+            bashls = {},
             basedpyright = {
                 -- use `uv` to run inside proper environment
                 cmd = { 'uv', 'run', 'basedpyright-langserver', '--stdio' },
