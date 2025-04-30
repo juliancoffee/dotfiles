@@ -31,6 +31,7 @@ local ts_opts = {
         -- html
         'html',
         'htmldjango',
+        'css',
         -- ron (Rusty Object Notation)
         'ron',
         -- python
