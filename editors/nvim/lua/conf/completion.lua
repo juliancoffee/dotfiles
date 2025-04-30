@@ -22,8 +22,11 @@ local main = {
 
     ---@type blink.cmp.Config
     opts = {
-        -- Default configuration closer to rust keybinds
+        -- Default configuration closer to default nvim keybinds
         keymap = { preset = 'default' },
+        enabled = function()
+            return not vim.tbl_contains({ 'dap-repl' }, vim.bo.filetype)
+        end,
 
         completion = {
             -- Always show docs if available
