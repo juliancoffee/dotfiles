@@ -63,7 +63,11 @@ local dap = {
         )
 
         local dapui = require('dapui')
-        vim.keymap.set('n', '<leader>de', dapui.eval, { desc = 'DAP: [E]val' })
+        vim.keymap.set('n', '<leader>de', function()
+            ---@diagnostic disable-next-line: missing-fields
+            dapui.eval(nil, { enter = true })
+        end, { desc = 'DAP: [E]val' })
+
         vim.keymap.set(
             'n',
             '<leader>do',
