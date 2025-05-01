@@ -204,6 +204,7 @@ return {
             lua_ls = {},
             cssls = {},
             bashls = {},
+            dockerls = {},
             basedpyright = {
                 -- use `uv` to run inside proper environment
                 cmd = { 'uv', 'run', 'basedpyright-langserver', '--stdio' },
