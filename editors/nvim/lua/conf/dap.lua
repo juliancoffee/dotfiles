@@ -4,19 +4,12 @@
 ---@module 'dapui'
 
 ---@type LazyPluginSpec
-local dap_python = {
-    'mfussenegger/nvim-dap-python',
-    event = 'VeryLazy',
-    config = function()
-        require('dap-python').setup('uv')
-    end,
-}
-
----@type LazyPluginSpec
 local dap_ui = {
     'rcarriga/nvim-dap-ui',
     dependencies = {
+        -- utility dependency
         'nvim-neotest/nvim-nio',
+        -- adds variable information as virtual text
         { 'theHamsta/nvim-dap-virtual-text', opts = {} },
     },
     event = 'VeryLazy',
@@ -49,9 +42,13 @@ local dap_ui = {
 local dap = {
     'mfussenegger/nvim-dap',
     event = 'VeryLazy',
-    dependencies = { dap_ui, dap_python },
+    dependencies = { dap_ui, 'mfussenegger/nvim-dap-python' },
     config = function()
+        -- init python provider
+        require('dap-python').setup('uv')
+
         local dap = require('dap')
+        local dapui = require('dapui')
         dap.set_log_level('DEBUG')
 
         vim.keymap.set('n', '<F5>', dap.continue, { desc = 'DAP: Continue' })
@@ -62,7 +59,6 @@ local dap = {
             { desc = 'DAP: Continue' }
         )
 
-        local dapui = require('dapui')
         vim.keymap.set('n', '<leader>de', function()
             ---@diagnostic disable-next-line: missing-fields
             dapui.eval(nil, { enter = true })
