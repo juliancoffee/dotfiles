@@ -53,6 +53,8 @@ function M.setup()
         require('conf.snacks').lazy_spec,
         -- debugging experience
         require('conf.dap'),
+        -- testing experience
+        require('conf.neotest'),
     }, {
         defaults = {
             lazy = true,
