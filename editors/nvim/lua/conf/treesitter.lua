@@ -40,17 +40,7 @@ local ts_opts = {
         'rust',
     },
     auto_install = false,
-    highlight = {
-        enable = true,
-        disable = {
-            'luadoc',
-            'vimdoc',
-            'rust',
-            'python',
-            'html',
-            'htmldjango',
-        },
-    },
+    highlight = { enable = false },
     incremental_selection = { enable = true },
     indent = { enable = true },
 }
