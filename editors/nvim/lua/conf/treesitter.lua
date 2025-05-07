@@ -41,10 +41,19 @@ local ts_opts = {
     },
     auto_install = false,
     highlight = {
-        enable = {
-            'gitcommit',
-            'diff',
-        },
+        -- Disable everything except the handpicked list of options
+        --
+        -- There's no way to do that without (ab)using disable function, so
+        -- we do that by enabling everything, and then disabling almost
+        -- everything
+        enable = true,
+        disable = function(lang)
+            local allowlist = {
+                'gitcommit',
+                'diff',
+            }
+            return not vim.tbl_contains(allowlist, lang)
+        end,
     },
     incremental_selection = { enable = true },
     indent = { enable = true },
