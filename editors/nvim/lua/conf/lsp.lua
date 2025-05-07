@@ -147,6 +147,12 @@ local on_attach = function(event)
     if client then
         client.server_capabilities.semanticTokensProvider = nil
     end
+
+    -- Disable bashls on `.env` files, that's kind of hillarious
+    local bufname = vim.api.nvim_buf_get_name(event.buf)
+    if string.match(bufname, '%.env') then
+        vim.diagnostic.enable(false, { bufnr = event.buf })
+    end
 end
 
 ---@type LazyPluginSpec
