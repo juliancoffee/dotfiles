@@ -40,7 +40,12 @@ local ts_opts = {
         'rust',
     },
     auto_install = false,
-    highlight = { enable = false },
+    highlight = {
+        enable = {
+            'gitcommit',
+            'diff',
+        },
+    },
     incremental_selection = { enable = true },
     indent = { enable = true },
 }
