@@ -1,6 +1,7 @@
 --- INFO: this module manages testing support for neovim
-
 ---@module 'lazy'
+
+local utils = require('conf._utils')
 
 ---@type LazyPluginSpec
 local vim_test = {
@@ -31,14 +32,22 @@ local neotest = {
         local neotest = require('neotest')
         ---@diagnostic disable-next-line: missing-fields
         neotest.setup {
+            ---@diagnostic disable-next-line: missing-fields
+            run = {
+                augment = function(tree, args)
+                    utils.fake_use(tree)
+
+                    args.env = { DJANGO_SETTINGS_MODULE = 'mysite.settings' }
+
+                    return args
+                end,
+            },
             adapters = {
                 python {
                     -- TODO: doesn't seem to work for me anyway
                     dap = {
-                        -- justMyCode = true,
+                        justMyCode = false,
                     },
-                    -- TODO: doesn't work, for some reason
-                    env = { DJANGO_SETTINGS_MODULE = 'mysite.settings' },
                     runner = 'django',
                     is_test_file = function(file_path)
                         local Path = require('plenary.path')

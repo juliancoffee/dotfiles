@@ -6,4 +6,6 @@ function M.is_termux()
     return vim.fn.executable('termux-setup-storage') == 1
 end
 
+function M.fake_use(...) end
+
 return M
