@@ -2,6 +2,14 @@
 ---@module 'lazy'
 
 local utils = require('conf._utils')
+local _ = utils.fake_use
+local conf = {}
+conf.runner = utils.from_local_config(function(config)
+    return config.neotest_runner
+end)
+conf.django_settings_module = utils.from_local_config(function(config)
+    return config.DJANGO_SETTINGS_MODULE
+end)
 
 ---@type LazyPluginSpec
 local vim_test = {
@@ -30,14 +38,18 @@ local neotest = {
     config = function()
         local python = require('neotest-python')
         local neotest = require('neotest')
+
         ---@diagnostic disable-next-line: missing-fields
         neotest.setup {
             ---@diagnostic disable-next-line: missing-fields
             run = {
                 augment = function(tree, args)
-                    utils.fake_use(tree)
+                    _(tree)
 
-                    args.env = { DJANGO_SETTINGS_MODULE = 'mysite.settings' }
+                    args.env = {
+                        DJANGO_SETTINGS_MODULE = conf.django_settings_module
+                            or 'mysite.settings',
+                    }
 
                     return args
                 end,
@@ -48,7 +60,7 @@ local neotest = {
                     dap = {
                         justMyCode = false,
                     },
-                    runner = 'django',
+                    runner = conf.runner or 'unittest',
                     is_test_file = function(file_path)
                         local Path = require('plenary.path')
                         local neotest_default = require('neotest-python.base')
@@ -81,6 +93,7 @@ local neotest = {
                 final_child_prefix = '└─',
                 non_collapsible = '─',
                 notify = '🔔',
+                test = '🔔',
                 passed = '✓',
                 running = '⏱',
                 running_animated = {
