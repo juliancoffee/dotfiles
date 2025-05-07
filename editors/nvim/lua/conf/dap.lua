@@ -42,23 +42,72 @@ local dap_ui = {
 local dap = {
     'mfussenegger/nvim-dap',
     event = 'VeryLazy',
-    dependencies = { dap_ui, 'mfussenegger/nvim-dap-python' },
+    dependencies = {
+        dap_ui,
+        'mfussenegger/nvim-dap-python',
+        'jbyuki/one-small-step-for-vimkind',
+    },
     config = function()
-        -- init python provider
-        require('dap-python').setup('uv')
-
         local dap = require('dap')
         local dapui = require('dapui')
-        dap.set_log_level('DEBUG')
 
-        vim.keymap.set('n', '<F5>', dap.continue, { desc = 'DAP: Continue' })
+        --
+        -- setup
+        --
+        -- enable logging
+        dap.set_log_level('DEBUG')
+        -- init python adapter
+        require('dap-python').setup('uv')
+        -- init osv adapter
+        -- we're overwriting it, hopefully this won't cause trouble :D
+        dap.configurations.lua = {
+            {
+                type = 'nlua',
+                request = 'attach',
+                name = 'attach to neovim instance',
+            },
+        }
+
+        dap.adapters.nlua = function(callback, config)
+            callback {
+                type = 'server',
+                host = config.host or '127.0.0.1',
+                port = config.port or 8086,
+            }
+        end
+
+        --
+        -- breakpoint keymap
+        --
         vim.keymap.set(
             'n',
             '<leader>b',
             dap.toggle_breakpoint,
-            { desc = 'DAP: Continue' }
+            { desc = 'DAP: Toggle [B]reakpoint' }
         )
 
+        --
+        -- execution keymaps, continue, step_over, step_into, etc
+        --
+        for _, key in ipairs { '<F5>', '<leader>dc' } do
+            vim.keymap.set('n', key, dap.continue, { desc = 'DAP: [C]ontinue' })
+        end
+        vim.keymap.set(
+            'n',
+            '<leader>ds',
+            dap.step_over,
+            { desc = 'DAP: [S]tep Over' }
+        )
+        vim.keymap.set(
+            'n',
+            '<leader>di',
+            dap.step_into,
+            { desc = 'DAP: Step [I]nto' }
+        )
+
+        --
+        -- visualization keymaps
+        --
         vim.keymap.set('n', '<leader>de', function()
             ---@diagnostic disable-next-line: missing-fields
             dapui.eval(nil, { enter = true })
@@ -76,17 +125,18 @@ local dap = {
             dap.repl.close,
             { desc = 'DAP: [Q]uit Repl' }
         )
+
+        --
+        -- keymaps for special stuff
+        --
+        vim.keymap.set('n', '<leader>dl', function()
+            -- [O]ne[S]mallstepfor[V]imkind
+            require('osv').launch { port = 8086 }
+        end, { noremap = true, desc = 'DAP: Launch Vim debugger' })
     end,
 }
 
 ---@type LazySpec
 return {
     dap,
-    {
-        -- it's arguably much less pretty one, but at least it works
-        'juliancoffee/vim-test',
-        -- fork with UV support
-        branch = 'juliancoffee/add-uv',
-        event = 'VeryLazy',
-    },
 }
