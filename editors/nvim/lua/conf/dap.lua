@@ -35,6 +35,15 @@ local dap_ui = {
                 disconnect = '⏏', -- eject / disconnect
             },
         },
+        layouts = {
+            {
+                elements = {
+                    { id = 'repl', size = 1.0 },
+                },
+                size = 20,
+                position = 'bottom',
+            },
+        },
     },
 }
 
@@ -50,6 +59,7 @@ local dap = {
     config = function()
         local dap = require('dap')
         local dapui = require('dapui')
+        local dap_text = require('nvim-dap-virtual-text.virtual_text')
 
         --
         -- setup
@@ -104,6 +114,12 @@ local dap = {
             dap.step_into,
             { desc = 'DAP: Step [I]nto' }
         )
+        vim.keymap.set(
+            'n',
+            '<leader>do',
+            dap.step_out,
+            { desc = 'DAP: Step [O]ut' }
+        )
 
         --
         -- visualization keymaps
@@ -113,18 +129,14 @@ local dap = {
             dapui.eval(nil, { enter = true })
         end, { desc = 'DAP: [E]val' })
 
-        vim.keymap.set(
-            'n',
-            '<leader>do',
-            dap.repl.open,
-            { desc = 'DAP: [O]pen Repl' }
-        )
-        vim.keymap.set(
-            'n',
-            '<leader>dq',
-            dap.repl.close,
-            { desc = 'DAP: [Q]uit Repl' }
-        )
+        vim.keymap.set('n', '<leader>dr', function()
+            dap.repl.toggle({}, 'belowright split')
+            vim.cmd('wincmd j')
+        end, { desc = 'DAP: Toggle [R]epl' })
+
+        vim.keymap.set('n', '<leader>dq', function()
+            dap_text.clear_virtual_text()
+        end, { desc = 'DAP: [Q]uit virtual text' })
 
         --
         -- keymaps for special stuff
