@@ -42,11 +42,20 @@ end
 --- Returns the path to project root using `.git`
 --- @param stop_list? [string] additional files to indicate the root
 --- @param toplevel? string path to a starting point, `.` by default
-function M.get_root(stop_list, toplevel)
+--- @param counter? number how many paths to take, default 25
+function M.get_root(stop_list, toplevel, counter)
+    -- set the defaults
+    counter = counter or 25
     stop_list = stop_list or {}
     table.insert(stop_list, '.git')
     toplevel = toplevel or vim.fn.getcwd()
 
+    -- if reached the limit, give up
+    if counter == 0 then
+        return nil
+    end
+
+    -- search for stopfile
     local files = vim.fn.readdir(toplevel)
     for _, f in ipairs(files) do
         if vim.tbl_contains(stop_list, f) then
@@ -54,8 +63,13 @@ function M.get_root(stop_list, toplevel)
         end
     end
 
+    -- recurse
     local parent = M.get_parent(toplevel)
-    return M.get_root(stop_list, parent)
+    if not parent then
+        return nil
+    end
+
+    return M.get_root(stop_list, parent, counter - 1)
 end
 
 --- Returns file content
@@ -72,6 +86,10 @@ end
 -- TODO: provide some fun meta table to fetch them?
 function M.get_local_config()
     local root = M.get_root()
+    if not root then
+        return {}
+    end
+
     local config_path = root .. '/.nvim/settings.json'
     if vim.fn.filereadable(config_path) == 1 then
         local content = M.filecontent(config_path)
