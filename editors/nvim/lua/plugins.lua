@@ -55,6 +55,12 @@ function M.setup()
         require('conf.dap'),
         -- testing experience
         require('conf.neotest'),
+        -- interactive colors
+        {
+            'catgoose/nvim-colorizer.lua',
+            event = 'BufReadPre',
+            opts = {},
+        },
     }, {
         defaults = {
             lazy = true,
