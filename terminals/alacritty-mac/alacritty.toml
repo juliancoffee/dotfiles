@@ -1,0 +1,14 @@
+[[keyboard.bindings]]
+chars = "\u001F"
+key = "Slash"
+mods = "Control"
+
+[font]
+size = 14.0
+
+[terminal.shell]
+args = ["--login", "-c", "tmux"]
+program = "/bin/zsh"
+
+[window]
+startup_mode = "Maximized"
