@@ -1,7 +1,7 @@
-[[keyboard.bindings]]
-chars = "\u001F"
-key = "Slash"
-mods = "Control"
+[general]
+import = [
+    "~/.config/alacritty/themes/themes/alacritty_0_12.toml"
+]
 
 [font]
 size = 14.0
@@ -12,3 +12,8 @@ program = "/bin/zsh"
 
 [window]
 startup_mode = "Maximized"
+
+[[keyboard.bindings]]
+chars = "\u001F"
+key = "Slash"
+mods = "Control"
