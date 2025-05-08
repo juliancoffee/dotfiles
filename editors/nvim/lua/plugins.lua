@@ -98,15 +98,6 @@ function M.setup()
         },
     })
 
-    -- Monkey-patch Sync option to keep lockfile intact
-    --
-    ---@diagnostic disable-next-line: duplicate-set-field
-    require('lazy.manage').sync = function(opts)
-        require('lazy.manage').install(opts)
-        require('lazy.manage').clean(opts)
-        require('lazy.manage').restore(opts)
-    end
-
     -- don't forget to set up a colorscheme
     colorscheme.run()
 
