@@ -65,20 +65,41 @@ function M.setup()
         ui = {
             icons = {
                 cmd = '⌘',
-                config = '🛠',
+                config = '⚙',
+                debug = '🐞',
                 event = '📅',
-                ft = '📂',
-                init = '⚙',
-                keys = '🗝',
+                favorite = '⭐',
+                ft = '📄',
+                init = '🚀',
+                import = '📥',
+                keys = '🔑',
+                lazy = '💤',
+                loaded = '⚫︎',
+                not_loaded = '⚪',
                 plugin = '🔌',
                 runtime = '💻',
+                require = '📦',
                 source = '📄',
-                start = '🚀',
-                task = '📌',
-                lazy = '💤 ',
+                start = '▶',
+                task = '✔️',
+                list = {
+                    '•',
+                    '➜',
+                    '★',
+                    '–',
+                },
             },
         },
     })
+
+    -- Monkey-patch Sync option to keep lockfile intact
+    --
+    ---@diagnostic disable-next-line: duplicate-set-field
+    require('lazy.manage').sync = function(opts)
+        require('lazy.manage').install(opts)
+        require('lazy.manage').clean(opts)
+        require('lazy.manage').restore(opts)
+    end
 
     -- don't forget to set up a colorscheme
     colorscheme.run()
