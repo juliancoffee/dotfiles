@@ -59,6 +59,8 @@ function M.setup()
         {
             'catgoose/nvim-colorizer.lua',
             event = 'BufReadPre',
+            -- until I configure it to sane behaviour
+            enabled = false,
             opts = {},
         },
     }, {
