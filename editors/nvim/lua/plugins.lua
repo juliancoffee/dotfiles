@@ -54,7 +54,7 @@ function M.setup()
         -- debugging experience
         require('conf.dap'),
         -- testing experience
-        require('conf.neotest'),
+        require('conf.test'),
         -- interactive colors
         {
             'catgoose/nvim-colorizer.lua',
