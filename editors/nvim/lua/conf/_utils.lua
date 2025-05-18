@@ -9,8 +9,27 @@ function M.is_termux()
     return vim.fn.executable('termux-setup-storage') == 1
 end
 
+--- Return `true` if editing the git file.
+---
+--- NOTE: uses filepath, not filetype, beause filetypes are sometimes
+--- not there
+--- @return boolean
+function M.is_gitfile()
+    return string.find(vim.fn.expand('%:p'), '.git') ~= nil
+end
+
+--- Return `true` if no file is opened
+function M.is_empty()
+    return vim.fn.expand('%:p') == ''
+end
+
 --- Consume unused local to silence the diagnostic
 function M.fake_use(...) end
+
+--- Yes, it does what it says it does, it crashes the editor
+function M.crash()
+    M.crash()
+end
 
 --- Return the fully resolved absolute path
 --- @param path string input path

@@ -3,6 +3,8 @@
 
 ---@module 'lazy'
 
+local utils = require('conf._utils')
+
 -- Run code on LSP attach
 --
 -- Mostly setting some useful keymaps
@@ -158,7 +160,18 @@ end
 ---@type LazyPluginSpec
 return {
     'neovim/nvim-lspconfig',
-    event = 'VeryLazy',
+    -- NOTE: you can't lazyload LSP for some unfortunate reason :(
+    lazy = false,
+    -- Disable LSP if in termux or editing a git file
+    --
+    -- I also wanted to disable it for empty files, but it would disable it
+    -- forever until I exit & re-open the editor
+    cond = function()
+        local is_gitfile = utils.is_gitfile()
+        local is_termux = utils.is_termux()
+
+        return not is_gitfile and not is_termux
+    end,
     dependencies = {
         -- to install other LSPs
         { 'williamboman/mason.nvim', opts = {} },
@@ -184,10 +197,6 @@ return {
             },
         },
     },
-    enabled = function()
-        return not require('conf._utils').is_termux()
-            and not string.find(vim.bo.filetype, 'git')
-    end,
     config = function()
         -- Add autocommand for LSP attach event
         vim.api.nvim_create_autocmd('LspAttach', {
