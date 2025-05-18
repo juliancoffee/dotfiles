@@ -49,7 +49,7 @@ local ts_opts = {
         enable = true,
         disable = function(lang)
             local allowlist = {
-                'gitcommit',
+                -- 'gitcommit',
                 'diff',
             }
             return not vim.tbl_contains(allowlist, lang)

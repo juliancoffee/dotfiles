@@ -186,6 +186,7 @@ return {
     },
     enabled = function()
         return not require('conf._utils').is_termux()
+            and not string.find(vim.bo.filetype, 'git')
     end,
     config = function()
         -- Add autocommand for LSP attach event
@@ -240,6 +241,7 @@ return {
         }
 
         -- configure ... stuff?
+        ---@diagnostic disable-next-line: missing-fields
         require('mason-lspconfig').setup {
             -- set this to empty, install via tool-insaller instead
             ensure_installed = {},
