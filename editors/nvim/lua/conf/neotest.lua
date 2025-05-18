@@ -120,13 +120,21 @@ local neotest = {
             neotest.summary.toggle,
             { desc = 'Test summary' }
         )
+        -- run the whole file
         vim.keymap.set('n', '<F3>', function()
             neotest.run.run { vim.fn.expand('%'), suite = false }
         end, { desc = 'Run the file' })
+
+        -- run single individual nearest test
+        vim.keymap.set('n', '<F3>i', function()
+            neotest.run.run()
+        end, { desc = 'Run the [i]ndividual test' })
+
         -- run the test under debugger (if supported)
         vim.keymap.set('n', '<F3>d', function()
             neotest.run.run { strategy = 'dap', suite = false }
         end, { desc = 'Run the file under [d]ebugger' })
+
         -- run the whole suite
         vim.keymap.set('n', '<F3>s', function()
             neotest.run.run { suite = true }
