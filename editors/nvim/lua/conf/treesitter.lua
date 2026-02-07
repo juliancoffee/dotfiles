@@ -38,6 +38,13 @@ local ts_opts = {
         'python',
         -- rust
         'rust',
+        -- java
+        'java',
+        -- js
+        'javascript',
+        -- ts
+        'typescript',
+        'tsx',
     },
     auto_install = false,
     highlight = {
