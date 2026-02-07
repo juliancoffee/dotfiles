@@ -38,13 +38,23 @@ return {
                 gitsigns.stage_hunk,
                 { desc = '[h]unk [s]tage' }
             )
-
             map(
                 'n',
                 '<leader>hr',
                 gitsigns.reset_hunk,
                 { desc = '[h]unk [r]estore' }
             )
+            map('v', '<leader>hs', function()
+                gitsigns.stage_hunk { vim.fn.line('.'), vim.fn.line('v') } {
+                    desc = '[h]unk [s]tage',
+                }
+            end)
+
+            map('v', '<leader>hr', function()
+                gitsigns.reset_hunk { vim.fn.line('.'), vim.fn.line('v') } {
+                    desc = '[h]unk [r]estore',
+                }
+            end)
 
             -- Previews
             map(
@@ -53,6 +63,13 @@ return {
                 gitsigns.preview_hunk_inline,
                 { desc = '[H]unk [P]review inline' }
             )
+
+            map('v', '<leader>hp', function()
+                gitsigns.preview_hunk_inline {
+                    vim.fn.line('.'),
+                    vim.fn.line('v'),
+                } { desc = '[H]unk [P]review inline' }
+            end)
 
             map('n', '<leader>hd', function()
                 gitsigns.diffthis(nil, {
