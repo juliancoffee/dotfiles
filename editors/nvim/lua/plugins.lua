@@ -65,8 +65,8 @@ function M.setup()
         },
         {
             -- highlights `f`-jumpable positions
-            'unblevable/quick-scope',
-            event = 'VeryLazy',
+            -- 'unblevable/quick-scope',
+            -- event = 'VeryLazy',
         },
     }, {
         defaults = {
