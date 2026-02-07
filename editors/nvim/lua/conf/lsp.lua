@@ -9,7 +9,7 @@ local utils = require('conf._utils')
 --
 -- Mostly setting some useful keymaps
 local on_attach = function(event)
-    -- Shorcut to create commands
+    -- Shortcut to create commands
     local map = function(keys, func, desc, mode)
         mode = mode or 'n'
         vim.keymap.set(mode, keys, func, {
@@ -59,7 +59,7 @@ local on_attach = function(event)
     -- Fuzzy find all the symbols in your current document.
     --  Symbols are things like variables, functions, types, etc.
     map(
-        'gO',
+        '<leader>sl',
         require('telescope.builtin').lsp_document_symbols,
         'Open Document Symbols'
     )
@@ -221,9 +221,16 @@ return {
             cssls = {},
             bashls = {},
             dockerls = {},
+            vtsls = {},
             basedpyright = {
                 -- use `uv` to run inside proper environment
-                cmd = { 'uv', 'run', 'basedpyright-langserver', '--stdio' },
+                cmd = {
+                    'uv',
+                    'run',
+                    '--dev',
+                    'basedpyright-langserver',
+                    '--stdio',
+                },
                 settings = {
                     -- let ruff/isort handle it
                     disableOrganizeImports = true,
@@ -243,6 +250,7 @@ return {
         vim.list_extend(ensure_installed, {
             'stylua',
             'isort',
+            'prettier',
         })
 
         require('mason-tool-installer').setup {

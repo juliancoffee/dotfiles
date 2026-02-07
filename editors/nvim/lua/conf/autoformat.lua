@@ -35,6 +35,15 @@ return {
                 'ruff_format',
                 lsp_format = 'fallback',
             },
+            js = {
+                'prettier',
+            },
+            javascriptreact = {
+                'prettier',
+            },
+            typescriptreact = {
+                'prettier',
+            },
         },
     },
 }
