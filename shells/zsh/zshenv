@@ -1,4 +1,5 @@
 ZDOTDIR=$HOME/.config/zsh
+NOCOR=1
 
 # this line was probably added by cargo, but I did add `if` exprt so it doesn't
 # trigger if you don't have cargo
