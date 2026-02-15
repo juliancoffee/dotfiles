@@ -15,7 +15,7 @@ end
 --- not there
 --- @return boolean
 function M.is_gitfile()
-    return string.find(vim.fn.expand('%:p'), '.git') ~= nil
+    return string.find(vim.fn.expand('%:p'), '%.git') ~= nil
 end
 
 --- Return `true` if no file is opened
