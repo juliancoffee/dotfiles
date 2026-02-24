@@ -14,10 +14,7 @@ end)
 ---@type LazyPluginSpec
 local vim_test = {
     -- it's arguably much less pretty one, but at least it works
-    'juliancoffee/vim-test',
-    -- fork with UV support
-    -- NOTE: doesn't autodetect django or anything
-    branch = 'juliancoffee/add-uv',
+    'vim-test/vim-test',
     event = 'VeryLazy',
 }
 
@@ -29,10 +26,7 @@ local neotest = {
         'nvim-lua/plenary.nvim',
         'antoinemadec/FixCursorHold.nvim',
         'nvim-treesitter/nvim-treesitter',
-        {
-            'juliancoffee/neotest-python',
-            branch = 'juliancoffee/uv-support',
-        },
+        'nvim-neotest/neotest-python',
     },
     event = 'VeryLazy',
     config = function()
@@ -60,7 +54,7 @@ local neotest = {
                     dap = {
                         justMyCode = false,
                     },
-                    runner = conf.runner or 'unittest',
+                    runner = conf.runner or 'pytest',
                     is_test_file = function(file_path)
                         local Path = require('plenary.path')
                         local neotest_default = require('neotest-python.base')

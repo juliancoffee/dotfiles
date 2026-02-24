@@ -258,25 +258,15 @@ return {
         }
 
         -- configure ... stuff?
-        ---@diagnostic disable-next-line: missing-fields
-        require('mason-lspconfig').setup {
-            -- set this to empty, install via tool-insaller instead
-            ensure_installed = {},
-            automatic_installation = false,
-            handlers = {
-                function(server_name)
-                    local server = servers[server_name] or {}
-                    -- merge default capabilities and server capabilities
-                    -- to potentially disabled unneded stuff
-                    server.capabilities = vim.tbl_deep_extend(
-                        'force',
-                        {},
-                        capabilities,
-                        server.capabilities or {}
-                    )
-                    require('lspconfig')[server_name].setup(server)
-                end,
-            },
-        }
+        for name, server in pairs(servers) do
+            server.capabilities = vim.tbl_deep_extend(
+                'force',
+                {},
+                capabilities,
+                server.capabilities or {}
+            )
+            vim.lsp.config(name, server)
+            vim.lsp.enable(name)
+        end
     end,
 }
