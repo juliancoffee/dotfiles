@@ -222,6 +222,7 @@ return {
             bashls = {},
             dockerls = {},
             vtsls = {},
+            ocamllsp = {},
             basedpyright = {
                 -- use `uv` to run inside proper environment
                 cmd = {
