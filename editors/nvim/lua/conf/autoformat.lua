@@ -44,6 +44,9 @@ return {
             typescriptreact = {
                 'prettier',
             },
+            json = {
+                'fixjson',
+            },
         },
     },
 }

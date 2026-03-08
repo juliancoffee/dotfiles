@@ -252,6 +252,8 @@ return {
             'stylua',
             'isort',
             'prettier',
+            'fixjson',
+            'shfmt',
         })
 
         require('mason-tool-installer').setup {
