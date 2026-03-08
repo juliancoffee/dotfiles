@@ -258,6 +258,16 @@ return {
             ensure_installed = ensure_installed,
         }
 
+        -- only load rust-analyzer if not banned
+        if
+            #vim.fs.find('nolsp', { path = utils.get_root(), type = 'file' })
+            ~= 0
+        then
+            servers.rust_analyzer = nil
+        else
+            servers.rust_analyzer = {}
+        end
+
         -- configure ... stuff?
         for name, server in pairs(servers) do
             server.capabilities = vim.tbl_deep_extend(
