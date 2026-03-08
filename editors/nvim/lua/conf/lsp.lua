@@ -265,7 +265,15 @@ return {
         then
             servers.rust_analyzer = nil
         else
-            servers.rust_analyzer = {}
+            servers.rust_analyzer = {
+                settings = {
+                    ['rust-analyzer'] = {
+                        check = {
+                            command = 'clippy',
+                        },
+                    },
+                },
+            }
         end
 
         -- configure ... stuff?

@@ -35,6 +35,8 @@ function M.setup()
         require('conf.lsp'),
         -- autoformat
         require('conf.autoformat'),
+        -- linters
+        require('conf.linter'),
         -- todo-style comments
         require('conf.todo'),
         -- filetree UI
