@@ -85,5 +85,12 @@ vim.keymap.set('n', '<C-_>', ':nohlsearch<CR>')
 
 vim.keymap.set('n', '<leader>o', ':only<CR>', { desc = 'Keep [o]nly window' })
 
+-- Trim leading whitespaces
+vim.keymap.set('n', '<leader>tw', function()
+    local save = vim.fn.getpos('.')
+    vim.cmd([[%s/\s\+$//e]])
+    vim.fn.setpos('.', save)
+end, { desc = 'Trim trailing whitespace' })
+
 -- call plugins at the end after all the options
 plugins.setup()
