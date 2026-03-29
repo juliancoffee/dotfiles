@@ -83,6 +83,9 @@ function () {
 
     # activate virtual environment
     alias activate="source .venv/bin/activate"
+
+    # i don't know what it is, but it stops me from using zed (the editor)
+    unfunction zed
 }
 
 # helpers
