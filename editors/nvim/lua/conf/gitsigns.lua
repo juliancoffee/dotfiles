@@ -1,6 +1,8 @@
 --- INFO:
 --- This module holds the plugin configuration for TODO-style comments
 
+local is_diffing_head = false
+
 ---@module 'lazy'
 ---@module 'gitsigns'
 
@@ -56,6 +58,20 @@ return {
                 }
             end)
 
+            -- Diff branch toggle
+            --
+            vim.keymap.set('n', '<leader>tb', function()
+                if is_diffing_head then
+                    gitsigns.change_base(nil)
+                    is_diffing_head = false
+                    vim.notify('Gitsigns diff base: Index', vim.log.levels.INFO)
+                else
+                    gitsigns.change_base('HEAD')
+                    is_diffing_head = true
+                    vim.notify('Gitsigns diff base: HEAD', vim.log.levels.INFO)
+                end
+            end, { desc = 'Toggle Gitsigns base (Index/HEAD)' })
+
             -- Previews
             map(
                 'n',
@@ -64,18 +80,13 @@ return {
                 { desc = '[H]unk [P]review inline' }
             )
 
-            map('v', '<leader>hp', function()
-                gitsigns.preview_hunk_inline {
-                    vim.fn.line('.'),
-                    vim.fn.line('v'),
-                } { desc = '[H]unk [P]review inline' }
-            end)
-
             map('n', '<leader>hd', function()
-                gitsigns.diffthis(nil, {
-                    split = 'rightbelow',
-                })
-            end, { desc = '[h]unt [d]iff' })
+                -- Apparently deprecated, but it's the only thing
+                -- I know how to make do what I need
+                gitsigns.toggle_deleted()
+                gitsigns.toggle_linehl()
+                gitsigns.toggle_word_diff()
+            end, { desc = '[h]unt all [d]iffs' })
 
             map('n', '<leader>hb', gitsigns.blame, { desc = '[h]unt [b]lame' })
 
