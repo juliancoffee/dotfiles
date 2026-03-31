@@ -84,8 +84,10 @@ function () {
     # activate virtual environment
     alias activate="source .venv/bin/activate"
 
-    # i don't know what it is, but it stops me from using zed (the editor)
-    unfunction zed
+    # Remove zsh's `zed` function so `zed` runs the editor binary instead.
+    if typeset -f zed > /dev/null 2>&1; then
+        unfunction zed
+    fi
 }
 
 # helpers
