@@ -57,14 +57,16 @@ function () {
     export PATH="$HOME/.local/bin:$PATH"
 
     # set up ICU4C paths (needed for building PyICU)
-    ICU_PATH="$(brew --prefix icu4c)"
-    # ICU_BIN_PATH="$ICU_PATH/bin"
-    # ICU_SBIN_PATH="$ICU_PATH/sbin"
-    ICU_PKG_PATH="$ICU_PATH/lib/pkgconfig"
-    # ${var:+smth} means put `smth` if `var` is set, or nothing otherwise
-    PKG_CONFIG_PATH="${PKG_CONFIG_PATH:+$PKG_CONFIG_PATH:}"
-    PKG_CONFIG_PATH+="$ICU_PKG_PATH"
-    export PKG_CONFIG_PATH
+    if command -v brew > /dev/null 2>&1; then
+        ICU_PATH="$(brew --prefix icu4c)"
+        # ICU_BIN_PATH="$ICU_PATH/bin"
+        # ICU_SBIN_PATH="$ICU_PATH/sbin"
+        ICU_PKG_PATH="$ICU_PATH/lib/pkgconfig"
+        # ${var:+smth} means put `smth` if `var` is set, or nothing otherwise
+        PKG_CONFIG_PATH="${PKG_CONFIG_PATH:+$PKG_CONFIG_PATH:}"
+        PKG_CONFIG_PATH+="$ICU_PKG_PATH"
+        export PKG_CONFIG_PATH
+    fi
 
     # aliases
     alias cddot="cd $DOTFILES"
