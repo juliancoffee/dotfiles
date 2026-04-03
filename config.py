@@ -1,26 +1,28 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-from typing import Optional, Any, Callable, Iterator, ClassVar, cast
-
-import sqlite3
-
-from enum import StrEnum, Enum
-from pathlib import PurePath, Path
-from dataclasses import dataclass
-import shutil
-import sys
-import os
+import argparse
 import fnmatch
 import itertools
-import argparse
+import os
+import shutil
+import sqlite3
+import sys
+from dataclasses import dataclass
+from enum import Enum, StrEnum
+from pathlib import Path
+from typing import Any, Callable, ClassVar, Iterator, Optional
+
+from typing_extensions import assert_never
+
 
 class ColorCode(StrEnum):
-    """ To be used with `print_colored`.
+    """To be used with `print_colored`.
 
     Read `print_colored` docs to understand what these numbers mean, if you
     want.
     """
+
     RED = "31"
     YELLOW = "33"
     GREEN = "32"
@@ -59,18 +61,22 @@ def print_colored(msg: str, code: ColorCode) -> None:
     """
     print(f"\x1b[{code}m{msg}\x1b[0m")
 
+
 def print_ok(msg: str) -> None:
     print_colored(msg, ColorCode.GREEN)
+
 
 def print_warn(msg: str) -> None:
     print_colored(msg, ColorCode.YELLOW)
 
+
 def print_err(msg: str) -> None:
     print_colored(msg, ColorCode.RED)
 
+
 def make_choice(desc: str, choices: list[tuple[str, Path]]) -> tuple[str, Path]:
     print(f"There are multiple choices for {desc}:")
-    for (i, (desc, path)) in enumerate(choices):
+    for i, (desc, path) in enumerate(choices):
         print(f"{i}) {desc} <> {path}")
 
     while True:
@@ -81,9 +87,10 @@ def make_choice(desc: str, choices: list[tuple[str, Path]]) -> tuple[str, Path]:
         except ValueError:
             print_err("failed to parse the number, please try again")
 
+
 def load_ignore_file() -> Iterator[str]:
     src = ".configignore"
-    with open(src, 'r') as f:
+    with open(src, "r") as f:
         for line in f:
             if line.startswith("#"):
                 continue
@@ -91,65 +98,62 @@ def load_ignore_file() -> Iterator[str]:
                 continue
             yield line.rstrip()
 
+
 def pretty_path(p: Path, home: Path, dotfiles: Path) -> str:
-    """ Makes the path easier to read
+    """Makes the path easier to read
     Replaces $HOME with `~`, and dotfiles with `{.}`
     """
     p_string = os.fspath(p)
     home_string = os.fspath(home)
     dots_string = os.fspath(dotfiles)
 
-    return (
-        p_string
-            .replace(dots_string, "{.}")
-            .replace(home_string, "~")
-    )
+    return p_string.replace(dots_string, "{.}").replace(home_string, "~")
+
 
 class Recorder:
     def __init__(self) -> None:
         self.connection = sqlite3.connect("recorder.db", autocommit=False)
-        fresh = (self
-            .connection
-            .execute("SELECT name FROM sqlite_master WHERE name='operation'")
-            .fetchone() is None)
+        fresh = (
+            self.connection.execute(
+                "SELECT name FROM sqlite_master WHERE name='operation'"
+            ).fetchone()
+            is None
+        )
 
         if fresh:
             with self.connection as con:
                 con.execute(
-                """CREATE TABLE operation(
+                    """CREATE TABLE operation(
                             desc TEXT,
                             src TEXT,
                             dest TEXT
-                )""")
+                )"""
+                )
 
     def register_link(self, desc: str, src: Path, dest: Path) -> None:
         src_string = os.fspath(src)
         dest_string = os.fspath(dest)
         with self.connection as con:
             con.execute(
-                "INSERT INTO operation VALUES(?, ?, ?)",
-                (desc, src_string, dest_string)
+                "INSERT INTO operation VALUES(?, ?, ?)", (desc, src_string, dest_string)
             )
 
     def unregister_link(self, dest: Path):
         dest_string = os.fspath(dest)
         with self.connection as con:
             con.execute(
-                "DELETE FROM operation WHERE operation.dest = ?",
-                (dest_string, )
+                "DELETE FROM operation WHERE operation.dest = ?", (dest_string,)
             )
 
     def numbered_configs(self) -> Iterator[tuple[int, Config]]:
-        res = self.connection.execute(
-            "SELECT oid, desc, src, dest FROM operation"
-        )
+        res = self.connection.execute("SELECT oid, desc, src, dest FROM operation")
         for i, desc, src_string, dest_string in res.fetchall():
             src = Path(src_string)
             dest = Path(dest_string)
             yield i, Config(desc, src, dest)
 
     def registered_configs(self) -> list[Config]:
-        return [c for i, c in self.numbered_configs()]
+        return [c for _, c in self.numbered_configs()]
 
     def undo_all(self) -> None:
         configs = self.registered_configs()
@@ -158,8 +162,7 @@ class Recorder:
 
     def undo_by_oid(self, oid: int) -> None:
         res = self.connection.execute(
-            "SELECT desc, src, dest FROM operation WHERE oid = ?",
-            (oid, )
+            "SELECT desc, src, dest FROM operation WHERE oid = ?", (oid,)
         )
         desc, src_string, dest_string = res.fetchone()
         src = Path(src_string)
@@ -171,22 +174,25 @@ class Recorder:
 class PathPicker:
     opts: list[tuple[str, Path]]
 
+
 @dataclass
 class DynPath:
     """To be used with Config() for paths that require in-code creation"""
+
     get: Callable[[], Path]
+
 
 class Config:
     OPTIONS: ClassVar[Optional[argparse.Namespace]] = None
     RECORDER: ClassVar[Optional[Recorder]] = None
 
     def __init__(
-            self,
-            desc: str,
-            src: Path | PathPicker,
-            dest: Path | DynPath,
-            *,
-            custom_check: Optional[Callable[[], Optional[str]]] = None,
+        self,
+        desc: str,
+        src: Path | PathPicker,
+        dest: Path | DynPath,
+        *,
+        custom_check: Optional[Callable[[], Optional[str]]] = None,
     ) -> None:
         self.desc = desc
         self.src = src
@@ -228,7 +234,6 @@ class Config:
         if self._handle_existence():
             return
 
-
         # if all is fine, link
         match self.src:
             case Path() as src:
@@ -236,8 +241,8 @@ class Config:
             case PathPicker(opts):
                 choice, src = make_choice(self.desc, opts)
                 setup(f"{self.desc}/{choice}", src, self.dest)
-            case _:
-                raise TypeError(f"wrong `src` type: {self.src}")
+            case r:
+                assert_never(r)
 
     def remove_link(self) -> None:
         # helper func
@@ -253,7 +258,6 @@ class Config:
 
             if self.OPTIONS.verbose >= 1:
                 print_warn(msg)
-
 
         # check if needs running
         if self.custom_check is not None:
@@ -271,18 +275,14 @@ class Config:
                 if src.absolute() == self.dest.resolve():
                     unlink(self.desc, self.dest)
                 else:
-                    verbose(
-                        f"{self.desc}: won't unlink, doesn't link to config"
-                    )
+                    verbose(f"{self.desc}: won't unlink, doesn't link to config")
             case PathPicker(opts):
                 for _alternative_desc, alternative_src in opts:
                     if alternative_src.absolute() == self.dest.resolve():
                         unlink(self.desc, self.dest)
                         break
                 else:
-                    verbose(
-                        f"{self.desc}: won't unlink, doesn't link to config"
-                    )
+                    verbose(f"{self.desc}: won't unlink, doesn't link to config")
 
     def _handle_existence(self) -> bool:
         assert self.OPTIONS is not None
@@ -295,12 +295,12 @@ class Config:
             if self.OPTIONS.verbose >= 1:
                 if self.dest.is_symlink():
                     print_warn(
-                            "\texplanation:"
-                            " destination is taken by [symlink to {}]"
-                                .format(self.dest.resolve())
+                        "\texplanation: destination is taken by [symlink to {}]".format(
+                            self.dest.resolve()
+                        )
                     )
                 else:
-                    print_warn(f"\texplanation: destination is taken by non-symlink")
+                    print_warn("\texplanation: destination is taken by non-symlink")
 
             if self.OPTIONS.verbose >= 2:
                 if self.dest.is_dir():
@@ -316,10 +316,10 @@ class Config:
                             link_num += 1
 
                     print_warn(
-                            "\tnote: it's a directory with"
-                            f" {file_num} files,"
-                            f" {dir_num} dirs,"
-                            f" {link_num} links."
+                        "\tnote: it's a directory with"
+                        f" {file_num} files,"
+                        f" {dir_num} dirs,"
+                        f" {link_num} links."
                     )
             return True
         return False
@@ -338,7 +338,7 @@ class FsNode:
         return self._this
 
     def find_adopter(self, potential_child: Path) -> Optional[FsNode]:
-        """ Finds the node that would be a direct parent in the tree """
+        """Finds the node that would be a direct parent in the tree"""
         potential_child = potential_child.absolute()
 
         def find_direct_parent(tree: FsNode, path: Path) -> Optional[FsNode]:
@@ -363,7 +363,7 @@ class FsNode:
         return find_direct_parent(self, potential_child)
 
     def try_adopting(self, child: Path) -> bool:
-        """ Pull the child under the tree.
+        """Pull the child under the tree.
 
         Creates new node and puts it to the direct parent.
         """
@@ -375,7 +375,7 @@ class FsNode:
         return True
 
     def nuke_ancestory(self) -> list[FsNode]:
-        """ Nuke the ancestory of this node.
+        """Nuke the ancestory of this node.
 
         Returns the list of orphaned branches.
         """
@@ -393,7 +393,7 @@ class FsNode:
         return leftout
 
     def _push_child(self, child: Path) -> bool:
-        """ Register new child node
+        """Register new child node
 
         Returns `False` if the current node can't have children, probably
         because it's a file.
@@ -413,6 +413,7 @@ class DirState(Enum):
     # We don't know
     UNKNOWN = 3
 
+
 def check_missed(configs: list[Config], dotfiles: Path) -> list[FsNode]:
     taken = []
     for config in configs:
@@ -426,9 +427,7 @@ def check_missed(configs: list[Config], dotfiles: Path) -> list[FsNode]:
     potentially_missed: list[FsNode] = []
     ignore_list = list(load_ignore_file())
     for root, dirs, files in dotfiles.walk():
-        skiplist = [
-            fnmatch.filter(dirs, skippath) for skippath in ignore_list
-        ]
+        skiplist = [fnmatch.filter(dirs, skippath) for skippath in ignore_list]
 
         for d in itertools.chain.from_iterable(skiplist):
             dirs.remove(d)
@@ -488,20 +487,24 @@ def check_missed(configs: list[Config], dotfiles: Path) -> list[FsNode]:
 
     return potentially_missed
 
+
 def dotfiles_dir(options: argparse.Namespace) -> Path:
     if options.verbose >= 1:
         print_warn("warning: assuming current directory as the dotfiles root")
     return Path.cwd()
+
 
 def link_all(configs: list[Config]) -> None:
     print_ok("Setting links up...")
     for config in configs:
         config.setup_link()
 
+
 def unlink_all(configs: list[Config]) -> None:
     print_ok("Removing links...")
     for config in configs:
         config.remove_link()
+
 
 def show_log(recorder: Recorder, home: Path, dotfiles: Path) -> None:
     print_ok("Getting registered operations...")
@@ -515,6 +518,7 @@ def show_log(recorder: Recorder, home: Path, dotfiles: Path) -> None:
             f"{i} @ {config.desc}: {src} => {dest}",
         )
 
+
 def display_missed(configs: list[Config], dotfiles: Path) -> None:
     print_ok("Checking paths that aren't in the config...")
     miss = False
@@ -523,6 +527,7 @@ def display_missed(configs: list[Config], dotfiles: Path) -> None:
         print(f"\t{missed.current()}")
     if not miss:
         print_ok("you're good!")
+
 
 def check_configs(configs: list[Config]) -> None:
     print_ok("Checking paths in config for validity...")
@@ -538,89 +543,84 @@ def check_configs(configs: list[Config]) -> None:
                     if not alternative_src.exists():
                         miss = True
                         print_warn(
-                            "\t{desc}: warning, {path} doesn't exist"
-                                .format(
-                                    desc=f"{config.desc}/{alternative_desc}",
-                                    path=alternative_src,
-                                )
+                            "\t{desc}: warning, {path} doesn't exist".format(
+                                desc=f"{config.desc}/{alternative_desc}",
+                                path=alternative_src,
+                            )
                         )
     if not miss:
         print_ok("you're good!")
+
 
 def option_parser() -> argparse.Namespace:
     # cmdline parsing
     prog = sys.argv[0]
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=
-        "=" * 50 +
-            "\nThis program will help you to manage your dotfiles."
-            "\n"
-            "\nThe most straightforward argument is probably `link-all`."
-            "\nThis will link every dotfile in the config:"
-            f"\n\t{prog} --link-all"
-            "\nIf you've changed the underlying file structure, use"
-            " `redo-all`."
-            f"\n\t{prog} --redo-all"
-            "\nOr if you want to be more delicate, maybe use `undo ID`."
-            "\n"
-        + "=" * 50)
+        description="=" * 50 + "\nThis program will help you to manage your dotfiles."
+        "\n"
+        "\nThe most straightforward argument is probably `link-all`."
+        "\nThis will link every dotfile in the config:"
+        f"\n\t{prog} --link-all"
+        "\nIf you've changed the underlying file structure, use"
+        " `redo-all`."
+        f"\n\t{prog} --redo-all"
+        "\nOr if you want to be more delicate, maybe use `undo ID`."
+        "\n" + "=" * 50,
+    )
 
     # main operations
     parser.add_argument(
-            "--link-all",
-            help="link all dotfiles in the config",
-            action="store_true"
+        "--link-all", help="link all dotfiles in the config", action="store_true"
     )
     parser.add_argument(
-            "--show-log",
-            help="show all registered operations",
-            action="store_true"
+        "--show-log", help="show all registered operations", action="store_true"
     )
     # management
     parser.add_argument(
-            "--undo",
-            help="undo specific ID-th operation",
-            type=int,
-            metavar="ID",
+        "--undo",
+        help="undo specific ID-th operation",
+        type=int,
+        metavar="ID",
     )
     parser.add_argument(
-            "--redo-all",
-            help="undo all registered operations and re-apply config",
-            action="store_true",
+        "--redo-all",
+        help="undo all registered operations and re-apply config",
+        action="store_true",
     )
     parser.add_argument(
-            "--undo-all",
-            help="undo all registered operations",
-            action="store_true",
+        "--undo-all",
+        help="undo all registered operations",
+        action="store_true",
     )
     # for manual testing
     parser.add_argument(
-            "--unlink-all",
-            help="unlink all dotfiles in the config",
-            action="store_true"
+        "--unlink-all", help="unlink all dotfiles in the config", action="store_true"
     )
     parser.add_argument(
-            "--relink-all",
-            help="unlink and relink all dotfiles in the config",
-            action="store_true"
+        "--relink-all",
+        help="unlink and relink all dotfiles in the config",
+        action="store_true",
     )
     # misc
     parser.add_argument(
-            "-v", "--verbose",
-            help="be verbose (can be repeated up to -vv)",
-            default=0,
-            action="count"
+        "-v",
+        "--verbose",
+        help="be verbose (can be repeated up to -vv)",
+        default=0,
+        action="count",
     )
     parser.add_argument(
-            "--no-check",
-            help="don't check missed from config dotfiles",
-            action="store_true")
+        "--no-check",
+        help="don't check missed from config dotfiles",
+        action="store_true",
+    )
     # force-feed help when no arguments were supplied
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
         sys.exit(1)
     return parser.parse_args()
+
 
 def main() -> None:
     # setup
@@ -648,11 +648,12 @@ def main() -> None:
         c("kitty", dotfiles / "terminals/kitty", home / ".config/kitty"),
         c(
             "alacritty",
-            PathPicker([
-                ("mac", dotfiles / "terminals/alacritty-mac"),
-            ]),
+            PathPicker(
+                [
+                    ("mac", dotfiles / "terminals/alacritty-mac"),
+                ]
+            ),
             home / ".config/alacritty",
-
         ),
         # has a dynamic target based on profile and OS
         c(
@@ -662,11 +663,9 @@ def main() -> None:
                 # check about:support for profile folder
                 lambda: Path(os.environ["FIREFOX_PROFILE_HOME"]) / "user.js",
             ),
-            custom_check=
-                lambda:
-                    "no $FIREFOX_PROFILE_HOME provided"
-                    if os.getenv("FIREFOX_PROFILE_HOME") is None
-                    else None,
+            custom_check=lambda: "no $FIREFOX_PROFILE_HOME provided"
+            if os.getenv("FIREFOX_PROFILE_HOME") is None
+            else None,
         ),
         # X11 specific
         c("rofi", dotfiles / "other/rofi", home / ".config/rofi"),
@@ -710,6 +709,7 @@ def main() -> None:
     if not options.no_check:
         display_missed(all_configs, dotfiles)
         check_configs(all_configs)
+
 
 if __name__ == "__main__":
     main()
