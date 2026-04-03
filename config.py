@@ -11,9 +11,7 @@ import sys
 from dataclasses import dataclass
 from enum import Enum, StrEnum
 from pathlib import Path
-from typing import Any, Callable, ClassVar, Iterator, Optional
-
-from typing_extensions import assert_never
+from typing import Any, Callable, ClassVar, Iterator, Optional, assert_never
 
 
 class ColorCode(StrEnum):
@@ -180,6 +178,14 @@ class DynPath:
     """To be used with Config() for paths that require in-code creation"""
 
     get: Callable[[], Path]
+    """
+    Returns a path to the config
+    """
+
+    error_if: Callable[[], Optional[str]]
+    """
+    Returns `str` with an error, or `None` if all's ok.
+    """
 
 
 class Config:
@@ -199,10 +205,10 @@ class Config:
         match dest:
             case Path() as path:
                 self.dest = path
-            case DynPath(get=f):
-                if custom_check is not None and custom_check() is None:
-                    if custom_check() is None:
-                        self.dest = f()
+            case DynPath(get=f, error_if=error_if):
+                custom_check = error_if
+                if error_if() is None:
+                    self.dest = f()
         self.custom_check = custom_check
 
     def setup_link(self) -> None:
@@ -212,7 +218,6 @@ class Config:
 
             # try to create a parent directory so that symlink won't fail
             # hopefully this won't backfire horribly
-            path_to_dest = dest.parent
             os.makedirs(dest.parent, exist_ok=True)
 
             dest.symlink_to(src)
@@ -451,7 +456,7 @@ def check_missed(configs: list[Config], dotfiles: Path) -> list[FsNode]:
         if (taken_dirs or taken_files) and (dirs or left_files):
             state = DirState.DIRTY
 
-        def register_miss(path, potentially_missed):
+        def register_miss(path: Path, potentially_missed: list[FsNode]):
             for miss in potentially_missed:
                 if miss.try_adopting(path):
                     break
@@ -459,7 +464,7 @@ def check_missed(configs: list[Config], dotfiles: Path) -> list[FsNode]:
                 unknown = FsNode(path, prev=None)
                 potentially_missed.append(unknown)
 
-        def cleanup_from(path, potentially_missed):
+        def cleanup_from(path, potentially_missed: list[FsNode]):
             orphans = None
             catch = None
             for miss in potentially_missed:
@@ -483,7 +488,7 @@ def check_missed(configs: list[Config], dotfiles: Path) -> list[FsNode]:
             cleanup_from(root, potentially_missed)
             # no need to do the same with dirs, btw
             for missed_file in left_files:
-                register_miss(missed_file, potentially_missed)
+                register_miss(Path(missed_file), potentially_missed)
 
     return potentially_missed
 
@@ -661,11 +666,11 @@ def main() -> None:
             dotfiles / "browser/firefox/user.js",
             DynPath(
                 # check about:support for profile folder
-                lambda: Path(os.environ["FIREFOX_PROFILE_HOME"]) / "user.js",
+                get=lambda: Path(os.environ["FIREFOX_PROFILE_HOME"]) / "user.js",
+                error_if=lambda: "no $FIREFOX_PROFILE_HOME provided"
+                if os.getenv("FIREFOX_PROFILE_HOME") is None
+                else None,
             ),
-            custom_check=lambda: "no $FIREFOX_PROFILE_HOME provided"
-            if os.getenv("FIREFOX_PROFILE_HOME") is None
-            else None,
         ),
         # X11 specific
         c("rofi", dotfiles / "other/rofi", home / ".config/rofi"),
