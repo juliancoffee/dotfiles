@@ -86,8 +86,10 @@ def make_choice(desc: str, choices: list[tuple[str, Path]]) -> tuple[str, Path]:
             print_err("failed to parse the number, please try again")
 
 
-def load_ignore_file() -> Iterator[str]:
-    src = ".configignore"
+def load_ignore_file(dotfiles: Path) -> Iterator[str]:
+    src = dotfiles / ".configignore"
+    if not src.exists():
+        return
     with open(src) as f:
         for line in f:
             if line.startswith("#"):
@@ -440,12 +442,17 @@ def check_missed(  # noqa: PLR0912, yes this is a complicated function
                     taken.append(alternative.name)
 
     potentially_missed: list[FsNode] = []
-    ignore_list = list(load_ignore_file())
+    ignore_list = list(load_ignore_file(dotfiles))
     for root, dirs, files in dotfiles.walk():
         skiplist = [fnmatch.filter(dirs, skippath) for skippath in ignore_list]
+        skipfiles = [
+            fnmatch.filter(files, skippath) for skippath in ignore_list
+        ]
 
         for d in itertools.chain.from_iterable(skiplist):
             dirs.remove(d)
+        for file in itertools.chain.from_iterable(skipfiles):
+            files.remove(file)
 
         # default to unknown
         state = DirState.UNKNOWN
@@ -475,21 +482,26 @@ def check_missed(  # noqa: PLR0912, yes this is a complicated function
                 potentially_missed.append(unknown)
 
         def cleanup_from(path, potentially_missed: list[FsNode]):
-            orphans = None
+            orphans = []
             catch = None
             for miss in potentially_missed:
                 adopter = miss.find_adopter(path)
                 if adopter is not None:
-                    orphans = adopter.nuke_ancestory()
+                    orphans += adopter.nuke_ancestory()
                     catch = miss
                     break
 
             if catch is not None:
                 potentially_missed.remove(catch)
+            potentially_missed += orphans
 
-        # If unknown, just add to potentially_missed
+        # If unknown, just add everything to potentially_missed
         if state is DirState.UNKNOWN:
             register_miss(root, potentially_missed)
+            for missed_dir in dirs:
+                register_miss(Path(root) / missed_dir, potentially_missed)
+            for missed_file in left_files:
+                register_miss(Path(root) / missed_file, potentially_missed)
         # If completely taken, remove ancestors from potentially_missed
         elif state is DirState.HOLDER:
             cleanup_from(root, potentially_missed)
@@ -498,7 +510,7 @@ def check_missed(  # noqa: PLR0912, yes this is a complicated function
             cleanup_from(root, potentially_missed)
             # no need to do the same with dirs, btw
             for missed_file in left_files:
-                register_miss(Path(missed_file), potentially_missed)
+                register_miss(Path(root) / missed_file, potentially_missed)
 
     return potentially_missed
 
@@ -638,6 +650,11 @@ def option_parser() -> argparse.Namespace:
     parser.add_argument(
         "--no-check",
         help="don't check missed from config dotfiles",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--check",
+        help="run checks",
         action="store_true",
     )
     # force-feed help when no arguments were supplied

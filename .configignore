@@ -3,13 +3,24 @@
 # has files, but not dotfiles
 blog
 scripts
+todo.txt
+README.md
 
 # machine-generated stuff
 .mypy_cache
 __pycache__
 .git
+uv.lock
+recorder.db
 
 # config related
 tests
 .pytest_cache
 .venv
+setup.sh
+config.py
+pyproject.toml
+.configignore
+.gitignore
+.python-version
+.nvim
