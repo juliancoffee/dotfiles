@@ -8,3 +8,8 @@ scripts
 .mypy_cache
 __pycache__
 .git
+
+# config related
+tests
+.pytest_cache
+.venv

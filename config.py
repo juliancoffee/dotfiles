@@ -529,9 +529,11 @@ def display_missed(configs: list[Config], dotfiles: Path) -> None:
     miss = False
     for missed in check_missed(configs, dotfiles):
         miss = True
-        print(f"\t{missed.current()}")
+        print_warn(f"\t{missed.current()}")
     if not miss:
         print_ok("you're good!")
+    if miss:
+        print("kinda bad, fix")
 
 
 def check_configs(configs: list[Config]) -> None:
@@ -679,10 +681,9 @@ def main() -> None:
         c("picom", dotfiles / "wm/compositors/picom", home / ".config/picom"),
     ]
 
-    dummy: Any = ""
+    _dummy: Any = ""
     ignored: list[Config] = [
-        # based on vimscript, will need deleting anyway
-        c("nvim-old", dotfiles / "editors/nvim-old", dummy),
+        # empty for now, use .configignore
     ]
     all_configs = configs + ignored
 
