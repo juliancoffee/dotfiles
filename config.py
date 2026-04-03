@@ -679,6 +679,18 @@ def main() -> None:
     # configs
     configs: list[Config] = [
         # cli
+        c(
+            "codex",
+            dotfiles / "codex/config.toml",
+            home / ".codex/config.toml",
+            custom_check=lambda: None,
+        ),
+        c(
+            "codex",
+            dotfiles / "codex/skills",
+            home / ".codex/skills",
+            custom_check=lambda: None,
+        ),
         c("tmux", dotfiles / "tmux/.tmux.conf", home / ".tmux.conf"),
         c("zsh", dotfiles / "shells/zsh/zshrc", home / ".config/zsh/.zshrc"),
         c("zsh", dotfiles / "shells/zsh/zshenv", home / ".zshenv"),
