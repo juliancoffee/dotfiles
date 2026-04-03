@@ -56,6 +56,10 @@ function () {
     # add ".local/bin" to path for locally installed scripts (like pipx)
     export PATH="$HOME/.local/bin:$PATH"
 
+    # add Bun-related paths
+    export BUN_INSTALL="$HOME/.bun"
+    export PATH="$BUN_INSTALL/bin:$PATH"
+
     # set up ICU4C paths (needed for building PyICU)
     if command -v brew > /dev/null 2>&1; then
         ICU_PATH="$(brew --prefix icu4c)"
