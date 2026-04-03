@@ -74,8 +74,8 @@ def print_err(msg: str) -> None:
 
 def make_choice(desc: str, choices: list[tuple[str, Path]]) -> tuple[str, Path]:
     print(f"There are multiple choices for {desc}:")
-    for i, (desc, path) in enumerate(choices):
-        print(f"{i}) {desc} <> {path}")
+    for i, (subdesc, path) in enumerate(choices):
+        print(f"{i}) {subdesc} <> {path}")
 
     while True:
         try:
@@ -88,7 +88,7 @@ def make_choice(desc: str, choices: list[tuple[str, Path]]) -> tuple[str, Path]:
 
 def load_ignore_file() -> Iterator[str]:
     src = ".configignore"
-    with open(src, "r") as f:
+    with open(src) as f:
         for line in f:
             if line.startswith("#"):
                 continue
@@ -133,7 +133,8 @@ class Recorder:
         dest_string = os.fspath(dest)
         with self.connection as con:
             con.execute(
-                "INSERT INTO operation VALUES(?, ?, ?)", (desc, src_string, dest_string)
+                "INSERT INTO operation VALUES(?, ?, ?)",
+                (desc, src_string, dest_string),
             )
 
     def unregister_link(self, dest: Path):
@@ -144,7 +145,9 @@ class Recorder:
             )
 
     def numbered_configs(self) -> Iterator[tuple[int, Config]]:
-        res = self.connection.execute("SELECT oid, desc, src, dest FROM operation")
+        res = self.connection.execute(
+            "SELECT oid, desc, src, dest FROM operation"
+        )
         for i, desc, src_string, dest_string in res.fetchall():
             src = Path(src_string)
             dest = Path(dest_string)
@@ -230,10 +233,9 @@ class Config:
                 case str(refusal):
                     print_warn(f"{self.desc}: skipped ({refusal})")
                     return
-        else:
-            if shutil.which(self.desc) is None:
-                print_warn(f"{self.desc}: skipped (binary not found)")
-                return
+        elif shutil.which(self.desc) is None:
+            print_warn(f"{self.desc}: skipped (binary not found)")
+            return
 
         # check if destination is used already
         if self._handle_existence():
@@ -280,14 +282,18 @@ class Config:
                 if src.absolute() == self.dest.resolve():
                     unlink(self.desc, self.dest)
                 else:
-                    verbose(f"{self.desc}: won't unlink, doesn't link to config")
+                    verbose(
+                        f"{self.desc}: won't unlink, doesn't link to config"
+                    )
             case PathPicker(opts):
                 for _alternative_desc, alternative_src in opts:
                     if alternative_src.absolute() == self.dest.resolve():
                         unlink(self.desc, self.dest)
                         break
                 else:
-                    verbose(f"{self.desc}: won't unlink, doesn't link to config")
+                    verbose(
+                        f"{self.desc}: won't unlink, doesn't link to config"
+                    )
 
     def _handle_existence(self) -> bool:
         assert self.OPTIONS is not None
@@ -305,27 +311,29 @@ class Config:
                         )
                     )
                 else:
-                    print_warn("\texplanation: destination is taken by non-symlink")
-
-            if self.OPTIONS.verbose >= 2:
-                if self.dest.is_dir():
-                    file_num = 0
-                    dir_num = 0
-                    link_num = 0
-                    for child in self.dest.iterdir():
-                        if child.is_file():
-                            file_num += 1
-                        if child.is_dir():
-                            dir_num += 1
-                        if child.is_symlink():
-                            link_num += 1
-
                     print_warn(
-                        "\tnote: it's a directory with"
-                        f" {file_num} files,"
-                        f" {dir_num} dirs,"
-                        f" {link_num} links."
+                        "\texplanation: destination is taken by non-symlink"
                     )
+
+            SUPERVERBOSE = 2
+            if self.OPTIONS.verbose >= SUPERVERBOSE and self.dest.is_dir():
+                file_num = 0
+                dir_num = 0
+                link_num = 0
+                for child in self.dest.iterdir():
+                    if child.is_file():
+                        file_num += 1
+                    if child.is_dir():
+                        dir_num += 1
+                    if child.is_symlink():
+                        link_num += 1
+
+                print_warn(
+                    "\tnote: it's a directory with"
+                    f" {file_num} files,"
+                    f" {dir_num} dirs,"
+                    f" {link_num} links."
+                )
             return True
         return False
 
@@ -419,7 +427,9 @@ class DirState(Enum):
     UNKNOWN = 3
 
 
-def check_missed(configs: list[Config], dotfiles: Path) -> list[FsNode]:
+def check_missed(  # noqa: PLR0912, yes this is a complicated function
+    configs: list[Config], dotfiles: Path
+) -> list[FsNode]:
     taken = []
     for config in configs:
         match config.src:
@@ -544,7 +554,9 @@ def check_configs(configs: list[Config]) -> None:
             case Path() as path:
                 if not path.exists():
                     miss = True
-                    print_warn(f"\t{config.desc}: warning, {path} doesn't exist")
+                    print_warn(
+                        f"\t{config.desc}: warning, {path} doesn't exist"
+                    )
             case PathPicker(opts):
                 for alternative_desc, alternative_src in opts:
                     if not alternative_src.exists():
@@ -564,7 +576,9 @@ def option_parser() -> argparse.Namespace:
     prog = sys.argv[0]
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description="=" * 50 + "\nThis program will help you to manage your dotfiles."
+        description="="
+        * 50
+        + "\nThis program will help you to manage your dotfiles."
         "\n"
         "\nThe most straightforward argument is probably `link-all`."
         "\nThis will link every dotfile in the config:"
@@ -578,7 +592,9 @@ def option_parser() -> argparse.Namespace:
 
     # main operations
     parser.add_argument(
-        "--link-all", help="link all dotfiles in the config", action="store_true"
+        "--link-all",
+        help="link all dotfiles in the config",
+        action="store_true",
     )
     parser.add_argument(
         "--show-log", help="show all registered operations", action="store_true"
@@ -602,7 +618,9 @@ def option_parser() -> argparse.Namespace:
     )
     # for manual testing
     parser.add_argument(
-        "--unlink-all", help="unlink all dotfiles in the config", action="store_true"
+        "--unlink-all",
+        help="unlink all dotfiles in the config",
+        action="store_true",
     )
     parser.add_argument(
         "--relink-all",
@@ -668,10 +686,14 @@ def main() -> None:
             dotfiles / "browser/firefox/user.js",
             DynPath(
                 # check about:support for profile folder
-                get=lambda: Path(os.environ["FIREFOX_PROFILE_HOME"]) / "user.js",
-                error_if=lambda: "no $FIREFOX_PROFILE_HOME provided"
-                if os.getenv("FIREFOX_PROFILE_HOME") is None
-                else None,
+                get=lambda: (
+                    Path(os.environ["FIREFOX_PROFILE_HOME"]) / "user.js"
+                ),
+                error_if=lambda: (
+                    None
+                    if os.getenv("FIREFOX_PROFILE_HOME") is not None
+                    else "no $FIREFOX_PROFILE_HOME provided"
+                ),
             ),
         ),
         # X11 specific

@@ -13,8 +13,56 @@ dev = [
     "ruff>=0.15.9",
 ]
 
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+only-include = ["config.py"]
+
+
 [tool.mypy]
 python_version = 3.12
 warn_unused_configs = true
 warn_unreachable = true
 check_untyped_defs = true
+
+[tool.ruff]
+line-length = 80
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # pyflakes,
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+    # ruff specific
+    "RUF",
+    # type checking
+    "TC",
+    # pylint
+    "PL",
+    # datetime
+    "DTZ",
+    # simplify lint
+    "SIM",
+]
+ignore = [
+    # I don't agree that Optional should be deprecated
+    "UP045",
+    # use f-string instead of .format
+    # I know they both exist, now shut up
+    "UP032",
+    # someday I'll import from collections.abc, but not today
+    "UP035",
+    # ruff should re-format long lines anyway, if possible
+    "E501",
+]
