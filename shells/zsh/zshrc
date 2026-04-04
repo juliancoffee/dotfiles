@@ -1,3 +1,8 @@
+# we must add completions to $fpath before grml, cause that's what inits all
+# the machinery
+typeset -ga fpath
+fpath=("$HOME/.config/dotfiles/shells/zsh/completions" $fpath)
+
 # download grml config if doesn't exist
 if [ ! -f ~/.zsh/grml.zsh ]; then
     echo "<> grml configuration not found"
