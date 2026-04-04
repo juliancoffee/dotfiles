@@ -1,0 +1,4 @@
+interface:
+  display_name: "Approval Rules Auditor"
+  short_description: "Inspect clunky allow rules and suggest cleaner prefixes"
+  default_prompt: "Audit my Codex approval rules, group repetitive allow entries, and propose cleaner common prefixes without changing anything yet."
