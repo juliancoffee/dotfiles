@@ -12,6 +12,7 @@ __pycache__
 .git
 uv.lock
 recorder.db
+.playwright-cli
 
 # config related
 tests

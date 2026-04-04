@@ -1,9 +1,8 @@
-### python stuff
-# ignore cache
+# python stuff
 **/__pycache__/**/*
 
-### Nvim
-# ignore all colorscheme, except my custom one
+# Nvim
+# ignore all colorschemes, except my custom one
 editors/nvim/colors/*
 !editors/nvim/colors/muclor.vim
 # sensitive data
@@ -13,10 +12,14 @@ editors/nvim/secrets/*
 editors/nvim/plugged
 editors/nvim/.netrwhist
 
-### MPV
+# MPV
 # ignore watch_later list
 other/mpv/watch_later
 
-### setup data
+# setup data
 recorder.db
 todo.txt
+
+# codex skills
+node_modules/
+.playwright-cli/
