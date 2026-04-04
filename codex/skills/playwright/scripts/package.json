@@ -1,0 +1,8 @@
+{
+  "name": "@codex-skill/playwright-cli-runtime",
+  "private": true,
+  "description": "Skill-local runtime for playwright-cli.",
+  "dependencies": {
+    "@playwright/cli": "0.1.5"
+  }
+}

@@ -1,11 +1,11 @@
 # Playwright CLI Reference
 
-Use the wrapper script unless the CLI is already installed globally:
+Use the Python entrypoint:
 
 ```bash
 export CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
-export PWCLI="$CODEX_HOME/skills/playwright/scripts/playwright_cli.sh"
-"$PWCLI" --help
+export PWCLI="$CODEX_HOME/skills/playwright/scripts/playwright_cli.py"
+python3 "$PWCLI" --help
 ```
 
 User-scoped skills install under `$CODEX_HOME/skills` (default: `~/.codex/skills`).

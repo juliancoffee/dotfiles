@@ -1,8 +1,16 @@
 # Playwright CLI Workflows
 
-Use the wrapper script and snapshot often.
+Use the Python entrypoint and snapshot often.
 Assume `PWCLI` is set and `pwcli` is an alias for `"$PWCLI"`.
-In this repo, run commands from `output/playwright/<label>/` to keep artifacts contained.
+Prefer `/tmp/playwright/` for screenshots so captures stay out of the repo.
+
+For screenshot-only work, prefer the dedicated wrapper over manually chaining open/screenshot/close:
+
+```bash
+python3 "$PWSHOT" https://example.com \
+  --output /tmp/playwright/example/page.png \
+  --full-page
+```
 
 ## Standard interaction loop
 

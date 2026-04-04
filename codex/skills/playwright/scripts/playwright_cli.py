@@ -12,6 +12,11 @@ import time
 from pathlib import Path
 
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+LOCAL_PLAYWRIGHT_CLI = SCRIPT_DIR / "node_modules" / ".bin" / "playwright-cli"
+PACKAGE_JSON = SCRIPT_DIR / "package.json"
+
+
 def parse_session_and_command(
     args: list[str],
 ) -> tuple[bool, str | None, str | None]:
@@ -162,17 +167,50 @@ def force_close_session(session_name: str) -> bool:
     return not find_daemon_pids(session_name)
 
 
+def install_local_cli() -> bool:
+    if not PACKAGE_JSON.exists() or shutil.which("npm") is None:
+        return False
+    completed = subprocess.run(
+        ["npm", "install", "--no-fund", "--no-audit"],
+        cwd=SCRIPT_DIR,
+        check=False,
+    )
+    return completed.returncode == 0 and LOCAL_PLAYWRIGHT_CLI.exists()
+
+
+def resolve_cli_command() -> list[str] | None:
+    env_override = os.environ.get("PLAYWRIGHT_CLI_BIN")
+    if env_override:
+        return [env_override]
+    if LOCAL_PLAYWRIGHT_CLI.exists():
+        return [str(LOCAL_PLAYWRIGHT_CLI)]
+    global_cli = shutil.which("playwright-cli")
+    if global_cli:
+        return [global_cli]
+    if install_local_cli():
+        return [str(LOCAL_PLAYWRIGHT_CLI)]
+    if shutil.which("npx") is not None:
+        return ["npx", "--yes", "--package", "@playwright/cli", "playwright-cli"]
+    return None
+
+
 def main() -> int:
     args = sys.argv[1:]
     has_session_flag, session_name, command_name = parse_session_and_command(
         args
     )
 
-    if shutil.which("npx") is None:
-        print("Error: npx is required but not found on PATH.", file=sys.stderr)
+    cli_cmd = resolve_cli_command()
+    if cli_cmd is None:
+        print(
+            "Error: playwright-cli is unavailable and could not be installed.",
+            file=sys.stderr,
+        )
         return 1
+    if command_name in {"open", "attach"} and session_name and len(session_name) > 16:
+        print("Error: session names must be 16 characters or fewer here. Use a short unique name like 'idx-0404-a1'.", file=sys.stderr); return 1
 
-    cmd = ["npx", "--yes", "--package", "@playwright/cli", "playwright-cli"]
+    cmd = cli_cmd.copy()
     if not has_session_flag and session_name:
         cmd.extend(["--session", session_name])
     cmd.extend(args)
