@@ -601,7 +601,7 @@ never\:"Disables colored output"))' \
 '--no-config[Avoid discovering configuration files (\`pyproject.toml\`, \`uv.toml\`)]' \
 '-h[Display the concise help for this command]' \
 '--help[Display the concise help for this command]' \
-"*::external_command:_default" \
+"*::external_command:_uv_run_complete" \
 && ret=0
 ;;
 (init)
@@ -5953,6 +5953,50 @@ never\:"Disables colored output"))' \
         esac
     ;;
 esac
+}
+
+(( $+functions[_uv_run_complete] )) ||
+_uv_run_complete() {
+    if (( CURRENT == 1 )); then
+        _alternative \
+            'commands:uv run command:_uv_run_venv_commands' \
+            'files:python script:_uv_run_python_scripts' || _default
+    else
+        _default
+    fi
+}
+
+(( $+functions[_uv_run_venv_commands] )) ||
+_uv_run_venv_commands() {
+    local venv_bin=$PWD/.venv/bin
+    local -a entries commands expl
+    local entry name
+
+    (( $+opt_args[-m] || $+opt_args[--module] || $+opt_args[-s] || $+opt_args[--script] || $+opt_args[--gui-script] )) && return 1
+    [[ -d $venv_bin ]] || return 1
+
+    entries=($venv_bin/*(N))
+    for entry in $entries; do
+        name=${entry:t}
+        [[ -d $entry ]] && continue
+        [[ -x $entry ]] || continue
+        [[ $name == activate || $name == activate.* || $name == activate_this.py || $name == *.bat ]] && continue
+        commands+=($name)
+    done
+
+    (( ${#commands} )) || return 1
+    _wanted commands expl 'uv run command' compadd "$expl[@]" -fW "$venv_bin/" -a commands
+}
+
+(( $+functions[_uv_run_python_scripts] )) ||
+_uv_run_python_scripts() {
+    local -a scripts expl
+
+    (( $+opt_args[-m] || $+opt_args[--module] || $+opt_args[-s] || $+opt_args[--script] || $+opt_args[--gui-script] )) && return 1
+
+    scripts=(./*.py(N))
+    (( ${#scripts} )) || return 1
+    _wanted files expl 'python script' compadd "$expl[@]" -f -a scripts
 }
 
 (( $+functions[_uv_commands] )) ||
