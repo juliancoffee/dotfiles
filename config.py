@@ -216,7 +216,12 @@ class Config:
                     self.dest = f()
         self.custom_check = custom_check
 
-    def setup_link(self) -> None:
+    def setup_link(
+        self,
+        *,
+        force: bool = False,
+        which: Callable[[str], Optional[str]] = shutil.which,
+    ) -> None:
         # helper func
         def setup(desc: str, src: Path, dest: Path) -> None:
             assert self.RECORDER is not None
@@ -235,7 +240,7 @@ class Config:
                 case str(refusal):
                     print_warn(f"{self.desc}: skipped ({refusal})")
                     return
-        elif shutil.which(self.desc) is None:
+        elif not force and which(self.desc) is None:
             print_warn(f"{self.desc}: skipped (binary not found)")
             return
 
@@ -527,6 +532,22 @@ def link_all(configs: list[Config]) -> None:
         config.setup_link()
 
 
+def link_named(
+    configs: list[Config],
+    name: str,
+    *,
+    which: Callable[[str], Optional[str]] = shutil.which,
+) -> None:
+    matches = [config for config in configs if config.desc == name]
+    if not matches:
+        print_warn(f"{name}: no matching config entry")
+        return
+
+    print_ok(f"Setting links up for {name}...")
+    for config in matches:
+        config.setup_link(force=True, which=which)
+
+
 def unlink_all(configs: list[Config]) -> None:
     print_ok("Removing links...")
     for config in configs:
@@ -607,6 +628,11 @@ def option_parser() -> argparse.Namespace:
         "--link-all",
         help="link all dotfiles in the config",
         action="store_true",
+    )
+    parser.add_argument(
+        "--link",
+        help="link dotfiles matching NAME",
+        metavar="NAME",
     )
     parser.add_argument(
         "--show-log", help="show all registered operations", action="store_true"
@@ -741,6 +767,9 @@ def main() -> None:
     # command execution
     if options.link_all:
         link_all(configs)
+
+    if options.link is not None:
+        link_named(configs, options.link)
 
     if options.show_log:
         show_log(recorder, home, dotfiles)

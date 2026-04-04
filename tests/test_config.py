@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from config import Config, check_missed
+from config import Config, check_missed, link_named
 
 
 def missed_paths(configs: list[Config], dotfiles: Path) -> list[Path]:
@@ -93,3 +93,81 @@ def test_dirty_directory_reports_untracked_file_at_its_real_path(
     assert missed_paths(configs, tmp_path) == [
         tmp_path / "shells" / "README.md"
     ]
+
+
+def test_setup_link_skips_when_binary_is_missing_by_default(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    src = tmp_path / "dotfiles" / "terminals" / "alacritty-mac"
+    dest = tmp_path / "home" / ".config" / "alacritty"
+    src.mkdir(parents=True)
+
+    real_which = __import__("shutil").which
+
+    def alacritty_missing(name: str):
+        if name == "alacritty":
+            return None
+        return real_which(name)
+
+    monkeypatch.setattr("config.shutil.which", alacritty_missing)
+    Config.RECORDER = type(
+        "DummyRecorder",
+        (),
+        {
+            "register_link": staticmethod(lambda desc, src, dest: None),
+            "unregister_link": staticmethod(lambda dest: None),
+        },
+    )()
+    Config.OPTIONS = type("DummyOptions", (), {"verbose": 0})()
+
+    Config("alacritty", src, dest).setup_link()
+
+    assert not dest.exists()
+    assert "alacritty: skipped (binary not found)" in capsys.readouterr().out
+
+
+def test_link_named_forces_link_for_matching_configs(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    alacritty_src = tmp_path / "dotfiles" / "terminals" / "alacritty-mac"
+    kitty_src = tmp_path / "dotfiles" / "terminals" / "kitty"
+    alacritty_dest = tmp_path / "home" / ".config" / "alacritty"
+    kitty_dest = tmp_path / "home" / ".config" / "kitty"
+    alacritty_src.mkdir(parents=True)
+    kitty_src.mkdir(parents=True)
+
+    real_which = __import__("shutil").which
+
+    def alacritty_missing(name: str):
+        if name == "alacritty":
+            return None
+        return real_which(name)
+
+    monkeypatch.setattr("config.shutil.which", alacritty_missing)
+    Config.RECORDER = type(
+        "DummyRecorder",
+        (),
+        {
+            "register_link": staticmethod(lambda desc, src, dest: None),
+            "unregister_link": staticmethod(lambda dest: None),
+        },
+    )()
+    Config.OPTIONS = type("DummyOptions", (), {"verbose": 0})()
+
+    configs = [
+        Config("alacritty", alacritty_src, alacritty_dest),
+        Config("kitty", kitty_src, kitty_dest),
+    ]
+
+    link_named(configs, "alacritty")
+
+    assert alacritty_dest.is_symlink()
+    assert alacritty_dest.resolve() == alacritty_src.resolve()
+    assert not kitty_dest.exists()
+    assert "Setting links up for alacritty..." in capsys.readouterr().out
+
+
+def test_link_named_warns_when_name_is_unknown(capsys) -> None:
+    link_named([], "alacritty")
+
+    assert "alacritty: no matching config entry" in capsys.readouterr().out
