@@ -1,7 +1,5 @@
-# we must add completions to $fpath before grml, cause that's what inits all
-# the machinery
-typeset -ga fpath
-fpath=("$HOME/.config/dotfiles/shells/zsh/completions" $fpath)
+# trust existing completion dump for faster startup
+zstyle ':grml:completion:compinit' arguments -C
 
 # download grml config if doesn't exist
 if [ ! -f ~/.zsh/grml.zsh ]; then
@@ -13,10 +11,30 @@ fi
 # load grml config
 . ~/.zsh/grml.zsh
 
-# prompts
-autoload -U promptinit; promptinit
+# this in theory makes it so that shell startup is faster
+typeset -ga fpath
+fpath+=("$HOME/.config/dotfiles/shells/zsh/completions")
 
-if git --version > /dev/null
+function () {
+    local completions_dir="$HOME/.config/dotfiles/shells/zsh/completions"
+    local completion_file first_line completion_function
+    local -a completion_names
+
+    for completion_file in "$completions_dir"/_*(N-.); do
+        IFS= read -r first_line < "$completion_file" || continue
+        [[ $first_line == '#compdef '* ]] || continue
+
+        completion_function=${completion_file:t}
+        completion_names=(${=first_line#\#compdef })
+        (( ${#completion_names} )) || continue
+
+        autoload -Uz "$completion_function"
+        compdef "$completion_function" "${completion_names[@]}"
+    done
+}
+
+# prompts
+if command -v git > /dev/null 2>&1
 then
     # two-line prompt with git integration
     # download if needed
@@ -39,12 +57,14 @@ then
     fi
 
     # setup
-    # promptinit must go after `fpath` modification
+    autoload -U promptinit
     promptinit
     # actually choose the prompt
     prompt agkozak-zsh-prompt
 else
     # fallback, comes with zsh by default
+    autoload -U promptinit
+    promptinit
     prompt adam2
 fi
 
@@ -65,18 +85,6 @@ function () {
     export BUN_INSTALL="$HOME/.bun"
     export PATH="$BUN_INSTALL/bin:$PATH"
 
-    # set up ICU4C paths (needed for building PyICU)
-    if command -v brew > /dev/null 2>&1; then
-        ICU_PATH="$(brew --prefix icu4c)"
-        # ICU_BIN_PATH="$ICU_PATH/bin"
-        # ICU_SBIN_PATH="$ICU_PATH/sbin"
-        ICU_PKG_PATH="$ICU_PATH/lib/pkgconfig"
-        # ${var:+smth} means put `smth` if `var` is set, or nothing otherwise
-        PKG_CONFIG_PATH="${PKG_CONFIG_PATH:+$PKG_CONFIG_PATH:}"
-        PKG_CONFIG_PATH+="$ICU_PKG_PATH"
-        export PKG_CONFIG_PATH
-    fi
-
     # aliases
     alias cddot="cd $DOTFILES"
     alias upd="source $SHELL_RC"
@@ -84,9 +92,9 @@ function () {
     alias edvim="$EDITOR $VIM_RC"
 
     # if has python3
-    if which python3 > /dev/null 2>&1; then
+    if command -v python3 > /dev/null 2>&1; then
         # but doesn't have python command
-        if ! which python > /dev/null 2>&1; then
+        if ! command -v python > /dev/null 2>&1; then
             # just add the alias, for the love of god
             alias python="python3"
         fi
