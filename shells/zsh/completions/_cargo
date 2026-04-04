@@ -1,5 +1,94 @@
 #compdef cargo
 
 if command -v rustc > /dev/null 2>&1; then
-    source "$(rustc --print sysroot)"/share/zsh/site-functions/_cargo
+    local cargo_completion_file cargo_completion_source
+    local -a cargo_completion_patches
+
+    cargo_completion_file="$(rustc --print sysroot)/share/zsh/site-functions/_cargo"
+    cargo_completion_patches=(
+        -e '$d'
+        -e "s/'(--bench --example --test --lib)--bin=\\[specify binary name\\]:binary name'/'(--bench --example --test --lib)--bin=[specify binary name]:binary name:_cargo_binary_names'/"
+        -e "s/'--bin=\\[only install the specified binary\\]:binary'/'--bin=[only install the specified binary]:binary:_cargo_binary_names'/"
+        -e "s/'--bin=\\[name of the bin target\\]:name'/'--bin=[name of the bin target]:name:_cargo_binary_names'/"
+        -e "s/'(--lib --doc --example --test --bench)--bin=\\[binary name\\]'/'(--lib --doc --example --test --bench)--bin=[binary name]:binary name:_cargo_binary_names'/"
+        -e "s/\\[specify features to activate\\]:feature'/[specify features to activate]:feature:_cargo_feature_names'/"
+    )
+
+    if [[ -r $cargo_completion_file ]]; then
+        cargo_completion_source="$(sed "${cargo_completion_patches[@]}" "$cargo_completion_file")"
+        eval "$cargo_completion_source"
+
+        _cargo_metadata_lines() {
+            local filter=$1
+            local manifest_path=${opt_args[--manifest-path]-}
+            local -a command
+
+            shift
+            (( $+commands[jq] )) || return 1
+
+            command=(cargo metadata --no-deps --format-version 1)
+            [[ -n $manifest_path ]] && command+=(--manifest-path "$manifest_path")
+
+            "${command[@]}" 2>/dev/null | jq -r "$@" "$filter" | sort -u
+        }
+
+        _cargo_package_names() {
+            local -a names
+
+            names=(${(@f)$(_cargo_metadata_lines '.packages[].name')})
+            (( ${#names} )) || return 1
+
+            _describe -t packages 'package' names
+        }
+
+        _cargo_binary_names() {
+            local package_name=${opt_args[--package]:-${opt_args[-p]-}}
+            local -a names
+
+            names=(${(@f)$(_cargo_metadata_lines '
+                .packages[]
+                | select(($package == "") or (.name == $package))
+                | .targets[]
+                | select(.kind | index("bin"))
+                | .name
+            ' --arg package "$package_name")})
+            (( ${#names} )) || return 1
+
+            _describe -t binaries 'binary' names
+        }
+
+        _cargo_feature_names() {
+            local package_name=${opt_args[--package]:-${opt_args[-p]-}}
+            local package_filter workspace_filter
+            local -a names
+
+            package_filter='
+                .packages[]
+                | select(.name == $package)
+                | .features
+                | keys[]
+                | select(. != "default")
+            '
+            workspace_filter='
+                .packages[]
+                | .name as $package
+                | .features
+                | keys[]
+                | select(. != "default")
+                | "\($package)/\(.)"
+            '
+
+            if [[ -n $package_name ]]; then
+                names=(${(@f)$(_cargo_metadata_lines "$package_filter" --arg package "$package_name")})
+            else
+                names=(${(@f)$(_cargo_metadata_lines "$workspace_filter")})
+            fi
+
+            (( ${#names} )) || return 1
+
+            _values -s , 'feature' "${names[@]}"
+        }
+
+        _cargo "$@"
+    fi
 fi
