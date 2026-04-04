@@ -45,12 +45,13 @@ User-scoped skills install under `$CODEX_HOME/skills` (default: `~/.codex/skills
 Use the wrapper script:
 
 ```bash
-"$PWCLI" open https://playwright.dev --headed
-"$PWCLI" snapshot
-"$PWCLI" click e15
-"$PWCLI" type "Playwright"
-"$PWCLI" press Enter
-"$PWCLI" screenshot
+"$PWCLI" --session shot-playwright-home-20260404-01 open https://playwright.dev --headed
+"$PWCLI" --session shot-playwright-home-20260404-01 snapshot
+"$PWCLI" --session shot-playwright-home-20260404-01 click e15
+"$PWCLI" --session shot-playwright-home-20260404-01 type "Playwright"
+"$PWCLI" --session shot-playwright-home-20260404-01 press Enter
+"$PWCLI" --session shot-playwright-home-20260404-01 screenshot
+"$PWCLI" --session shot-playwright-home-20260404-01 close
 ```
 
 If the user prefers a global install, this is also valid:
@@ -62,19 +63,26 @@ playwright-cli --help
 
 ## Core workflow
 
-1. Open the page.
-2. Snapshot to get stable element refs.
-3. Interact using refs from the latest snapshot.
-4. Re-snapshot after navigation or significant DOM changes.
-5. Capture artifacts (screenshot, pdf, traces) when useful.
+1. Pick a unique `--session` name for the run. Do not rely on the default session.
+2. Open the page.
+3. Snapshot to get stable element refs.
+4. Interact using refs from the latest snapshot.
+5. Re-snapshot after navigation or significant DOM changes.
+6. Capture artifacts (screenshot, pdf, traces) when useful.
+7. Close the same session when you are done.
+
+Session names must be unique per run, not just descriptive.
+Good: `shot-index-20260404-01`, `debug-checkout-20260404-02`, `tabs-docs-20260404-01`
+Bad: `demo`, `form`, `debug`, `tabs`, `test`
 
 Minimal loop:
 
 ```bash
-"$PWCLI" open https://example.com
-"$PWCLI" snapshot
-"$PWCLI" click e3
-"$PWCLI" snapshot
+"$PWCLI" --session flow-example-home-20260404-01 open https://example.com
+"$PWCLI" --session flow-example-home-20260404-01 snapshot
+"$PWCLI" --session flow-example-home-20260404-01 click e3
+"$PWCLI" --session flow-example-home-20260404-01 snapshot
+"$PWCLI" --session flow-example-home-20260404-01 close
 ```
 
 ## When to snapshot again
@@ -93,30 +101,34 @@ Refs can go stale. When a command fails due to a missing ref, snapshot again.
 ### Form fill and submit
 
 ```bash
-"$PWCLI" open https://example.com/form
-"$PWCLI" snapshot
-"$PWCLI" fill e1 "user@example.com"
-"$PWCLI" fill e2 "password123"
-"$PWCLI" click e3
-"$PWCLI" snapshot
+"$PWCLI" --session form-login-20260404-01 open https://example.com/form
+"$PWCLI" --session form-login-20260404-01 snapshot
+"$PWCLI" --session form-login-20260404-01 fill e1 "user@example.com"
+"$PWCLI" --session form-login-20260404-01 fill e2 "password123"
+"$PWCLI" --session form-login-20260404-01 click e3
+"$PWCLI" --session form-login-20260404-01 snapshot
+"$PWCLI" --session form-login-20260404-01 close
 ```
 
 ### Debug a UI flow with traces
 
 ```bash
-"$PWCLI" open https://example.com --headed
-"$PWCLI" tracing-start
+"$PWCLI" --session debug-home-20260404-01 open https://example.com --headed
+"$PWCLI" --session debug-home-20260404-01 tracing-start
 # ...interactions...
-"$PWCLI" tracing-stop
+"$PWCLI" --session debug-home-20260404-01 tracing-stop
+"$PWCLI" --session debug-home-20260404-01 close
 ```
 
 ### Multi-tab work
 
 ```bash
-"$PWCLI" tab-new https://example.com
-"$PWCLI" tab-list
-"$PWCLI" tab-select 0
-"$PWCLI" snapshot
+"$PWCLI" --session tabs-example-20260404-01 open about:blank
+"$PWCLI" --session tabs-example-20260404-01 tab-new https://example.com
+"$PWCLI" --session tabs-example-20260404-01 tab-list
+"$PWCLI" --session tabs-example-20260404-01 tab-select 0
+"$PWCLI" --session tabs-example-20260404-01 snapshot
+"$PWCLI" --session tabs-example-20260404-01 close
 ```
 
 ## Wrapper script
@@ -128,6 +140,16 @@ The wrapper script uses `npx --package @playwright/cli playwright-cli` so the CL
 ```
 
 Prefer the wrapper unless the repository already standardizes on a global install.
+The wrapper also adds a targeted fallback for `close` when Python is available. If Python is unavailable, the wrapper warns and falls back to the basic `npx` behavior, so you should re-check that the session actually exited.
+
+## Session hygiene
+
+- Always pass a unique `--session` name.
+- Never use generic session names like `demo`, `form`, `debug`, `tabs`, or `test`.
+- Prefer a pattern like `<task>-<page>-<date>-<counter>`.
+- Reuse that same session name for every command in the flow.
+- Always run `"$PWCLI" --session NAME close` after the flow finishes.
+- If `close` reports trouble, re-check the session/process state before starting a new run.
 
 ## References
 
