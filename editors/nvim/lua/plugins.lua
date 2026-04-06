@@ -62,8 +62,31 @@ function M.setup()
             'catgoose/nvim-colorizer.lua',
             event = 'BufReadPre',
             -- until I configure it to sane behaviour
-            enabled = false,
-            opts = {},
+            enabled = true,
+            opts = {
+                filetypes = {
+                    '*',
+                    css = { css = true, css_fn = true },
+                    scss = { css = true, css_fn = true },
+                    sass = { css = true, css_fn = true },
+                    less = { css = true, css_fn = true },
+                    javascriptreact = { css_fn = true },
+                    typescriptreact = { css_fn = true },
+                },
+                user_default_options = {
+                    names = false,
+                    RGB = true,
+                    RGBA = true,
+                    RRGGBB = true,
+                    RRGGBBAA = true,
+                    AARRGGBB = false,
+                    rgb_fn = true,
+                    hsl_fn = true,
+                    css = false,
+                    css_fn = true,
+                    tailwind = 'normal',
+                },
+            },
         },
         {
             -- highlights `f`-jumpable positions
