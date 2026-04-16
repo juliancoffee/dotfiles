@@ -80,6 +80,8 @@ function () {
 
     # add ".local/bin" to path for locally installed scripts (like pipx)
     export PATH="$HOME/.local/bin:$PATH"
+    # opencode
+    export PATH="$HOME/.opencode/bin:$PATH"
 
     # add Bun-related paths
     export BUN_INSTALL="$HOME/.bun"
