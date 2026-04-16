@@ -1,6 +1,6 @@
 ---
 name: skill-installer
-description: Install skills into $AGENTS_HOME/skills from a curated list or a GitHub repo path. Use when a user asks to list installable skills, install a curated skill, or install a skill from another repo (including private repos).
+description: Install skills into $AGENTS_HOME/skills from a curated list, a GitHub repo path, or a local skill directory. Use when a user asks to list installable skills, install a curated skill, install a skill from another repo (including private repos), or promote a local skill into their user skills directory.
 metadata:
   short-description: Install curated skills from openai/skills or other repos
 ---
@@ -13,6 +13,7 @@ Use the helper scripts based on the task:
 - List skills when the user asks what is available, or if the user uses this skill without specifying what to do. Default listing is `.curated`, but you can pass `--path skills/.experimental` when they ask about experimental skills.
 - Install from the curated list when the user provides a skill name.
 - Install from another repo when the user provides a GitHub repo/path (including private repos).
+- Install from a local directory when the user already has a skill on disk and wants it added to `$AGENTS_HOME/skills`.
 
 Install skills with the helper scripts.
 
@@ -38,6 +39,8 @@ All of these scripts use network, so when running in the sandbox, request escala
 - Example (experimental list): `scripts/list-skills.py --path skills/.experimental`
 - `scripts/install-skill-from-github.py --repo <owner>/<repo> --path <path/to/skill> [<path/to/skill> ...]`
 - `scripts/install-skill-from-github.py --url https://github.com/<owner>/<repo>/tree/<ref>/<path>`
+- `scripts/install-skill-from-local.py /abs/path/to/skill`
+- `scripts/install-skill-from-local.py /abs/path/to/skill --name <installed-skill-name>`
 - Example (experimental skill): `scripts/install-skill-from-github.py --repo openai/skills --path skills/.experimental/<skill-name>`
 
 ## Behavior and Options
@@ -47,7 +50,8 @@ All of these scripts use network, so when running in the sandbox, request escala
 - Aborts if the destination skill directory already exists.
 - Installs into `$AGENTS_HOME/skills/<skill-name>` (defaults to `~/.agents/skills`).
 - Multiple `--path` values install multiple skills in one run, each named from the path basename unless `--name` is supplied.
-- Options: `--ref <ref>` (default `main`), `--dest <path>`, `--method auto|download|git`.
+- GitHub installer options: `--ref <ref>` (default `main`), `--dest <path>`, `--method auto|download|git`.
+- Local installer options: `--dest <path>`, `--name <skill-name>`.
 
 ## Notes
 
@@ -56,3 +60,4 @@ All of these scripts use network, so when running in the sandbox, request escala
 - Git fallback tries HTTPS first, then SSH.
 - The skills at https://github.com/openai/skills/tree/main/skills/.system are preinstalled, so no need to help users install those. If they ask, just explain this. If they insist, you can download and overwrite.
 - Installed annotations come from `$AGENTS_HOME/skills`.
+- Local installs copy the skill directory directly and skip network access.
