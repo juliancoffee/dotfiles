@@ -1,0 +1,4 @@
+interface:
+  display_name: "Notebook Tools"
+  short_description: "Read and modify Jupyter notebooks safely"
+  default_prompt: "Use $notebook-tools to inspect this .ipynb, replace or rewrite the right cell, and keep the notebook structure valid."
