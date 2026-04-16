@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install a skill from a GitHub repo path into $CODEX_HOME/skills."""
+"""Install a skill from a GitHub repo path into $AGENTS_HOME/skills."""
 
 from __future__ import annotations
 
@@ -42,18 +42,18 @@ class InstallError(Exception):
     pass
 
 
-def _codex_home() -> str:
-    return os.environ.get("CODEX_HOME", os.path.expanduser("~/.codex"))
+def _agents_home() -> str:
+    return os.environ.get("AGENTS_HOME", os.path.expanduser("~/.agents"))
 
 
 def _tmp_root() -> str:
-    base = os.path.join(tempfile.gettempdir(), "codex")
+    base = os.path.join(tempfile.gettempdir(), "agents")
     os.makedirs(base, exist_ok=True)
     return base
 
 
 def _request(url: str) -> bytes:
-    return github_request(url, "codex-skill-install")
+    return github_request(url, "agents-skill-install")
 
 
 def _parse_github_url(url: str, default_ref: str) -> tuple[str, str, str, str | None]:
@@ -241,7 +241,7 @@ def _resolve_source(args: Args) -> Source:
 
 
 def _default_dest() -> str:
-    return os.path.join(_codex_home(), "skills")
+    return os.path.join(_agents_home(), "skills")
 
 
 def _parse_args(argv: list[str]) -> Args:
@@ -254,7 +254,10 @@ def _parse_args(argv: list[str]) -> Args:
         help="Path(s) to skill(s) inside repo",
     )
     parser.add_argument("--ref", default=DEFAULT_REF)
-    parser.add_argument("--dest", help="Destination skills directory")
+    parser.add_argument(
+        "--dest",
+        help="Destination skills directory (default: $AGENTS_HOME/skills or ~/.agents/skills)",
+    )
     parser.add_argument(
         "--name", help="Destination skill name (defaults to basename of path)"
     )

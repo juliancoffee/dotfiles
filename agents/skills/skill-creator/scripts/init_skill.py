@@ -3,17 +3,18 @@
 Skill Initializer - Creates a new skill from template
 
 Usage:
-    init_skill.py <skill-name> --path <path> [--resources scripts,references,assets] [--examples] [--interface key=value]
+    init_skill.py <skill-name> [--path <path>] [--resources scripts,references,assets] [--examples] [--interface key=value]
 
 Examples:
-    init_skill.py my-new-skill --path skills/public
-    init_skill.py my-new-skill --path skills/public --resources scripts,references
+    init_skill.py my-new-skill
+    init_skill.py my-new-skill --resources scripts,references
     init_skill.py my-api-helper --path skills/private --resources scripts --examples
     init_skill.py custom-skill --path /custom/location
-    init_skill.py my-skill --path skills/public --interface short_description="Short UI label"
+    init_skill.py my-skill --interface short_description="Short UI label"
 """
 
 import argparse
+import os
 import re
 import sys
 from pathlib import Path
@@ -22,6 +23,11 @@ from generate_openai_yaml import write_openai_yaml
 
 MAX_SKILL_NAME_LENGTH = 64
 ALLOWED_RESOURCES = {"scripts", "references", "assets"}
+
+
+def default_skill_root() -> str:
+    agents_home = os.environ.get("AGENTS_HOME", "~/.agents")
+    return str((Path(agents_home).expanduser()) / "skills")
 
 SKILL_TEMPLATE = """---
 name: {skill_name}
@@ -338,7 +344,11 @@ def main():
         description="Create a new skill directory with a SKILL.md template.",
     )
     parser.add_argument("skill_name", help="Skill name (normalized to hyphen-case)")
-    parser.add_argument("--path", required=True, help="Output directory for the skill")
+    parser.add_argument(
+        "--path",
+        default=default_skill_root(),
+        help="Output directory for the skill (default: $AGENTS_HOME/skills or ~/.agents/skills)",
+    )
     parser.add_argument(
         "--resources",
         default="",
@@ -376,7 +386,7 @@ def main():
         print("[ERROR] --examples requires --resources to be set.")
         sys.exit(1)
 
-    path = args.path
+    path = str(Path(args.path).expanduser())
 
     print(f"Initializing skill: {skill_name}")
     print(f"   Location: {path}")
