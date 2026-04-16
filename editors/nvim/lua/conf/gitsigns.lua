@@ -1,7 +1,22 @@
 --- INFO:
 --- This module holds the plugin configuration for TODO-style comments
 
-local is_diffing_head = false
+local is_diffing_master = false
+
+local function first_existing_base()
+    for _, base in ipairs { 'main', 'master' } do
+        local result = vim.system({
+            'git',
+            'rev-parse',
+            '--verify',
+            '--quiet',
+            base,
+        }):wait()
+        if result.code == 0 then
+            return base
+        end
+    end
+end
 
 ---@module 'lazy'
 ---@module 'gitsigns'
@@ -12,7 +27,7 @@ return {
     event = 'VeryLazy',
     opts = {
         -- show blame lens if hovered for 1s
-        current_line_blame = true,
+        current_line_blame = false,
         -- diff vertically
         diff_opts = {
             vertical = false,
@@ -60,17 +75,31 @@ return {
 
             -- Diff branch toggle
             --
-            vim.keymap.set('n', '<leader>tb', function()
-                if is_diffing_head then
+            map('n', '<leader>hm', function()
+                if is_diffing_master then
                     gitsigns.change_base(nil)
-                    is_diffing_head = false
+                    is_diffing_master = false
                     vim.notify('Gitsigns diff base: Index', vim.log.levels.INFO)
                 else
-                    gitsigns.change_base('HEAD')
-                    is_diffing_head = true
-                    vim.notify('Gitsigns diff base: HEAD', vim.log.levels.INFO)
+                    local base = first_existing_base()
+                    if not base then
+                        vim.notify(
+                            'Gitsigns diff base: neither main nor master exists',
+                            vim.log.levels.WARN
+                        )
+                        return
+                    end
+
+                    gitsigns.change_base(base)
+                    is_diffing_master = true
+                    vim.notify(
+                        'Gitsigns diff base: ' .. base,
+                        vim.log.levels.INFO
+                    )
                 end
-            end, { desc = 'Toggle Gitsigns base (Index/HEAD)' })
+            end, {
+                desc = 'Toggle Gitsigns base (index vs main/master)',
+            })
 
             -- Previews
             map(
