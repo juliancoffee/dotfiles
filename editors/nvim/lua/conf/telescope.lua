@@ -37,6 +37,27 @@ return {
                     },
                 },
             }),
+            pickers = {
+                find_files = {
+                    hidden = true,
+                    find_command = {
+                        'rg',
+                        '--files',
+                        '--hidden',
+                        '--glob',
+                        '!.git',
+                    },
+                },
+                live_grep = {
+                    additional_args = function()
+                        return {
+                            '--hidden',
+                            '--glob',
+                            '!.git',
+                        }
+                    end,
+                },
+            },
             extensions = {
                 -- switch default vim's select menu to telescope
                 ['ui-select'] = {
