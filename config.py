@@ -712,9 +712,21 @@ def main() -> None:
             custom_check=lambda: None,
         ),
         c(
+            "agents",
+            dotfiles / "agents/skills",
+            home / ".agents/skills",
+            custom_check=lambda: None,
+        ),
+        c(
             "codex",
             dotfiles / "codex/skills",
             home / ".codex/skills",
+            custom_check=lambda: None,
+        ),
+        c(
+            "claude",
+            home / ".agents/skills",
+            home / ".claude/skills",
             custom_check=lambda: None,
         ),
         c("tmux", dotfiles / "tmux/.tmux.conf", home / ".tmux.conf"),

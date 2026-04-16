@@ -3,12 +3,12 @@
 Use the Python entrypoint:
 
 ```bash
-export CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
-export PWCLI="$CODEX_HOME/skills/playwright/scripts/playwright_cli.py"
+export AGENTS_HOME="${AGENTS_HOME:-$HOME/.agents}"
+export PWCLI="$AGENTS_HOME/skills/playwright/scripts/playwright_cli.py"
 python3 "$PWCLI" --help
 ```
 
-User-scoped skills install under `$CODEX_HOME/skills` (default: `~/.codex/skills`).
+User-scoped shared skills install under `$AGENTS_HOME/skills` (default: `~/.agents/skills`).
 
 Optional convenience alias:
 
