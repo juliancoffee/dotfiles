@@ -183,6 +183,8 @@ return {
         { 'j-hui/fidget.nvim', opts = {} },
         -- more completion capabilities
         'saghen/blink.cmp',
+        -- upstream JSON/YAML schema catalog helpers
+        'b0o/SchemaStore.nvim',
         {
             -- Add vim info to lua lsp
             'folke/lazydev.nvim',
@@ -198,6 +200,8 @@ return {
         },
     },
     config = function()
+        local schemastore = require('schemastore')
+
         -- Add autocommand for LSP attach event
         vim.api.nvim_create_autocmd('LspAttach', {
             group = vim.api.nvim_create_augroup('kickstart-lsp-attach', {
@@ -221,6 +225,37 @@ return {
             cssls = {},
             bashls = {},
             dockerls = {},
+            jsonls = {
+                settings = {
+                    json = {
+                        schemas = schemastore.json.schemas(),
+                        validate = { enable = true },
+                    },
+                },
+            },
+            yamlls = {
+                settings = {
+                    yaml = {
+                        -- Use SchemaStore.nvim as the single schema source.
+                        schemaStore = {
+                            enable = false,
+                            url = '',
+                        },
+                        schemas = schemastore.yaml.schemas(),
+                        validate = true,
+                        keyOrdering = false,
+                    },
+                },
+            },
+            taplo = {
+                settings = {
+                    evenBetterToml = {
+                        schema = {
+                            enabled = true,
+                        },
+                    },
+                },
+            },
             vtsls = {},
             ocamllsp = {},
             basedpyright = {
@@ -261,10 +296,7 @@ return {
         }
 
         -- only load rust-analyzer if not banned
-        if
-            #vim.fs.find('nolsp', { path = utils.get_root(), type = 'file' })
-            ~= 0
-        then
+        if utils.find_in_parents('nolsp', { type = 'file' }) then
             servers.rust_analyzer = nil
         else
             servers.rust_analyzer = {

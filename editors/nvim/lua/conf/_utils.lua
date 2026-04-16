@@ -91,6 +91,61 @@ function M.get_root(stop_list, toplevel, counter)
     return M.get_root(stop_list, parent, counter - 1)
 end
 
+--- Find a file or directory in the current path or its ancestors.
+---
+--- The search checks only the current directory at each level and stops once
+--- a stop marker is found. This avoids recursive downward scans in large trees.
+---
+--- @param names string|string[] files or directories to find
+--- @param opts? {path?: string, stop?: string|string[], type?: string}
+--- @return string?
+function M.find_in_parents(names, opts)
+    opts = opts or {}
+
+    if type(names) == 'string' then
+        names = { names }
+    end
+
+    local stop = opts.stop or { '.git' }
+    if type(stop) == 'string' then
+        stop = { stop }
+    end
+
+    local path = opts.path or vim.api.nvim_buf_get_name(0)
+    if path == '' then
+        path = vim.fn.getcwd()
+    end
+
+    path = M.absolute_path(path)
+
+    local stat = vim.uv.fs_stat(path)
+    if stat and stat.type ~= 'directory' then
+        path = M.get_parent(path)
+    end
+
+    while path do
+        for _, name in ipairs(names) do
+            local candidate = vim.fs.joinpath(path, name)
+            local candidate_stat = vim.uv.fs_stat(candidate)
+            if
+                candidate_stat
+                and (not opts.type or candidate_stat.type == opts.type)
+            then
+                return candidate
+            end
+        end
+
+        for _, marker in ipairs(stop) do
+            local marker_path = vim.fs.joinpath(path, marker)
+            if vim.uv.fs_stat(marker_path) then
+                return nil
+            end
+        end
+
+        path = M.get_parent(path)
+    end
+end
+
 --- Returns file content
 --- @param path string path to the file to read
 function M.filecontent(path)
