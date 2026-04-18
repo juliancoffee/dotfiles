@@ -1,7 +1,7 @@
 /*
- * Fuck background processes
+ * Limit background web push without disabling service workers entirely.
  */
-user_pref("dom.serviceWorkers.enabled", false);
+user_pref("dom.push.enabled", false);
 
 /*
  * Disable pocket
@@ -12,7 +12,6 @@ user_pref("extensions.pocket.enabled", false);
  * Cache settings
  */
 user_pref("browser.cache.memory.enable", false);
-user_pref("browser.cache.offline.enable", false);
 user_pref("browser.sessionhistory.max_total_viewers", 0);
 // Enable disk cache
 user_pref('browser.cache.disk.enable', true);
@@ -33,7 +32,6 @@ user_pref('middlemouse.paste', false);
 /*
  * Disable Mega bar
  */
-user_pref('browser.urlbar.openViewOnFocus', false);
 user_pref('browser.urlbar.suggest.topsites', false);
 
 /*
@@ -41,8 +39,24 @@ user_pref('browser.urlbar.suggest.topsites', false);
  */
 // Always asking where to download
 user_pref('browser.download.useDownloadDir', false);
-// Disable hiding mime types not associated with a plugin
-user_pref('browser.download.hide_plugins_without_extensions', false);
+
+/*
+ * Tab unloading
+ */
+// Cap the web content process pool on this 8 GB machine.
+user_pref('dom.ipc.processCount', 5);
+// Keep a small cache of recent tab layers for snappier switching.
+user_pref('browser.tabs.remote.tabCacheSize', 3);
+// Optional: disable tab warmup if Firefox still feels too heavy.
+// user_pref('browser.tabs.remote.warmup.enabled', false);
+// Start unloading earlier on macOS memory-pressure warnings.
+user_pref('browser.lowMemoryResponseOnWarn', true);
+// Let Firefox unload inactive tabs under memory pressure.
+user_pref('browser.tabs.unloadOnLowMemory', true);
+// Make tabs eligible for unloading after 5 minutes of inactivity.
+user_pref('browser.tabs.min_inactive_duration_before_unload', 300000);
+// Expose the "Unload Tab" right-click action.
+user_pref('browser.tabs.unloadTabInContextMenu', true);
 
 /*
  * Appearance
@@ -56,5 +70,5 @@ user_pref('privacy.userContext.enabled', true);
 // Enable Container Tabs setting in preferences
 user_pref('privacy.userContext.ui.enabled', true);
 
-// make google docs work
-user_pref('gfx.canvas.accelerated', false)
+// Disable it, if sites (like google docs break)
+user_pref('gfx.canvas.accelerated', true);
