@@ -22,6 +22,7 @@ Inspect a notebook before editing:
 ```bash
 python3 "$NBTOOL" summary path/to/notebook.ipynb
 python3 "$NBTOOL" read path/to/notebook.ipynb --cell 3
+python3 "$NBTOOL" diff path/to/notebook.ipynb
 python3 "$NBTOOL" replace path/to/notebook.ipynb --cell 3 --old "foo" --new "bar"
 ```
 
@@ -48,7 +49,8 @@ python3 "$NBTOOL" delete path/to/notebook.ipynb --cell 5
 1. Run `summary` first to map the notebook.
 2. Run `read` on the target cell before changing it.
 3. Use `replace`, `write`, `insert`, or `delete` instead of direct JSON edits.
-4. Run `summary` or `read` again to verify the final structure.
+4. Run `diff` to review changed cells and source hunks against git.
+5. Run `summary` or `read` again to verify the final structure.
 
 ## Commands
 
@@ -73,6 +75,27 @@ Reads one cell and prints:
 - source
 
 Add `--outputs` to also print code-cell outputs in JSON form.
+
+### `diff`
+
+Shows a notebook-aware diff against git, grouped by changed cells instead of raw
+JSON lines.
+
+By default it compares `HEAD` to the working tree and prints:
+
+- changed cell count
+- one summary line per changed cell
+- unified diffs for each changed cell's source
+
+Useful options:
+
+- `--cell N` to show only the changed cell whose old or new index matches `N`
+- `--rev REV` to compare against another git revision
+- `--staged` to compare against the staged notebook instead of the working tree
+- `--metadata` to include metadata changes
+- `--outputs` to include execution count and outputs
+- `--context N` to control unified diff context lines
+- `--json` to emit structured data with `changed_cells` and per-section diffs
 
 ### `write`
 
@@ -122,5 +145,6 @@ Deletes one cell by index.
 
 - Prefer source files or stdin for multiline edits.
 - Do not hand-edit notebook JSON unless the user specifically asks for raw JSON changes.
+- Prefer `diff` over raw `git diff` when you want cell-aware notebook review.
 - For code cells, clear stale outputs unless preserving outputs is part of the task.
 - Re-run `summary` after structural changes to confirm indexes shifted as expected.
