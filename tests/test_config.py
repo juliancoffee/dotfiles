@@ -1,10 +1,17 @@
 from pathlib import Path
 
-from config import Config, check_missed, link_named
+from config import Config, check_missed, firefox_profile_home, link_named
 
 
 def missed_paths(configs: list[Config], dotfiles: Path) -> list[Path]:
     return sorted(node.current() for node in check_missed(configs, dotfiles))
+
+
+def write_firefox_profiles_ini(home: Path, body: str) -> Path:
+    ini_path = home / "Library/Application Support/Firefox/profiles.ini"
+    ini_path.parent.mkdir(parents=True, exist_ok=True)
+    ini_path.write_text(body)
+    return ini_path
 
 
 def test_fully_unmanaged_tree_is_reported_as_root_directory(
@@ -171,3 +178,57 @@ def test_link_named_warns_when_name_is_unknown(capsys) -> None:
     link_named([], "alacritty")
 
     assert "alacritty: no matching config entry" in capsys.readouterr().out
+
+
+def test_firefox_profile_home_uses_absolute_install_default(
+    tmp_path: Path, monkeypatch
+) -> None:
+    home = tmp_path / "home"
+    profile = tmp_path / "custom-profile"
+    profile.mkdir(parents=True)
+    write_firefox_profiles_ini(
+        home,
+        f"""
+[Profile0]
+Name=default-release
+IsRelative=1
+Path=Profiles/ignored.default-release
+
+[InstallABCDEF]
+Default={profile}
+Locked=1
+""".strip(),
+    )
+
+    monkeypatch.delenv("FIREFOX_PROFILE_HOME", raising=False)
+
+    assert firefox_profile_home(home) == profile
+
+
+def test_firefox_profile_home_returns_none_without_resolvable_default(
+    tmp_path: Path, monkeypatch
+) -> None:
+    home = tmp_path / "home"
+    first_profile = (
+        home
+        / "Library/Application Support/Firefox/Profiles/first.default-release"
+    )
+    first_profile.mkdir(parents=True)
+    write_firefox_profiles_ini(
+        home,
+        """
+[Profile0]
+Name=default-release
+IsRelative=1
+Path=Profiles/first.default-release
+
+[Profile1]
+Name=dev-edition-default
+IsRelative=1
+Path=Profiles/second.dev-edition-default
+""".strip(),
+    )
+
+    monkeypatch.delenv("FIREFOX_PROFILE_HOME", raising=False)
+
+    assert firefox_profile_home(home) is None

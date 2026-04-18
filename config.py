@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import configparser
 import fnmatch
 import itertools
 import os
@@ -108,6 +109,74 @@ def pretty_path(p: Path, home: Path, dotfiles: Path) -> str:
     dots_string = os.fspath(dotfiles)
 
     return p_string.replace(dots_string, "{.}").replace(home_string, "~")
+
+
+def firefox_profile_home(home: Path) -> Optional[Path]:
+    def firefox_profiles_ini(home: Path) -> Optional[Path]:
+        candidates = [
+            home / "Library/Application Support/Firefox/profiles.ini",
+            home / ".mozilla/firefox/profiles.ini",
+        ]
+        return next((path for path in candidates if path.exists()), None)
+
+    env_profile = os.getenv("FIREFOX_PROFILE_HOME")
+    if env_profile is not None:
+        return Path(env_profile).expanduser()
+
+    ini_path = firefox_profiles_ini(home)
+    if ini_path is None:
+        return None
+
+    parser = configparser.ConfigParser(interpolation=None)
+    parser.read(ini_path)
+
+    def resolve_raw(raw_path: str, *, is_relative: bool) -> Optional[Path]:
+        path = (
+            ini_path.parent / raw_path
+            if is_relative
+            else Path(raw_path).expanduser()
+        )
+        return path if path.exists() else None
+
+    def resolve(section: configparser.SectionProxy) -> Optional[Path]:
+        raw_path = section.get("Path")
+        if raw_path is None:
+            return None
+
+        is_relative = section.get("IsRelative", "1") == "1"
+        return resolve_raw(raw_path, is_relative=is_relative)
+
+    for section_name in parser.sections():
+        if not section_name.startswith("Install"):
+            continue
+        profile = parser[section_name].get("Default")
+        if profile is None:
+            continue
+
+        path = resolve_raw(profile, is_relative=not Path(profile).is_absolute())
+        if path is not None:
+            return path
+
+    for section_name in parser.sections():
+        if not section_name.startswith("Profile"):
+            continue
+        section = parser[section_name]
+        if section.get("Default") == "1":
+            return resolve(section)
+
+    return None
+
+
+def firefox_home(home: Path) -> Path:
+    """
+    To be used as DynPath.get
+
+    See `firefox_profile_home`
+    """
+    path = firefox_profile_home(home)
+    # NOTE: shouldn't happen as DynPath checks `error_if` first
+    assert path is not None
+    return path
 
 
 class Recorder:
@@ -706,12 +775,6 @@ def main() -> None:
     configs: list[Config] = [
         # cli
         c(
-            "codex",
-            dotfiles / "codex/config.toml",
-            home / ".codex/config.toml",
-            custom_check=lambda: None,
-        ),
-        c(
             "agents",
             dotfiles / "agents/skills",
             home / ".agents/skills",
@@ -752,14 +815,11 @@ def main() -> None:
             "firefox",
             dotfiles / "browser/firefox/user.js",
             DynPath(
-                # check about:support for profile folder
-                get=lambda: (
-                    Path(os.environ["FIREFOX_PROFILE_HOME"]) / "user.js"
-                ),
+                get=lambda: firefox_home(home) / "user.js",
                 error_if=lambda: (
                     None
-                    if os.getenv("FIREFOX_PROFILE_HOME") is not None
-                    else "no $FIREFOX_PROFILE_HOME provided"
+                    if firefox_profile_home(home) is not None
+                    else "could not find a Firefox profile; set $FIREFOX_PROFILE_HOME to override"
                 ),
             ),
         ),

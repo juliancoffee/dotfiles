@@ -13,6 +13,7 @@ Most changes should stay inside the repo. Running `config.py` changes local mach
 - Do not create or remove symlinks in `$HOME` unless the user explicitly asks.
 - Prefer non-dot names in the repo when practical.
 - Use dotted target paths only where the installed program expects them.
+- Prefer `uv run ...` for Python commands and tests in this repo.
 - Prefer reading, searching, and tests before taking actions that affect install layout.
 - Read `README.md`, `config.py`, and relevant tests before changing installer behavior.
 - Keep changes minimal and avoid repo-wide restructuring unless the user explicitly requests it.
