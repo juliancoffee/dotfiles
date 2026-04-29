@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Bootstrap"
+  short_description: "Create new projects in safe workspace paths with sensible defaults"
+  default_prompt: "Bootstrap a new project with the right initializer, pick a safe workspace path, and explain the created layout."

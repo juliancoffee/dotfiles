@@ -1,0 +1,3 @@
+interface:
+  display_name: "Command Name Ideas"
+  short_description: "Generate and compare CLI names with ergonomic scoring"
