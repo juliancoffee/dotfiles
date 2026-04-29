@@ -800,6 +800,11 @@ def main() -> None:
         c("most", dotfiles / "pagers/most/.mostrc", home / ".mostrc"),
         # GUI
         c("mpv", dotfiles / "other/mpv", home / ".config/mpv"),
+        c(
+            "ghostty",
+            dotfiles / "terminals/ghostty/config",
+            home / ".config/ghostty/config",
+        ),
         c("kitty", dotfiles / "terminals/kitty", home / ".config/kitty"),
         c(
             "alacritty",
