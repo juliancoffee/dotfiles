@@ -23,3 +23,4 @@ todo.txt
 # codex skills
 node_modules/
 .playwright-cli/
+codex/skills/.system/
