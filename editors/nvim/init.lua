@@ -68,6 +68,15 @@ vim.opt.splitright = true
 vim.opt.splitbelow = true
 
 --
+-- filetypes
+--
+vim.filetype.add {
+    extension = {
+        ftl = 'fluent',
+    },
+}
+
+--
 -- keybinds
 --
 

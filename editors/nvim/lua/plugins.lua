@@ -47,8 +47,6 @@ function M.setup()
         require('conf.treesitter'),
         -- status line
         require('conf.statusline'),
-        -- fluent
-        'projectfluent/fluent.vim',
         -- git intergrations
         require('conf.gitsigns'),
         -- snacks
