@@ -58,6 +58,7 @@ local dap = {
     },
     config = function()
         local dap = require('dap')
+        local utils = require('conf._utils')
         local dapui = require('dapui')
         local dap_text = require('nvim-dap-virtual-text.virtual_text')
 
@@ -67,7 +68,12 @@ local dap = {
         -- enable logging
         dap.set_log_level('DEBUG')
         -- init python adapter
-        require('dap-python').setup('uv')
+        local root = utils.get_root()
+        if root and utils.is_uv_project(root) then
+            require('dap-python').setup('uv')
+        else
+            require('dap-python').setup()
+        end
         -- init osv adapter
         -- we're overwriting it, hopefully this won't cause trouble :D
         dap.configurations.lua = {
