@@ -2,6 +2,28 @@
 
 local M = {}
 
+local function read_file(path)
+    return table.concat(vim.fn.readfile(path), '\n')
+end
+
+local function match_django_settings_module(content)
+    return content:match(
+        'os%.environ%.setdefault%s*%(%s*[\'"]DJANGO_SETTINGS_MODULE[\'"]%s*,%s*[\'"]([^\'"]+)[\'"]%s*[,%)]'
+    )
+end
+
+local function match_django_settings_module_in_pyproject(content)
+    local section = content:match('%[tool%.django%-stubs%](.-)\n%[')
+        or content:match('%[tool%.django%-stubs%](.*)')
+    if not section then
+        return nil
+    end
+
+    return section:match(
+        'django_settings_module%s*=%s*[\'"]([^\'"]+)[\'"]'
+    )
+end
+
 --- Return `true` if in `termux` environment
 --- @return boolean
 function M.is_termux()
@@ -58,37 +80,41 @@ function M.get_parent(path)
     return parent
 end
 
---- Returns the path to project root using `.git`
---- @param stop_list? [string] additional files to indicate the root
+--- Returns the path to project root using `.git` and optional extra markers.
+--- @param markers? string|string[] additional files to indicate the root
 --- @param toplevel? string path to a starting point, `.` by default
 --- @param counter? number how many paths to take, default 25
-function M.get_root(stop_list, toplevel, counter)
-    -- set the defaults
-    counter = counter or 25
-    stop_list = stop_list or {}
-    table.insert(stop_list, '.git')
-    toplevel = toplevel or vim.fn.getcwd()
-
-    -- if reached the limit, give up
-    if counter == 0 then
-        return nil
+function M.get_root(markers, toplevel, counter)
+    local root_markers = { '.git' }
+    if type(markers) == 'string' then
+        table.insert(root_markers, markers)
+    elseif markers then
+        vim.list_extend(root_markers, markers)
     end
 
-    -- search for stopfile
-    local files = vim.fn.readdir(toplevel)
-    for _, f in ipairs(files) do
-        if vim.tbl_contains(stop_list, f) then
-            return toplevel
+    local function find_root(path, depth)
+        -- if reached the limit, give up
+        if depth == 0 then
+            return nil
         end
+
+        -- search for stopfile
+        local files = vim.fn.readdir(path)
+        for _, f in ipairs(files) do
+            if vim.tbl_contains(root_markers, f) then
+                return path
+            end
+        end
+
+        local parent = M.get_parent(path)
+        if not parent then
+            return nil
+        end
+
+        return find_root(parent, depth - 1)
     end
 
-    -- recurse
-    local parent = M.get_parent(toplevel)
-    if not parent then
-        return nil
-    end
-
-    return M.get_root(stop_list, parent, counter - 1)
+    return find_root(toplevel or vim.fn.getcwd(), counter or 25)
 end
 
 --- Find a file or directory in the current path or its ancestors.
@@ -154,49 +180,83 @@ function M.is_uv_project(path)
         and vim.uv.fs_stat(vim.fs.joinpath(path, 'uv.lock')) ~= nil
 end
 
---- Returns file content
---- @param path string path to the file to read
-function M.filecontent(path)
-    local buf = ''
-    for _, line in ipairs(vim.fn.readfile(path)) do
-        buf = buf .. '\n' .. line
+--- Return `true` if path belongs to a pytest-configured project.
+--- @param path string project root path
+--- @return boolean
+function M.is_pytest_project(path)
+    if vim.uv.fs_stat(vim.fs.joinpath(path, 'pytest.toml')) then
+        return true
     end
-    return buf
+    if vim.uv.fs_stat(vim.fs.joinpath(path, '.pytest.toml')) then
+        return true
+    end
+    if vim.uv.fs_stat(vim.fs.joinpath(path, 'pytest.ini')) then
+        return true
+    end
+    if vim.uv.fs_stat(vim.fs.joinpath(path, '.pytest.ini')) then
+        return true
+    end
+    if vim.uv.fs_stat(vim.fs.joinpath(path, 'conftest.py')) then
+        return true
+    end
+
+    local pyproject = vim.fs.joinpath(path, 'pyproject.toml')
+    if vim.fn.filereadable(pyproject) == 1 then
+        local content = read_file(pyproject)
+        if
+            content:match('%[tool%.pytest%]')
+            or content:match('%[tool%.pytest%.ini_options%]')
+        then
+            return true
+        end
+    end
+
+    local tox = vim.fs.joinpath(path, 'tox.ini')
+    if vim.fn.filereadable(tox) == 1 then
+        local content = read_file(tox)
+        if content:match('%[pytest%]') then
+            return true
+        end
+    end
+
+    local setup_cfg = vim.fs.joinpath(path, 'setup.cfg')
+    if vim.fn.filereadable(setup_cfg) == 1 then
+        local content = read_file(setup_cfg)
+        if content:match('%[tool:pytest%]') then
+            return true
+        end
+    end
+
+    return false
 end
 
---- Get local `.nvim/settings.json` configuration
--- TODO: provide some fun meta table to fetch them?
-function M.get_local_config()
-    local root = M.get_root()
-    if not root then
-        return {}
-    end
-
-    local config_path = root .. '/.nvim/settings.json'
-    if vim.fn.filereadable(config_path) == 1 then
-        local content = M.filecontent(config_path)
-        return vim.json.decode(content)
-    end
-
-    return {}
+--- Return `true` if path looks like a Django project root.
+--- @param path string project root path
+--- @return boolean
+function M.is_django_project(path)
+    return vim.uv.fs_stat(vim.fs.joinpath(path, 'manage.py')) ~= nil
 end
 
---- Get a variable using fetcher function
---- @generic T
----
---- @param fetcher fun(table):T
----
---- @return T?
-function M.from_local_config(fetcher)
-    local ok, res = pcall(function()
-        local conf = M.get_local_config()
-        return fetcher(conf)
-    end)
-    if ok then
-        return res
-    else
-        vim.notify('Error loading config: ' .. res)
+--- Return Django settings module declared in project config.
+--- @param path string project root path
+--- @return string?
+function M.get_django_settings_module(path)
+    local pyproject = vim.fs.joinpath(path, 'pyproject.toml')
+    if vim.fn.filereadable(pyproject) == 1 then
+        local settings_module = match_django_settings_module_in_pyproject(
+            read_file(pyproject)
+        )
+        if settings_module then
+            return settings_module
+        end
     end
+
+    local manage_py = vim.fs.joinpath(path, 'manage.py')
+    if vim.fn.filereadable(manage_py) ~= 1 then
+        return nil
+    end
+
+    return match_django_settings_module(read_file(manage_py))
 end
 
 return M

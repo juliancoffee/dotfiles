@@ -2,14 +2,6 @@
 ---@module 'lazy'
 
 local utils = require('conf._utils')
-local _ = utils.fake_use
-local conf = {}
-conf.runner = utils.from_local_config(function(config)
-    return config.neotest_runner
-end)
-conf.django_settings_module = utils.from_local_config(function(config)
-    return config.DJANGO_SETTINGS_MODULE
-end)
 
 ---@type LazyPluginSpec
 local vim_test = {
@@ -32,18 +24,39 @@ local neotest = {
     config = function()
         local python = require('neotest-python')
         local neotest = require('neotest')
+        local root = utils.get_root {
+            'uv.lock',
+            'pyproject.toml',
+            'manage.py',
+            'pytest.toml',
+            '.pytest.toml',
+            'pytest.ini',
+            '.pytest.ini',
+            'tox.ini',
+            'setup.cfg',
+            'conftest.py',
+        }
+        local runner = 'unittest'
+        local django_settings_module
+
+        if root and utils.is_pytest_project(root) then
+            runner = 'pytest'
+        elseif root and utils.is_django_project(root) then
+            runner = 'django'
+            django_settings_module = utils.get_django_settings_module(root)
+        end
 
         ---@diagnostic disable-next-line: missing-fields
         neotest.setup {
             ---@diagnostic disable-next-line: missing-fields
             run = {
                 augment = function(tree, args)
-                    _(tree)
+                    utils.fake_use(tree)
 
-                    args.env = {
-                        DJANGO_SETTINGS_MODULE = conf.django_settings_module
-                            or 'mysite.settings',
-                    }
+                    if django_settings_module then
+                        args.env = args.env or {}
+                        args.env.DJANGO_SETTINGS_MODULE = django_settings_module
+                    end
 
                     return args
                 end,
@@ -54,7 +67,7 @@ local neotest = {
                     dap = {
                         justMyCode = false,
                     },
-                    runner = conf.runner or 'pytest',
+                    runner = runner,
                     is_test_file = function(file_path)
                         local Path = require('plenary.path')
                         local neotest_default = require('neotest-python.base')

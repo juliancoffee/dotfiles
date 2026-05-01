@@ -68,7 +68,7 @@ local dap = {
         -- enable logging
         dap.set_log_level('DEBUG')
         -- init python adapter
-        local root = utils.get_root()
+        local root = utils.get_root { 'uv.lock', 'pyproject.toml', 'manage.py' }
         if root and utils.is_uv_project(root) then
             require('dap-python').setup('uv')
         else
