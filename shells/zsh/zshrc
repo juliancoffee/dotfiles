@@ -20,6 +20,12 @@ function () {
     local completion_file first_line completion_function
     local -a completion_names
 
+    # opam autocompletes go here, I guess
+    if [ -r "$HOME/.opam/opam-init/init.zsh" ]
+    then
+        . "$HOME/.opam/opam-init/init.zsh" > /dev/null 2> /dev/null
+    fi
+
     for completion_file in "$completions_dir"/_*(N-.); do
         IFS= read -r first_line < "$completion_file" || continue
         [[ $first_line == '#compdef '* ]] || continue

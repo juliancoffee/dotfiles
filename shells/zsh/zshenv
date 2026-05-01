@@ -1,4 +1,4 @@
-ZDOTDIR=$HOME/.config/zsh
+export ZDOTDIR=$HOME/.config/zsh
 NOCOR=1
 
 # this line was probably added by cargo, but I did add `if` exprt so it doesn't
@@ -6,12 +6,6 @@ NOCOR=1
 if [ -r "$HOME/.cargo/env" ]
 then
     . "$HOME/.cargo/env"
-fi
-
-# opam init, similar to rust's above
-if [ -r "$HOME/.opam/opam-init/init.zsh" ]
-then
-    . "$HOME/.opam/opam-init/init.zsh" > /dev/null 2> /dev/null
 fi
 
 # bun completions
