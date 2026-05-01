@@ -24,7 +24,7 @@ set PATH $PATH $WORK/bin
 set PATH $PATH $HOME/.poetry/bin
 set PATH $PATH $HOME/.cargo/bin
 set PATH $PATH $HOME/.opam/default/bin
-set PATH $PATH $HOME/.local/bin
+set PATH $HOME/.local/bin $PATH
 set PATH $PATH $HOME/.yarn/bin
 set PATH $PATH $HOME/.gem/ruby/2.7.0/bin
 set PATH $PATH $PYENV_ROOT/bin
