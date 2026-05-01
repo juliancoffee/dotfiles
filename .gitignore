@@ -24,3 +24,6 @@ todo.txt
 node_modules/
 .playwright-cli/
 codex/skills/.system/
+
+# Shell stuff
+shells/fish/fish_variables
