@@ -70,6 +70,7 @@ fi
 
 # globals
 local WORK="$HOME/Workspace"
+
 # "main" function, because I do want my local variables to stay local
 function () {
     # some variables
@@ -78,7 +79,8 @@ function () {
     local VIM_RC="$HOME/.config/nvim/init.lua"
     export EDITOR="nvim"
 
-    # add ".local/bin" to path for locally installed scripts (like pipx)
+    # keep user-level executables first, by prepending to the path
+    # especially useful for uv/fnm types of installs
     export PATH="$HOME/.local/bin:$PATH"
     # opencode
     export PATH="$HOME/.opencode/bin:$PATH"
