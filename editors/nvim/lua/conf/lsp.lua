@@ -259,14 +259,27 @@ return {
             vtsls = {},
             ocamllsp = {},
             basedpyright = {
-                -- use `uv` to run inside proper environment
-                cmd = {
-                    'uv',
-                    'run',
-                    '--dev',
-                    'basedpyright-langserver',
-                    '--stdio',
-                },
+                cmd = function(dispatchers, config)
+                    local root = config.root_dir
+                    local cmd
+
+                    if utils.is_uv_project(root) then
+                        cmd = {
+                            'uv',
+                            'run',
+                            '--dev',
+                            'basedpyright-langserver',
+                            '--stdio',
+                        }
+                    else
+                        cmd = {
+                            'basedpyright-langserver',
+                            '--stdio',
+                        }
+                    end
+
+                    return vim.lsp.rpc.start(cmd, dispatchers)
+                end,
                 settings = {
                     -- let ruff/isort handle it
                     disableOrganizeImports = true,

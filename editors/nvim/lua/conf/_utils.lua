@@ -146,6 +146,14 @@ function M.find_in_parents(names, opts)
     end
 end
 
+--- Return `true` if path belongs to a uv-managed project.
+--- @param path string project root path
+--- @return boolean
+function M.is_uv_project(path)
+    return vim.fn.executable('uv') == 1
+        and vim.uv.fs_stat(vim.fs.joinpath(path, 'uv.lock')) ~= nil
+end
+
 --- Returns file content
 --- @param path string path to the file to read
 function M.filecontent(path)
