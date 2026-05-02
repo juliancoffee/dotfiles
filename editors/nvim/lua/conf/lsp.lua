@@ -220,7 +220,7 @@ return {
 
         -- Configuring servers and capabilities
         local capabilities = require('blink.cmp').get_lsp_capabilities()
-        local servers = {
+        local managed = {
             lua_ls = {},
             cssls = {},
             bashls = {},
@@ -258,6 +258,15 @@ return {
             },
             vtsls = {},
             ocamllsp = {},
+            rust_analyzer = {
+                settings = {
+                    ['rust-analyzer'] = {
+                        check = {
+                            command = 'clippy',
+                        },
+                    },
+                },
+            },
             basedpyright = {
                 cmd = function(dispatchers, config)
                     local root = config.root_dir
@@ -293,9 +302,22 @@ return {
             },
             ruff = {},
         }
+        local external = {
+            fluent_lsp = {
+                cmd = { 'fluent-lsp' },
+                filetypes = { 'fluent' },
+                root_markers = { 'fluent-lsp.toml', '.fluent-lsp.toml' },
+                workspace_required = true,
+            },
+        }
+
+        -- only load rust-analyzer if not banned
+        if utils.find_in_parents('nolsp', { type = 'file' }) then
+            managed.rust_analyzer = nil
+        end
 
         -- Install needed tools
-        local ensure_installed = vim.tbl_keys(servers or {})
+        local ensure_installed = vim.tbl_keys(managed or {})
         vim.list_extend(ensure_installed, {
             'stylua',
             'isort',
@@ -308,22 +330,8 @@ return {
             ensure_installed = ensure_installed,
         }
 
-        -- only load rust-analyzer if not banned
-        if utils.find_in_parents('nolsp', { type = 'file' }) then
-            servers.rust_analyzer = nil
-        else
-            servers.rust_analyzer = {
-                settings = {
-                    ['rust-analyzer'] = {
-                        check = {
-                            command = 'clippy',
-                        },
-                    },
-                },
-            }
-        end
-
-        -- configure ... stuff?
+        -- Register servers for neovim
+        local servers = vim.tbl_extend('force', managed, external)
         for name, server in pairs(servers) do
             server.capabilities = vim.tbl_deep_extend(
                 'force',
