@@ -16,7 +16,10 @@ Most changes should stay inside the repo. Running `config.py` changes local mach
 - Prefer `uv run ...` for Python commands and tests in this repo.
 - Prefer reading, searching, and tests before taking actions that affect install layout.
 - Read `README.md`, `config.py`, and relevant tests before changing installer behavior.
+- Add a short comment above each function explaining what it does.
+- The first line of a function comment must be short.
 - Keep changes minimal and avoid repo-wide restructuring unless the user explicitly requests it.
+- Review your code with `git diff` afterwards, to ensure code quality and simplicity.
 
 ## Notes
 - Repo naming and installed-path naming are different concerns.
