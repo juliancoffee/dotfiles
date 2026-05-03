@@ -19,7 +19,8 @@ Most changes should stay inside the repo. Running `config.py` changes local mach
 - Add a short comment above each function explaining what it does.
 - The first line of a function comment must be short.
 - Keep changes minimal and avoid repo-wide restructuring unless the user explicitly requests it.
-- Review your code with `git diff` afterwards, to ensure code quality and simplicity.
+- Review your code with `git diff` afterwards, to ensure code quality and simplicity. Read it!
+- Fix all error-hiding fallbacks, unneeded helper functions, and all other problems you'll find.
 
 ## Notes
 - Repo naming and installed-path naming are different concerns.

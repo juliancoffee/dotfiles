@@ -162,10 +162,7 @@ local on_attach = function(event)
         end, '[T]oggle Inlay [H]ints')
     end
 
-    if
-        client
-        and client:supports_method(codelens_method, event.buf)
-    then
+    if client and client:supports_method(codelens_method, event.buf) then
         -- Neovim runs the codelens on the current line, so we keep lenses fresh
         -- after common editing events.
         map('grx', vim.lsp.codelens.run, 'Run Code Lens')
