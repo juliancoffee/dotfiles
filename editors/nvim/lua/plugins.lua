@@ -62,6 +62,12 @@ function M.setup()
             -- until I configure it to sane behaviour
             enabled = true,
             opts = {
+                -- Skip popup-style buffers such as LSP hover windows.
+                buftypes = {
+                    '!nofile',
+                    '!prompt',
+                    '!popup',
+                },
                 filetypes = {
                     '*',
                     css = { css = true, css_fn = true },
