@@ -6,10 +6,10 @@
 local utils = require('conf._utils')
 local codelens_method = vim.lsp.protocol.Methods.textDocument_codeLens
 
--- Refresh codelenses for one buffer.
--- Skip buffers without codelens-capable clients so the shared autocmd stays
--- cheap for unrelated files.
-local refresh_codelens = function(bufnr)
+-- Enable codelens for one buffer.
+-- Neovim refreshes enabled codelenses automatically, so we only need to turn
+-- the feature on for buffers that actually have supporting clients.
+local enable_codelens = function(bufnr)
     local codelens_clients = vim.lsp.get_clients {
         bufnr = bufnr,
         method = codelens_method,
@@ -19,7 +19,7 @@ local refresh_codelens = function(bufnr)
         return
     end
 
-    vim.lsp.codelens.refresh { bufnr = bufnr }
+    vim.lsp.codelens.enable(true, { bufnr = bufnr })
 end
 
 -- Run code on LSP attach
@@ -163,10 +163,8 @@ local on_attach = function(event)
     end
 
     if client and client:supports_method(codelens_method, event.buf) then
-        -- Neovim runs the codelens on the current line, so we keep lenses fresh
-        -- after common editing events.
         map('grx', vim.lsp.codelens.run, 'Run Code Lens')
-        refresh_codelens(event.buf)
+        enable_codelens(event.buf)
     end
 
     -- Disable semantic highlighting
@@ -233,21 +231,6 @@ return {
             }),
             callback = on_attach,
         })
-        vim.api.nvim_create_autocmd(
-            { 'BufEnter', 'InsertLeave', 'BufWritePost' },
-            {
-                group = vim.api.nvim_create_augroup(
-                    'kickstart-lsp-codelens',
-                    { clear = true }
-                ),
-                -- Refresh globally instead of per-buffer attach/detach bookkeeping.
-                -- The helper itself filters out buffers without codelens support.
-                callback = function(event)
-                    refresh_codelens(event.buf)
-                end,
-            }
-        )
-
         -- Diagnostics configuration
         vim.diagnostic.config {
             -- Use virtual text to display errors
