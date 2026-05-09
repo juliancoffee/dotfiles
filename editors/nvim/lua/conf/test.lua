@@ -17,7 +17,10 @@ local neotest = {
         'nvim-neotest/nvim-nio',
         'nvim-lua/plenary.nvim',
         'antoinemadec/FixCursorHold.nvim',
-        'nvim-treesitter/nvim-treesitter',
+        {
+            'juliancoffeelab/nvim-treesitter',
+            branch = 'codex/fix-markdown-hover',
+        },
         'nvim-neotest/neotest-python',
     },
     event = 'VeryLazy',

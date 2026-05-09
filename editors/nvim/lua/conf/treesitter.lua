@@ -68,7 +68,9 @@ local ts_opts = {
 
 ---@type LazyPluginSpec
 local treesitter = {
-    'nvim-treesitter/nvim-treesitter',
+    'juliancoffeelab/nvim-treesitter',
+    branch = 'codex/fix-markdown-hover',
+    -- branch = 'master',
     build = ':TSUpdate',
     event = 'VeryLazy',
     config = function()
