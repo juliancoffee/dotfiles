@@ -436,7 +436,7 @@ return {
         }
 
         -- only load rust-analyzer if not banned
-        if utils.find_in_parents('nolsp', { type = 'file' }) then
+        if utils.find_at_root('nolsp', { type = 'file' }) then
             managed.rust_analyzer = nil
         end
 

@@ -19,9 +19,7 @@ local function match_django_settings_module_in_pyproject(content)
         return nil
     end
 
-    return section:match(
-        'django_settings_module%s*=%s*[\'"]([^\'"]+)[\'"]'
-    )
+    return section:match('django_settings_module%s*=%s*[\'"]([^\'"]+)[\'"]')
 end
 
 --- Return `true` if in `termux` environment
@@ -117,15 +115,16 @@ function M.get_root(markers, toplevel, counter)
     return find_root(toplevel or vim.fn.getcwd(), counter or 25)
 end
 
---- Find a file or directory in the current path or its ancestors.
+--- Find a file or directory at the detected project root.
 ---
---- The search checks only the current directory at each level and stops once
---- a stop marker is found. This avoids recursive downward scans in large trees.
+--- This helper first resolves the nearest root directory using stop markers
+--- such as `.git`, then checks only that root for the requested names.
+--- It does not scan intermediate parent directories.
 ---
 --- @param names string|string[] files or directories to find
 --- @param opts? {path?: string, stop?: string|string[], type?: string}
 --- @return string?
-function M.find_in_parents(names, opts)
+function M.find_at_root(names, opts)
     opts = opts or {}
 
     if type(names) == 'string' then
@@ -138,37 +137,17 @@ function M.find_in_parents(names, opts)
     end
 
     local path = opts.path or vim.api.nvim_buf_get_name(0)
-    if path == '' then
-        path = vim.fn.getcwd()
+    local root = M.get_root(stop, path == '' and vim.fn.getcwd() or path)
+    if not root then
+        return nil
     end
 
-    path = M.absolute_path(path)
-
-    local stat = vim.uv.fs_stat(path)
-    if stat and stat.type ~= 'directory' then
-        path = M.get_parent(path)
-    end
-
-    while path do
-        for _, name in ipairs(names) do
-            local candidate = vim.fs.joinpath(path, name)
-            local candidate_stat = vim.uv.fs_stat(candidate)
-            if
-                candidate_stat
-                and (not opts.type or candidate_stat.type == opts.type)
-            then
-                return candidate
-            end
+    for _, name in ipairs(names) do
+        local candidate = vim.fs.joinpath(root, name)
+        local candidate_stat = vim.uv.fs_stat(candidate)
+        if candidate_stat and (not opts.type or candidate_stat.type == opts.type) then
+            return candidate
         end
-
-        for _, marker in ipairs(stop) do
-            local marker_path = vim.fs.joinpath(path, marker)
-            if vim.uv.fs_stat(marker_path) then
-                return nil
-            end
-        end
-
-        path = M.get_parent(path)
     end
 end
 
@@ -243,9 +222,8 @@ end
 function M.get_django_settings_module(path)
     local pyproject = vim.fs.joinpath(path, 'pyproject.toml')
     if vim.fn.filereadable(pyproject) == 1 then
-        local settings_module = match_django_settings_module_in_pyproject(
-            read_file(pyproject)
-        )
+        local settings_module =
+            match_django_settings_module_in_pyproject(read_file(pyproject))
         if settings_module then
             return settings_module
         end
