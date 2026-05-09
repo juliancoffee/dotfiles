@@ -137,7 +137,15 @@ function M.find_at_root(names, opts)
     end
 
     local path = opts.path or vim.api.nvim_buf_get_name(0)
-    local root = M.get_root(stop, path == '' and vim.fn.getcwd() or path)
+    path = path == '' and vim.fn.getcwd() or path
+    path = M.absolute_path(path)
+
+    local stat = vim.uv.fs_stat(path)
+    if stat and stat.type ~= 'directory' then
+        path = M.get_parent(path)
+    end
+
+    local root = path and M.get_root(stop, path) or nil
     if not root then
         return nil
     end
