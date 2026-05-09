@@ -21,6 +21,7 @@ Most changes should stay inside the repo. Running `config.py` changes local mach
 - Keep changes minimal and avoid repo-wide restructuring unless the user explicitly requests it.
 - Review your code with `git diff` afterwards, to ensure code quality and simplicity. Read it!
 - Fix all error-hiding fallbacks, unneeded helper functions, and all other problems you'll find.
+- Commits should be of form `(<program/area>): <change>`, use `git log` to get inspiration.
 
 ## Notes
 - Repo naming and installed-path naming are different concerns.
