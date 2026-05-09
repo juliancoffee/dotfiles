@@ -226,6 +226,7 @@ local to_opts = {
 ---@type LazyPluginSpec
 return {
     'nvim-treesitter/nvim-treesitter-textobjects',
+    branch = 'master',
     dependencies = { treesitter },
     enabled = function()
         return not require('conf._utils').is_termux()
