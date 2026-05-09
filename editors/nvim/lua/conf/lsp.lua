@@ -5,6 +5,94 @@
 
 local utils = require('conf._utils')
 local codelens_method = vim.lsp.protocol.Methods.textDocument_codeLens
+local codelens_namespace_prefix = 'nvim.lsp.codelens:'
+local codelens_extmark_patch_installed = false
+
+-- Return the namespace name for one extmark namespace id.
+-- This lets us target Neovim's built-in codelens extmarks without touching
+-- unrelated virtual text from other features.
+local namespace_name = function(namespace)
+    for name, id in pairs(vim.api.nvim_get_namespaces()) do
+        if id == namespace then
+            return name
+        end
+    end
+end
+
+-- Find the leading indentation for one line.
+-- We reuse the line's own indentation so codelenses attach to the first
+-- visible character instead of drifting to the exact symbol column.
+local line_indent = function(buffer, line)
+    local text = vim.api.nvim_buf_get_lines(buffer, line, line + 1, false)[1]
+
+    if type(text) ~= 'string' then
+        return ''
+    end
+
+    return string.match(text, '^%s*') or ''
+end
+
+-- Normalize Neovim's built-in codelens extmarks.
+-- Neovim 0.12 pads codelenses to the symbol column, which makes them look
+-- random in indented code. Replace that padding with the target line's
+-- indentation so the lens attaches to the first non-empty character instead.
+local normalize_codelens_extmark_opts = function(buffer, line, opts)
+    if not (opts and opts.virt_lines and opts.virt_lines_above) then
+        return opts
+    end
+
+    local virt_lines = vim.deepcopy(opts.virt_lines)
+    local first_line = virt_lines[1]
+    local first_chunk = first_line and first_line[1]
+    local first_text = first_chunk and first_chunk[1]
+
+    if type(first_text) == 'string' and string.match(first_text, '^%s+$') then
+        local indent = line_indent(buffer, line)
+        first_line[1] = { indent, first_chunk[2] }
+
+        if vim.tbl_isempty(first_line) then
+            table.insert(first_line, { '', 'LspCodeLens' })
+        end
+    end
+
+    return vim.tbl_extend('force', opts, {
+        virt_lines = virt_lines,
+    })
+end
+
+-- Patch Neovim's codelens renderer once.
+-- The built-in renderer uses a regular extmark call, so a tiny wrapper is the
+-- least invasive way to keep codelenses readable until upstream exposes a real
+-- layout option for them.
+local patch_codelens_extmarks = function()
+    if codelens_extmark_patch_installed then
+        return
+    end
+
+    local original_set_extmark = vim.api.nvim_buf_set_extmark
+
+    vim.api.nvim_buf_set_extmark = function(
+        buffer,
+        namespace,
+        line,
+        column,
+        opts
+    )
+        local name = namespace_name(namespace)
+
+        if
+            name
+            and vim.startswith(name, codelens_namespace_prefix)
+            and opts
+        then
+            opts = normalize_codelens_extmark_opts(buffer, line, opts)
+        end
+
+        return original_set_extmark(buffer, namespace, line, column, opts)
+    end
+
+    codelens_extmark_patch_installed = true
+end
 
 -- Enable codelens for one buffer.
 -- Neovim refreshes enabled codelenses automatically, so we only need to turn
@@ -223,6 +311,8 @@ return {
     },
     config = function()
         local schemastore = require('schemastore')
+
+        patch_codelens_extmarks()
 
         -- Add autocommand for LSP attach event
         vim.api.nvim_create_autocmd('LspAttach', {
