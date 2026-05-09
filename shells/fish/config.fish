@@ -6,7 +6,9 @@
 alias upd="source $HOME/.config/fish/config.fish"
 
 function fish_greeting
-    cal
+    if command -q cal
+        cal
+    end
 end
 
 function fish_command_not_found
