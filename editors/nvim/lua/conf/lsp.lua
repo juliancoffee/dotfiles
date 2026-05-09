@@ -269,6 +269,19 @@ return {
                 },
             },
             taplo = {
+                cmd = (function()
+                    local cargo_taplo = vim.fs.normalize(
+                        vim.fn.expand '~/.cargo/bin/taplo'
+                    )
+
+                    if vim.uv.fs_stat(cargo_taplo) then
+                        return {
+                            cargo_taplo,
+                            'lsp',
+                            'stdio',
+                        }
+                    end
+                end)(),
                 settings = {
                     evenBetterToml = {
                         schema = {
