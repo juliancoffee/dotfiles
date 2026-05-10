@@ -20,6 +20,7 @@ return {
         vim.g.loaded_netrwPlugin = 1
         vim.g.loaded_netrw = 1
     end,
+    -- Configure the file tree UI and netrw replacement behavior.
     config = function()
         require('neo-tree').setup {
             log_level = 'debug',

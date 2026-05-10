@@ -2,14 +2,6 @@
 
 local M = {}
 local logging_enabled = false
-local default_notify_level = vim.log.levels.INFO
-
---- Return an absolute path for one Neovim state log file.
---- @param name string basename without `.log`
---- @return string
-function M.state_log_path(name)
-    return vim.fs.joinpath(vim.fn.stdpath('state'), name .. '.log')
-end
 
 --- Append one formatted log entry to a file.
 ---
@@ -32,80 +24,41 @@ function M.append_log(path, level, msg)
     vim.fn.writefile(payload, path, 'a')
 end
 
---- Convert one numeric `vim.notify` level into a stable string label.
---- @param level? integer|string
---- @return string
-function M.notify_level_name(level)
-    if type(level) ~= 'number' then
-        return tostring(level or 'INFO')
-    end
-
-    for name, value in pairs(vim.log.levels) do
-        if value == level then
-            return name
-        end
-    end
-
-    return tostring(level)
-end
-
 --- Enable persistent Neovim error-oriented logging.
 ---
---- This wires together Neovim's separate logging surfaces so startup and
+--- This wires together Neovim's custom logging surfaces so startup and
 --- plugin failures are harder to lose:
---- * `verbose.log` via `verbosefile`
---- * `session.log` via `vim.notify` mirroring and lifecycle markers
---- * `messages.log` via `:messages` dump on exit
---- * `lsp.log` via debug-level LSP logging
+--- * `nvim.log` for `WARN`, `ERROR`, `ERRMSG`, and `:messages`
+--- * `lsp.log` kept separate for the built-in LSP logger
 ---
 --- The setup is idempotent and safe to call multiple times.
----
---- @param opts? {session_log?: string, verbose_log?: string, messages_log?: string, verbose?: integer, lsp_log_level?: string|integer, notify_log_level?: integer}
-function M.enable_persistent_error_logging(opts)
-    local logging_state = {}
-    opts = opts or {}
+function M.enable_persistent_error_logging()
+    local main_log = vim.fs.joinpath(vim.fn.stdpath('log'), 'nvim.log')
 
-    logging_state.session_log = opts.session_log or M.state_log_path('session')
-    logging_state.verbose_log = opts.verbose_log or M.state_log_path('verbose')
-    logging_state.messages_log = opts.messages_log
-        or M.state_log_path('messages')
-    logging_state.notify_log_level = opts.notify_log_level
-        or default_notify_level
-
-    vim.opt.verbosefile = logging_state.verbose_log
-    vim.opt.verbose = opts.verbose or 1
-
-    if vim.lsp and vim.lsp.log and vim.lsp.log.set_level then
-        local ok, err =
-            pcall(vim.lsp.log.set_level, opts.lsp_log_level or 'debug')
-        if not ok then
-            M.append_log(
-                logging_state.session_log,
-                'ERROR',
-                'Failed to set LSP log level: ' .. tostring(err)
-            )
-        end
-    else
-        M.append_log(
-            logging_state.session_log,
-            'WARN',
-            'LSP log level hook unavailable: vim.lsp.log.set_level'
-                .. ' is missing'
-        )
+    if vim.env.LSP_DEBUG then
+        local lsp_debug_log =
+            vim.fs.joinpath(vim.fn.stdpath('state'), 'lsp-debug.log')
+        vim.lsp.log._set_filename(lsp_debug_log)
+        vim.lsp.log.set_level('debug')
     end
 
     if not logging_enabled then
         local original_notify = vim.notify
         ---@diagnostic disable-next-line: duplicate-set-field
         vim.notify = function(msg, level, notify_opts)
-            local numeric_level = type(level) == 'number' and level
-                or logging_state.notify_log_level
-            if numeric_level >= logging_state.notify_log_level then
-                M.append_log(
-                    logging_state.session_log,
-                    M.notify_level_name(level),
-                    msg
-                )
+            local label = tostring(level or 'INFO')
+
+            if type(level) == 'number' then
+                for name, value in pairs(vim.log.levels) do
+                    if value == level then
+                        label = name
+                        break
+                    end
+                end
+            end
+
+            if label == 'WARN' or label == 'ERROR' then
+                M.append_log(main_log, label, msg)
             end
             return original_notify(msg, level, notify_opts)
         end
@@ -115,44 +68,22 @@ function M.enable_persistent_error_logging(opts)
                 clear = true,
             }),
             callback = function()
-                local ok, messages = pcall(function()
-                    return vim.api.nvim_exec2('silent messages', {
-                        output = true,
-                    }).output
-                end)
+                local messages = vim.api.nvim_exec2('silent messages', {
+                    output = true,
+                }).output
 
-                if ok and messages ~= '' then
-                    vim.fn.writefile(
-                        vim.split(messages, '\n'),
-                        logging_state.messages_log,
-                        'a'
-                    )
+                if messages ~= '' then
+                    M.append_log(main_log, 'MESSAGES', messages)
                 end
 
                 if vim.v.errmsg ~= '' then
-                    M.append_log(
-                        logging_state.session_log,
-                        'ERRMSG',
-                        vim.v.errmsg
-                    )
+                    M.append_log(main_log, 'ERRMSG', vim.v.errmsg)
                 end
-
-                M.append_log(
-                    logging_state.session_log,
-                    'INFO',
-                    '=== nvim session end ==='
-                )
             end,
         })
 
         logging_enabled = true
     end
-
-    M.append_log(
-        logging_state.session_log,
-        'INFO',
-        '=== nvim session start ==='
-    )
 end
 
 return M
