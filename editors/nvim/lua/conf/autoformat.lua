@@ -30,6 +30,9 @@ return {
             rust = {
                 'rustfmt',
             },
+            ocaml = {
+                'ocamlformat',
+            },
             python = {
                 'isort',
                 'ruff_format',
