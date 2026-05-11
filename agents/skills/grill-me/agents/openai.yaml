@@ -1,0 +1,4 @@
+interface:
+  display_name: "Grill Me"
+  short_description: "Stress-test a plan with focused questions"
+  default_prompt: "Grill this plan and ask me the hard questions one at a time."

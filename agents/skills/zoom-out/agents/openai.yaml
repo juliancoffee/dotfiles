@@ -1,0 +1,4 @@
+interface:
+  display_name: "Zoom Out"
+  short_description: "Explain the bigger picture around a code area"
+  default_prompt: "Zoom out and give me a higher-level map of this part of the codebase."

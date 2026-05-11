@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ubiquitous Language"
+  short_description: "Build a domain glossary and sharpen terminology"
+  default_prompt: "Extract the domain language here and propose a clean canonical glossary."

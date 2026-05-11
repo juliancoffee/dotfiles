@@ -1,0 +1,4 @@
+interface:
+  display_name: "TDD"
+  short_description: "Use a red-green-refactor workflow"
+  default_prompt: "Implement this with TDD: one failing test at a time."

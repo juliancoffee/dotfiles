@@ -1,0 +1,4 @@
+interface:
+  display_name: "Rust Hotpath Profiler"
+  short_description: "Benchmark and profile Rust hot paths on macOS"
+  default_prompt: "Use $rust-hotpath-profiler to benchmark a Rust hot path and print a folded-stack hotspot tree."

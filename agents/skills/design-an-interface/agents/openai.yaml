@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design an Interface"
+  short_description: "Compare multiple API or module interface shapes"
+  default_prompt: "Design a few different interface options for this module and compare them."

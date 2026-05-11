@@ -1,0 +1,4 @@
+interface:
+  display_name: "Obsidian Vault"
+  short_description: "Find and manage notes in an Obsidian vault"
+  default_prompt: "Help me find or manage notes in my Obsidian vault and ask for the vault root if needed."

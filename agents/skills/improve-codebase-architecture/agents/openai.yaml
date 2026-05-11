@@ -1,0 +1,4 @@
+interface:
+  display_name: "Improve Architecture"
+  short_description: "Find architectural friction and deeper module opportunities"
+  default_prompt: "Review this codebase architecture and suggest a few high-value deepening opportunities."

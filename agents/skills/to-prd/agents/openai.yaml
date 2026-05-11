@@ -1,0 +1,4 @@
+interface:
+  display_name: "To PRD"
+  short_description: "Turn feature context into a product requirements doc"
+  default_prompt: "Turn this conversation and repo context into a clean PRD."
