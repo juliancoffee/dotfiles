@@ -1,6 +1,6 @@
 ---
 name: project-bootstrap
-description: Use when the user wants to create, scaffold, initialize, or bootstrap a brand-new project or repository. Pick a safe workspace path first, strongly prefer `~/Workspace/lab` on this machine, avoid fuzzying into user-content folders like Documents or Movies, then initialize the project with language-appropriate tooling such as `uv init`, `cargo init`, `dune`, or Vite. For Python, prefer Hatch, pytest, and `src/` layout.
+description: Use when the user wants to create, scaffold, initialize, or bootstrap a brand-new project or repository. Pick a safe workspace path first, strongly prefer `~/Workspace/lab` on this machine, avoid fuzzying into user-content folders like Documents or Movies, then initialize the project with language-appropriate tooling such as `uv init`, `cargo init`, `dune`, or Vite. For Python, prefer Hatch, pytest, and a lightweight single-file start unless the project clearly needs package structure.
 metadata:
   short-description: Create new projects in a safe workspace with sensible defaults
 ---
