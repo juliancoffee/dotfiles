@@ -1,0 +1,4 @@
+interface:
+  display_name: "DocTools"
+  short_description: "Process docs with uv --with"
+  default_prompt: "Use $doctools to process this local file with ephemeral Python dependencies instead of stopping at missing tools."
