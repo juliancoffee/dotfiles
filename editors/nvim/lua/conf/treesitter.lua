@@ -113,6 +113,7 @@ local treesitter = {
     end,
 }
 
+--- Build a query mapping entry.
 local function mapquery(query, desc)
     return {
         query = query,
@@ -225,8 +226,9 @@ local to_opts = {
 
 ---@type LazyPluginSpec
 return {
-    'nvim-treesitter/nvim-treesitter-textobjects',
-    branch = 'master',
+    'juliancoffeelab/nvim-treesitter-textobjects',
+    branch = 'codex/fix-tsrange-nil-nodes',
+    -- branch = 'master',
     dependencies = { treesitter },
     enabled = function()
         return not require('conf._utils').is_termux()
