@@ -141,7 +141,7 @@ function M.find_at_root(names, opts)
     path = M.absolute_path(path)
 
     local stat = vim.uv.fs_stat(path)
-    if stat and stat.type ~= 'directory' then
+    if not stat or stat.type ~= 'directory' then
         path = M.get_parent(path)
     end
 
