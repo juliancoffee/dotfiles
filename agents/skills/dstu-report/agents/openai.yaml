@@ -1,0 +1,4 @@
+interface:
+  display_name: "DSTU Report"
+  short_description: "Use the local DSTU Typst report template"
+  default_prompt: "Use $dstu-report to create or revise a Typst report with the local DSTU template."

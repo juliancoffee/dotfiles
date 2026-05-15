@@ -1,0 +1,13 @@
+[package]
+name = "dstu-report"
+version = "0.1.0"
+entrypoint = "lib.typ"
+authors = ["Codex"]
+license = "MIT-0"
+description = "A Typst template package for DSTU 3008:2015-style reports."
+compiler = "0.14.0"
+repository = "https://example.com/dstu-report"
+
+[template]
+path = "template"
+entrypoint = "main.typ"
