@@ -1,3 +1,4 @@
+## Render the shell prompt.
 function fish_prompt --description 'Write out the prompt'
     set -l last_status $status
     set -l normal (set_color normal)
@@ -5,6 +6,7 @@ function fish_prompt --description 'Write out the prompt'
     set -l cwd_color (set_color $fish_color_cwd)
     set -l vcs_color (set_color brpurple)
     set -l prompt_status ""
+    set -l prompt_prefix (prompt_login)' '
 
     # Since we display the prompt on a new line allow the directory names to be longer.
     set -q fish_prompt_pwd_dir_length
@@ -25,6 +27,10 @@ function fish_prompt --description 'Write out the prompt'
         set prompt_status $status_color "[" $last_status "]" $normal
     end
 
-    echo -s (prompt_login) ' ' $cwd_color (prompt_pwd) $vcs_color (fish_vcs_prompt) $normal ' ' $prompt_status
+    if set -q FISH_HIDE
+        set prompt_prefix ""
+    end
+
+    echo -s $prompt_prefix $cwd_color (prompt_pwd) $vcs_color (fish_vcs_prompt) $normal ' ' $prompt_status
     echo -n -s $status_color $suffix ' ' $normal
 end
