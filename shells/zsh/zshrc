@@ -91,6 +91,11 @@ function () {
     # opencode
     export PATH="$HOME/.opencode/bin:$PATH"
 
+    # initialize fnm so the selected Node version is added to PATH
+    if command -v fnm > /dev/null 2>&1; then
+        eval "$(fnm env --shell zsh)"
+    fi
+
     # add Bun-related paths
     export BUN_INSTALL="$HOME/.bun"
     export PATH="$BUN_INSTALL/bin:$PATH"
