@@ -105,3 +105,17 @@ uv run --with matplotlib python scripts/make_chart.py assets/examples/chart-data
   Use for figures, tables, and cross-references.
 - `assets/examples/references.typ`
   Use for linked numeric citations and bibliography rows.
+
+## Code blocks
+
+Prefer normal fenced code blocks for static code samples in report text.
+
+```typ
+```python
+print("hello")
+```
+```
+
+Do not hand-write manual raw-function calls for ordinary examples unless the
+content is being generated programmatically or a fenced block cannot express
+the needed Typst behavior.

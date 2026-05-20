@@ -184,21 +184,24 @@
 
 #let report-table(body) = block(width: 100%)[
   #set par(justify: false, first-line-indent: 0pt, leading: 1.2em)
-  #set text(hyphenate: false)
+  #set text(hyphenate: true)
   #body
 ]
 
+// Renders a DSTU image figure.
 #let dstu-image-figure(body, caption, width: 100%, key: none) = context [
   #dstu-image-counter.step()
   #let caption-line = [Рисунок #dstu-image-number() -- #caption]
-  #align(center)[#box(width: width, body)]
-  #v(6pt)
   #align(center)[
     #if key != none {
-      [#caption-line #label(key)]
+      box(width: width, body)
     } else {
-      caption-line
+      box(width: width, body)
     }
+  ]#if key != none { label(key) }
+  #v(6pt)
+  #align(center)[
+    #caption-line
   ]
   #v(6pt)
 ]
@@ -316,10 +319,16 @@
 
   // Issue #1595 Fix: Non-latin enumerations (lists) are cursed
   let enum-depth = state("enum-depth", 0)
+  let table-depth = state("table-depth", 0)
   show enum: it => {
     enum-depth.update(d => d + 1)
     it
     enum-depth.update(d => d - 1)
+  }
+  show table: it => {
+    table-depth.update(d => d + 1)
+    it
+    table-depth.update(d => d - 1)
   }
   set enum(
     indent: 1.25cm,
@@ -358,11 +367,25 @@
         it,
       )
     } else {
-      box(
-        inset: (x: 2pt, y: 0pt),
-        radius: 2pt,
-        text(font: default-mono-font, size: 0.95em, it.text),
-      )
+      let raw-text = if table-depth.get() > 0 {
+        it.text
+          .replace("/", "/​")
+          .replace("_", "_​")
+          .replace("-", "-​")
+          .replace(".", ".​")
+      } else {
+        it.text
+      }
+
+      if table-depth.get() > 0 {
+        text(font: default-mono-font, size: 0.95em, raw-text)
+      } else {
+        box(
+          inset: (x: 2pt, y: 0pt),
+          radius: 2pt,
+          text(font: default-mono-font, size: 0.95em, raw-text),
+        )
+      }
     }
   }
 

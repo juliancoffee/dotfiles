@@ -102,6 +102,23 @@ Examples live here:
 - `assets/examples/figures-and-tables.typ`
 - `assets/examples/references.typ`
 
+## Code Blocks
+
+Prefer normal fenced code blocks for static examples:
+
+```typ
+```python
+print("hello")
+```
+```
+
+Do not hand-write manual raw-function calls for ordinary code samples in user
+documents.
+
+Use explicit raw-function calls only when the raw content is being generated
+programmatically or when a Typst-specific constraint makes a fenced block
+insufficient.
+
 ## Images And Charts
 
 You are allowed to prepare supporting visual assets when the document needs them.
