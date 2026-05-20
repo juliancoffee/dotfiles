@@ -80,6 +80,28 @@ set -U WORK "$HOME/Workspace"
 set -U CONFIG "$HOME/.config"
 set -U DOWNLOADS "$HOME/Downloads"
 
+# Complete directories relative to a configured base path.
+function __complete_relative_directories --argument-names base
+    set -l token (commandline -ct)
+    set -l prefix ""
+    set -l search_dir $base
+
+    if string match -q -- '*/' $token
+        set prefix $token
+        set search_dir "$base/"(string trim -r -c / -- $prefix)
+    else if string match -q -- '*/*' $token
+        set prefix (string replace -r '/[^/]*$' '/' -- $token)
+        set search_dir "$base/"(string trim -r -c / -- $prefix)
+    end
+
+    test -d "$search_dir"; or return
+
+    for entry in "$search_dir"/*
+        test -d "$entry"; or continue
+        printf '%s\tDirectory\n' (string escape -- "$prefix"(path basename -- $entry)/)
+    end
+end
+
 function toterm
     sh -c "cat $argv[1] | nc termbin.com 9999 | xclip -selection clipboard"
 end
@@ -87,22 +109,22 @@ end
 function store
     cd "$STORAGE/$argv[1]"
 end
-complete -c store -x -a "(__fish_complete_directories ($STORAGE))" 
+complete -c store -x -a '(__complete_relative_directories $STORAGE)'
 
 function cdwork 
     cd "$WORK/$argv[1]"
 end
-complete -c cdwork -x -a "(__fish_complete_directories ($WORK))" 
+complete -c cdwork -x -a '(__complete_relative_directories $WORK)'
 
 function cdconf 
     cd "$CONFIG/$argv[1]"
 end
-complete -c cdconf -x -a "(__fish_complete_directories ($CONFIG))" 
+complete -c cdconf -x -a '(__complete_relative_directories $CONFIG)'
 
 function cdload
     cd "$DOWNLOADS/$argv[1]"
 end
-complete -c cdload -x -a "(__fish_complete_directories ($DOWNLOADS))" 
+complete -c cdload -x -a '(__complete_relative_directories $DOWNLOADS)'
 
 #dotfiles
 set -U DOTFILES "$HOME/.config/dotfiles"
@@ -112,7 +134,7 @@ end
 function cddot
     cd "$DOTFILES/$argv[1]"
 end
-complete -c cddot -x -a "(__fish_complete_directories ($DOTFILES))" 
+complete -c cddot -x -a '(__complete_relative_directories $DOTFILES)'
 
 #pyenv
 if command -v pyenv 1>/dev/null 2>&1
