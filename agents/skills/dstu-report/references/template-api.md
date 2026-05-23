@@ -6,7 +6,7 @@ Use the bundled examples in `assets/examples/` as the primary reference patterns
 
 When working on a user's real project, do not copy the bundled package into that
 project by default. Install it as a Typst local package with
-`scripts/install_local_package.sh` and import it through `@local/...`.
+`python3 scripts/install_local_package.py` and import it through `@local/...`.
 
 ## Main entrypoint
 

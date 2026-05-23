@@ -67,7 +67,7 @@ spray into arbitrary repos.
 Instead:
 
 1. install the bundled package into Typst's local package directory with
-   `scripts/install_local_package.sh`;
+   `python3 scripts/install_local_package.py`;
 2. create the user's actual `.typ` file where the user wants it;
 3. have the document import the package through Typst's local package
    mechanism, not through direct file paths.
