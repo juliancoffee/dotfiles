@@ -2,7 +2,10 @@
 --- Config entry point
 
 --- NOTE: to introduce new module, add it to lua/ folder
-require('conf._log_utils').enable_persistent_error_logging()
+local log_utils = require('conf._log_utils')
+
+log_utils.enable_persistent_error_logging()
+log_utils.create_log_commands()
 
 local plugins = require('plugins')
 

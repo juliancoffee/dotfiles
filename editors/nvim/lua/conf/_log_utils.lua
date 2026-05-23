@@ -3,6 +3,45 @@
 local M = {}
 local logging_enabled = false
 
+--- Return the main Neovim log path.
+---
+--- @return string
+function M.main_log_path()
+    return vim.fs.joinpath(vim.fn.stdpath('log'), 'nvim.log')
+end
+
+--- Return the active LSP log path.
+---
+--- @return string
+function M.lsp_log_path()
+    return vim.lsp.log.get_filename()
+end
+
+--- Open one log file in the current window.
+---
+--- @param path string absolute log file path
+function M.open_log(path)
+    vim.cmd.edit(vim.fn.fnameescape(path))
+end
+
+--- Register commands for opening log files.
+---
+--- This adds a short alias for the main Neovim log and one command for the
+--- active LSP log file.
+function M.create_log_commands()
+    vim.api.nvim_create_user_command('Log', function()
+        M.open_log(M.main_log_path())
+    end, {
+        desc = 'Open the main Neovim log file',
+    })
+
+    vim.api.nvim_create_user_command('LspLog', function()
+        M.open_log(M.lsp_log_path())
+    end, {
+        desc = 'Open the active LSP log file',
+    })
+end
+
 --- Append one formatted log entry to a file.
 ---
 --- If `msg` contains multiple lines, each line receives the same timestamp
@@ -33,7 +72,7 @@ end
 ---
 --- The setup is idempotent and safe to call multiple times.
 function M.enable_persistent_error_logging()
-    local main_log = vim.fs.joinpath(vim.fn.stdpath('log'), 'nvim.log')
+    local main_log = M.main_log_path()
 
     if vim.env.LSP_DEBUG then
         local lsp_debug_log =

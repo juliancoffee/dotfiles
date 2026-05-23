@@ -3,6 +3,27 @@
 
 local is_diffing_master = false
 
+--- Make hunk motions participate in tree-sitter repeats.
+local function make_hunk_repeatables(ts_repeat_move, next_hunk, prev_hunk)
+    if ts_repeat_move.make_repeatable_move_pair then
+        return ts_repeat_move.make_repeatable_move_pair(next_hunk, prev_hunk)
+    end
+
+    local repeatable_hunk_move = ts_repeat_move.make_repeatable_move(function(opts)
+        if opts.forward then
+            next_hunk()
+        else
+            prev_hunk()
+        end
+    end)
+
+    return function()
+        repeatable_hunk_move { forward = true }
+    end, function()
+        repeatable_hunk_move { forward = false }
+    end
+end
+
 local function first_existing_base()
     for _, base in ipairs { 'main', 'master' } do
         local result = vim.system({
@@ -129,7 +150,7 @@ return {
 
             -- Movements
             local has_ts_moves, ts_repeat_move = pcall(function()
-                return require('nvim-treesitter.textobjects.repeatable_move')
+                return require('nvim-treesitter-textobjects.repeatable_move')
             end)
 
             local next_hunk, prev_hunk =
@@ -140,7 +161,8 @@ return {
                 end
 
             if has_ts_moves then
-                next_hunk, prev_hunk = ts_repeat_move.make_repeatable_move_pair(
+                next_hunk, prev_hunk = make_hunk_repeatables(
+                    ts_repeat_move,
                     next_hunk,
                     prev_hunk
                 )
