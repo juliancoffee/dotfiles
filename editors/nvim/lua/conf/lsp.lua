@@ -5,72 +5,78 @@
 
 local utils = require('conf._utils')
 local codelens_method = vim.lsp.protocol.Methods.textDocument_codeLens
-local codelens_namespace_prefix = 'nvim.lsp.codelens:'
-local codelens_extmark_patch_installed = false
-
--- Return the namespace name for one extmark namespace id.
--- This lets us target Neovim's built-in codelens extmarks without touching
--- unrelated virtual text from other features.
-local namespace_name = function(namespace)
-    for name, id in pairs(vim.api.nvim_get_namespaces()) do
-        if id == namespace then
-            return name
-        end
-    end
-end
-
--- Find the leading indentation for one line.
--- We reuse the line's own indentation so codelenses attach to the first
--- visible character instead of drifting to the exact symbol column.
-local line_indent = function(buffer, line)
-    local text = vim.api.nvim_buf_get_lines(buffer, line, line + 1, false)[1]
-
-    if type(text) ~= 'string' then
-        return ''
-    end
-
-    return string.match(text, '^%s*') or ''
-end
-
--- Normalize Neovim's built-in codelens extmarks.
--- Neovim 0.12 pads codelenses to the symbol column, which makes them look
--- random in indented code. Replace that padding with the target line's
--- indentation so the lens attaches to the first non-empty character instead.
-local normalize_codelens_extmark_opts = function(buffer, line, opts)
-    if not (opts and opts.virt_lines and opts.virt_lines_above) then
-        return opts
-    end
-
-    local virt_lines = vim.deepcopy(opts.virt_lines)
-    local first_line = virt_lines[1]
-    local first_chunk = first_line and first_line[1]
-    local first_text = first_chunk and first_chunk[1]
-
-    if type(first_text) == 'string' and string.match(first_text, '^%s+$') then
-        local indent = line_indent(buffer, line)
-        first_line[1] = { indent, first_chunk[2] }
-
-        if vim.tbl_isempty(first_line) then
-            table.insert(first_line, { '', 'LspCodeLens' })
-        end
-    end
-
-    return vim.tbl_extend('force', opts, {
-        virt_lines = virt_lines,
-    })
-end
+local codelens_enabled_var = 'dotfiles_codelens_enabled'
 
 -- Patch Neovim's codelens renderer once.
 -- The built-in renderer uses a regular extmark call, so a tiny wrapper is the
 -- least invasive way to keep codelenses readable until upstream exposes a real
 -- layout option for them.
 local patch_codelens_extmarks = function()
+    local codelens_namespace_prefix = 'nvim.lsp.codelens:'
+    local codelens_extmark_patch_installed = false
+
+    -- Return the namespace name for one extmark namespace id.
+    -- This lets us target Neovim's built-in codelens extmarks without touching
+    -- unrelated virtual text from other features.
+    local namespace_name = function(namespace)
+        for name, id in pairs(vim.api.nvim_get_namespaces()) do
+            if id == namespace then
+                return name
+            end
+        end
+    end
+
+    -- Find the leading indentation for one line.
+    -- We reuse the line's own indentation so codelenses attach to the first
+    -- visible character instead of drifting to the exact symbol column.
+    local line_indent = function(buffer, line)
+        local text =
+            vim.api.nvim_buf_get_lines(buffer, line, line + 1, false)[1]
+
+        if type(text) ~= 'string' then
+            return ''
+        end
+
+        return string.match(text, '^%s*') or ''
+    end
+
+    -- Normalize Neovim's built-in codelens extmarks.
+    -- Neovim 0.12 pads codelenses to the symbol column, which makes them look
+    -- random in indented code. Replace that padding with the target line's
+    -- indentation so the lens attaches to the first non-empty character instead.
+    local normalize_codelens_extmark_opts = function(buffer, line, opts)
+        if not (opts and opts.virt_lines and opts.virt_lines_above) then
+            return opts
+        end
+
+        local virt_lines = vim.deepcopy(opts.virt_lines)
+        local first_line = virt_lines[1]
+        local first_chunk = first_line and first_line[1]
+        local first_text = first_chunk and first_chunk[1]
+
+        if
+            type(first_text) == 'string' and string.match(first_text, '^%s+$')
+        then
+            local indent = line_indent(buffer, line)
+            first_line[1] = { indent, first_chunk[2] }
+
+            if vim.tbl_isempty(first_line) then
+                table.insert(first_line, { '', 'LspCodeLens' })
+            end
+        end
+
+        return vim.tbl_extend('force', opts, {
+            virt_lines = virt_lines,
+        })
+    end
+
     if codelens_extmark_patch_installed then
         return
     end
 
     local original_set_extmark = vim.api.nvim_buf_set_extmark
 
+    ---@diagnostic disable-next-line: duplicate-set-field
     vim.api.nvim_buf_set_extmark = function(
         buffer,
         namespace,
@@ -94,16 +100,39 @@ local patch_codelens_extmarks = function()
     codelens_extmark_patch_installed = true
 end
 
+-- Return whether one buffer should show codelens.
+-- A global toggle wins; otherwise Rust defaults off and other filetypes on.
+local wants_codelens = function(bufnr)
+    if vim.g[codelens_enabled_var] ~= nil then
+        return vim.g[codelens_enabled_var]
+    end
+
+    return vim.bo[bufnr].filetype ~= 'rust'
+end
+
+-- Toggle codelens globally.
+-- Store the preference once so every current and future LSP buffer follows it.
+local toggle_codelens = function()
+    local enabled = not wants_codelens(vim.api.nvim_get_current_buf())
+
+    vim.g[codelens_enabled_var] = enabled
+    vim.lsp.codelens.enable(enabled)
+
+    vim.notify(
+        string.format('Code lens %s globally', enabled and 'enabled' or 'disabled')
+    )
+end
+
 -- Enable codelens for one buffer.
 -- Neovim refreshes enabled codelenses automatically, so we only need to turn
--- the feature on for buffers that actually have supporting clients.
+-- the feature on for buffers that support it and were not toggled off.
 local enable_codelens = function(bufnr)
     local codelens_clients = vim.lsp.get_clients {
         bufnr = bufnr,
         method = codelens_method,
     }
 
-    if vim.tbl_isempty(codelens_clients) then
+    if vim.tbl_isempty(codelens_clients) or not wants_codelens(bufnr) then
         return
     end
 
@@ -251,6 +280,9 @@ local on_attach = function(event)
     end
 
     if client and client:supports_method(codelens_method, event.buf) then
+        map('<leader>tl', function()
+            toggle_codelens()
+        end, '[T]oggle Code [L]ens')
         map('grx', vim.lsp.codelens.run, 'Run Code Lens')
         enable_codelens(event.buf)
     end
@@ -360,9 +392,8 @@ return {
             },
             taplo = {
                 cmd = (function()
-                    local cargo_taplo = vim.fs.normalize(
-                        vim.fn.expand '~/.cargo/bin/taplo'
-                    )
+                    local cargo_taplo =
+                        vim.fs.normalize(vim.fn.expand('~/.cargo/bin/taplo'))
 
                     if vim.uv.fs_stat(cargo_taplo) then
                         return {
