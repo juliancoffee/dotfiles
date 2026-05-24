@@ -3,28 +3,12 @@
 
 ---@module 'lazy'
 
--- NOTE: copypasted from the source
----
----return a string type use ufo providers
----return a string in a table like a string type
----return empty string '' will disable any providers
----return `nil` will use default value {'lsp', 'indent'}
----@alias UfoProviderSelector fun(
----    bufnr: number,
----    filetype: string,
----    buftype: string,
----): UfoProviderEnum|string[]|function|nil
-
----@type UfoProviderSelector
-local provider_selector = function(_, _, _)
-    return { 'treesitter', 'indent' }
-end
-
 ---@type LazyPluginSpec
 return {
     'kevinhwang91/nvim-ufo',
     dependencies = {
         'kevinhwang91/promise-async',
+        'juliancoffeelab/tuck.nvim',
     },
     event = { 'BufReadPost', 'BufNewFile' },
     init = function()
@@ -34,9 +18,26 @@ return {
         vim.o.foldenable = true
     end,
     config = function()
+        local tuck = require('tuck')
         local ufo = require('ufo')
+
+        tuck.setup {
+            manage_folds = false,
+            auto_unfold = false,
+            integrations = {
+                telescope = true,
+            },
+        }
+
         ufo.setup {
-            provider_selector = provider_selector,
+            provider_selector = function()
+                return tuck.ufo_provider
+            end,
+            close_fold_kinds_for_ft = {
+                -- nvim-ufo doesn't know that we're defining a new type
+                ---@diagnostic disable-next-line: assign-type-mismatch
+                default = { 'body' },
+            },
         }
 
         vim.keymap.set('n', 'zR', ufo.openAllFolds, {
@@ -55,6 +56,21 @@ return {
             vim.cmd.normal { args = { 'za' }, bang = true }
         end, {
             desc = 'Toggle fold under cursor',
+        })
+
+        local disable_foldbg = function()
+            vim.cmd([[
+                    highlight Folded guibg=NONE ctermbg=NONE
+                    highlight UfoFoldedBg guibg=NONE ctermbg=NONE
+                    highlight UfoCursorFoldedLine guibg=NONE ctermbg=NONE
+                ]])
+        end
+        disable_foldbg()
+        vim.api.nvim_create_autocmd('ColorScheme', {
+            group = vim.api.nvim_create_augroup('ufo_highlights', {
+                clear = true,
+            }),
+            callback = disable_foldbg,
         })
     end,
 }
