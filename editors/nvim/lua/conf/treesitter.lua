@@ -130,19 +130,6 @@ local treesitter = {
     config = function()
         require('nvim-treesitter').setup()
         ensure_ts_languages_installed()
-        --
-        -- Enable folds with treesitter
-        --
-        vim.o.foldmethod = 'expr'
-        vim.o.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
-
-        -- The number of levels to fold on startup
-        -- * 0 is toplevel
-        -- * 1 is level lower
-        -- * 2 is even lower
-        -- * ... etc
-        vim.o.foldlevel = 50
-
         -- Enable core treesitter features for parsable buffers.
         vim.api.nvim_create_autocmd('FileType', {
             group = vim.api.nvim_create_augroup('TreesitterCoreFeatures', {}),
