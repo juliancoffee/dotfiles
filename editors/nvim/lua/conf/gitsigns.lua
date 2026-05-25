@@ -9,13 +9,15 @@ local function make_hunk_repeatables(ts_repeat_move, next_hunk, prev_hunk)
         return ts_repeat_move.make_repeatable_move_pair(next_hunk, prev_hunk)
     end
 
-    local repeatable_hunk_move = ts_repeat_move.make_repeatable_move(function(opts)
-        if opts.forward then
-            next_hunk()
-        else
-            prev_hunk()
+    local repeatable_hunk_move = ts_repeat_move.make_repeatable_move(
+        function(opts)
+            if opts.forward then
+                next_hunk()
+            else
+                prev_hunk()
+            end
         end
-    end)
+    )
 
     return function()
         repeatable_hunk_move { forward = true }
@@ -161,11 +163,8 @@ return {
                 end
 
             if has_ts_moves then
-                next_hunk, prev_hunk = make_hunk_repeatables(
-                    ts_repeat_move,
-                    next_hunk,
-                    prev_hunk
-                )
+                next_hunk, prev_hunk =
+                    make_hunk_repeatables(ts_repeat_move, next_hunk, prev_hunk)
             end
 
             vim.keymap.set(
