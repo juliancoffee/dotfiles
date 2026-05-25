@@ -3,74 +3,56 @@
 
 ---@module 'lazy'
 
+--- Build the folded line-count suffix.
+local function folded_text(_, _)
+    local hidden_lines = math.max(vim.v.foldend - vim.v.foldstart, 0)
+    return {
+        { '  .. ', 'Comment' },
+        {
+            tostring(hidden_lines)
+                .. (hidden_lines == 1 and ' line' or ' lines'),
+            'Comment',
+        },
+    }
+end
+
 ---@type LazyPluginSpec
 return {
-    'kevinhwang91/nvim-ufo',
+    'juliancoffeelab/tuck.nvim',
     dependencies = {
-        'kevinhwang91/promise-async',
-        'juliancoffeelab/tuck.nvim',
+        {
+            'OXY2DEV/foldtext.nvim',
+            opts = {
+                styles = {
+                    default = {
+                        {
+                            kind = 'bufline',
+                        },
+                        {
+                            kind = 'section',
+                            output = folded_text,
+                        },
+                    },
+                },
+            },
+        },
     },
     event = { 'BufReadPost', 'BufNewFile' },
     init = function()
         vim.o.foldcolumn = '1'
-        vim.o.foldlevel = 99
-        vim.o.foldlevelstart = 99
+        vim.o.foldlevel = 0
+        vim.o.foldlevelstart = 0
         vim.o.foldenable = true
     end,
     config = function()
-        local tuck = require('tuck')
-        local ufo = require('ufo')
-
-        tuck.setup {
-            manage_folds = false,
+        require('tuck').setup {
             auto_unfold = false,
-            integrations = {
-                telescope = true,
-            },
         }
 
-        ufo.setup {
-            provider_selector = function()
-                return tuck.ufo_provider
-            end,
-            close_fold_kinds_for_ft = {
-                -- nvim-ufo doesn't know that we're defining a new type
-                ---@diagnostic disable-next-line: assign-type-mismatch
-                default = { 'body' },
-            },
-        }
-
-        vim.keymap.set('n', 'zR', ufo.openAllFolds, {
-            desc = 'Open all folds',
-        })
-        vim.keymap.set('n', 'zM', ufo.closeAllFolds, {
-            desc = 'Close all folds',
-        })
-        vim.keymap.set('n', 'zr', ufo.openFoldsExceptKinds, {
-            desc = 'Open folds except kinds',
-        })
-        vim.keymap.set('n', 'zm', ufo.closeFoldsWith, {
-            desc = 'Close folds with level',
-        })
         vim.keymap.set('n', 'zz', function()
             vim.cmd.normal { args = { 'za' }, bang = true }
         end, {
             desc = 'Toggle fold under cursor',
-        })
-
-        local disable_foldbg = function()
-            vim.cmd([[
-                    highlight Folded guibg=NONE ctermbg=NONE
-                    highlight UfoFoldedBg guibg=NONE ctermbg=NONE
-                    highlight UfoCursorFoldedLine guibg=NONE ctermbg=NONE
-                ]])
-        end
-        disable_foldbg()
-        vim.api.nvim_create_autocmd('ColorScheme', {
-            group = vim.api.nvim_create_augroup('ufo_highlights', {
-                clear = true,
-            }),
-            callback = disable_foldbg,
         })
     end,
 }
