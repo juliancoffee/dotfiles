@@ -20,6 +20,8 @@ vim.opt.rtp:prepend(lazypath)
 
 -- create a module object to return
 local M = {}
+
+--- Configure lazy.nvim and register plugin specs.
 function M.setup()
     -- install all the plugins
     require('lazy').setup({
@@ -102,6 +104,10 @@ function M.setup()
     }, {
         defaults = {
             lazy = true,
+        },
+        dev = {
+            path = vim.fn.expand '~/.config/dotfiles/nvim_plugins',
+            fallback = true,
         },
         rocks = {
             enabled = false,

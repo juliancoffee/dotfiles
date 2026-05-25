@@ -19,6 +19,7 @@ end
 ---@type LazyPluginSpec
 return {
     'juliancoffeelab/tuck.nvim',
+    dev = true,
     dependencies = {
         {
             'OXY2DEV/foldtext.nvim',
@@ -40,13 +41,16 @@ return {
     event = { 'BufReadPost', 'BufNewFile' },
     init = function()
         vim.o.foldcolumn = '1'
-        vim.o.foldlevel = 0
-        vim.o.foldlevelstart = 0
+        vim.o.foldlevel = 99
+        vim.o.foldlevelstart = 99
         vim.o.foldenable = true
     end,
     config = function()
         require('tuck').setup {
             auto_unfold = false,
+            integrations = {
+                gitsigns = true,
+            },
         }
 
         vim.keymap.set('n', 'zz', function()

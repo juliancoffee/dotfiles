@@ -1,0 +1,3 @@
+[submodule "nvim_plugins/tuck.nvim"]
+	path = nvim_plugins/tuck.nvim
+	url = git@github.com:juliancoffeelab/tuck.nvim.git
