@@ -47,8 +47,6 @@ function M.setup()
         require('conf.minipack'),
         -- tree-sitter
         require('conf.treesitter'),
-        -- folds
-        require('conf.ufo'),
         -- status line
         require('conf.statusline'),
         -- git intergrations
