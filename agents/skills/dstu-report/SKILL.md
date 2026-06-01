@@ -119,6 +119,20 @@ Use explicit raw-function calls only when the raw content is being generated
 programmatically or when a Typst-specific constraint makes a fenced block
 insufficient.
 
+Embedding whole source files in the report is almost always the wrong choice.
+Do that only when the user explicitly asks for full-file listings, such as an
+appendix with complete source texts.
+
+When the user explicitly asks for full-file listings, use `read(...)` through a
+raw block instead of pasting the file by hand:
+
+```typ
+#raw(read("../parastat/src/lib.rs"), lang: "rust", block: true)
+```
+
+After adding such listings, recompile the document and inspect a rendered page
+to confirm that syntax highlighting and pagination are still acceptable.
+
 ## Images And Charts
 
 You are allowed to prepare supporting visual assets when the document needs them.
