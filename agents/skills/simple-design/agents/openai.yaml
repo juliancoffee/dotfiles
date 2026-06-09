@@ -1,0 +1,4 @@
+interface:
+  display_name: "Simple Design"
+  short_description: "Default clean web UI design with minimal visual noise"
+  default_prompt: "Use this skill for default clean UI design work. Design the UI in a simple, restrained way with strong typography, clear hierarchy, and minimal filler."
